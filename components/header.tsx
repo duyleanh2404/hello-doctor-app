@@ -9,14 +9,14 @@ import { IoClose } from "react-icons/io5";
 import { FaAngleDown } from "react-icons/fa";
 import { FaBarsStaggered } from "react-icons/fa6";
 
+import Link from "next/link";
+import Image from "next/image";
+
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 
 import { MenuState } from "@/types/header-types";
 import menuMobile from "@/constants/menu-mobile";
-
-import Link from "next/link";
-import Image from "next/image";
 
 const MenuMobile = dynamic(() => import("@/app/(home)/menu-mobile"), { ssr: false });
 const CategoriesMenu = dynamic(() => import("@/app/(home)/categories-menu"), { ssr: false });
@@ -41,8 +41,8 @@ const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0">
-      <div className="h-[65px] flex items-center justify-between gap-3 border-b bg-white px-6 shadow-sm z-50">
+    <header className="h-[65px] sticky top-0 left-0 right-0">
+      <div className="h-full flex items-center justify-between gap-3 border-b bg-white px-6 shadow-sm z-50">
         <div className="flex items-center gap-8">
           <Link href="/" aria-label="Home">
             <div>

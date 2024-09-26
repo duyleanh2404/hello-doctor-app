@@ -3,11 +3,11 @@ import { cn } from "@/lib/utils";
 
 import { FiSearch } from "react-icons/fi";
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-
 import Link from "next/link";
 import Image from "next/image";
+
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 import menuMobile from "@/constants/menu-mobile";
 
@@ -53,7 +53,7 @@ const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: MenuMobile
               width={24}
               height={24}
             />
-            <p className="text-[15px] font-semibold text-[#262626] hover:text-primary transition duration-500">
+            <p className="text-[15px] font-semibold text-[#172B4C] hover:text-primary transition duration-500">
               Đặt lịch với bác sĩ
             </p>
           </Link>
@@ -66,7 +66,7 @@ const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: MenuMobile
                 onClick={() => handleToggleMenu(value)}
                 className={cn(
                   "group flex items-center justify-between gap-3 text-[15px] font-semibold hover:text-primary p-0 hover:bg-transparent transition duration-500 cursor-pointer select-none",
-                  tabActive === value ? "text-primary" : "text-[#262626]"
+                  tabActive === value ? "text-primary" : "text-[#172B4C]"
                 )}
               >
                 {label}

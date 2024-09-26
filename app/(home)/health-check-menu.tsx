@@ -4,12 +4,13 @@ import { cn } from "@/lib/utils";
 import { IoClose } from "react-icons/io5";
 import { FaAngleRight } from "react-icons/fa6";
 
+import Link from "next/link";
+import Image from "next/image";
+
 import { Button } from "@/components/ui/button";
 import { MenuState } from "@/types/header-types";
 import toolsCheck from "@/constants/tools-check";
 
-import Link from "next/link";
-import Image from "next/image";
 
 interface HealthCheckMenuProps {
   tabActive: string | null;
@@ -48,7 +49,7 @@ const HealthCheckMenu = memo(({ tabActive, setMenuState }: HealthCheckMenuProps)
                 <Link
                   key={id}
                   href={href}
-                  className="flex items-center gap-3"
+                  className="group flex items-center gap-3"
                 >
                   <Image
                     loading="lazy"
@@ -58,7 +59,7 @@ const HealthCheckMenu = memo(({ tabActive, setMenuState }: HealthCheckMenuProps)
                     height={50}
                     className="object-cover"
                   />
-                  <p className="w-full h-full flex items-center text-[15px] font-medium px-4 text-start hover:text-primary transition-colors duration-500">
+                  <p className="w-full h-full flex items-center text-[15px] font-medium px-4 text-start group-hover:text-primary transition-colors duration-500">
                     {title}
                   </p>
                 </Link>
@@ -93,7 +94,7 @@ const HealthCheckMenu = memo(({ tabActive, setMenuState }: HealthCheckMenuProps)
               <Link
                 key={id}
                 href={href}
-                className="flex flex-col justify-between gap-8 py-6 px-4 border hover:-translate-y-2 shadow-md hover:shadow-lg rounded-xl transition-transform duration-500"
+                className="flex flex-col justify-between gap-8 py-6 px-4 border shadow-md hover:shadow-lg rounded-xl transition-all duration-500"
               >
                 <div className="flex flex-col gap-8">
                   <Image
@@ -107,7 +108,7 @@ const HealthCheckMenu = memo(({ tabActive, setMenuState }: HealthCheckMenuProps)
 
                   <div className="flex flex-col gap-3 text-start">
                     <h1 className="text-[17px] font-semibold">{title}</h1>
-                    <p className="text-sm font-medium text-[#595959] line-clamp-2">{desc}</p>
+                    <p className="text-sm font-medium text-[#172B4C] line-clamp-2">{desc}</p>
                   </div>
                 </div>
 

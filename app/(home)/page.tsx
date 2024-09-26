@@ -1,5 +1,11 @@
+import Hero from "./hero";
+import Categories from "./categories";
+
 export default function Home() {
   return (
-    <main>Home</main>
+    <main>
+      <Hero />
+      <Categories />
+    </main>
   );
 }

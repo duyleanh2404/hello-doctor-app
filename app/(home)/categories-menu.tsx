@@ -4,14 +4,15 @@ import { cn } from "@/lib/utils";
 import { IoClose } from "react-icons/io5";
 import { FaAngleRight } from "react-icons/fa6";
 
+import Link from "next/link";
+import Image from "next/image";
+
 import { MenuState } from "@/types/header-types";
 import centralPoints from "@/constants/central-points";
 
 import { Button } from "@/components/ui/button";
 import Hint from "@/components/hint";
 
-import Link from "next/link";
-import Image from "next/image";
 
 interface CategoriesMenuProps {
   tabActive: string | null;
@@ -86,7 +87,7 @@ const CategoriesMenu = memo(({ tabActive, setMenuState }: CategoriesMenuProps) =
                     src={image}
                     alt="Central point image"
                     fill
-                    className="w-full h-full object-cover hover:-translate-y-2 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-500"
+                    className="w-full h-full object-cover rounded-xl shadow-xl hover:shadow-2xl transition-all duration-500"
                   />
                 </Hint>
               </Link>
