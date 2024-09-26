@@ -22,7 +22,7 @@ const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: MenuMobile
 
   return (
     <div className={cn(
-      "h-[calc(100vh-65px)] border-t bg-white p-6 shadow-sm transition duration-500",
+      "absolute top-[65px] left-0 right-0 w-full h-[calc(100vh-65px)] border-t bg-white p-6 shadow-sm transition duration-500",
       isOpenMenu ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
     )}>
       <div className="h-full flex flex-col justify-between">
