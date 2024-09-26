@@ -41,8 +41,8 @@ const Header = () => {
   };
 
   return (
-    <header className="h-[65px] sticky top-0 left-0 right-0">
-      <div className="h-full flex items-center justify-between gap-3 border-b bg-white px-6 shadow-sm z-50">
+    <header className="h-[65px] sticky top-0 left-0 right-0 border-b bg-white px-6 shadow-sm z-50">
+      <div className="h-full flex items-center justify-between gap-3">
         <div className="flex items-center gap-8">
           <Link href="/" aria-label="Home">
             <div>

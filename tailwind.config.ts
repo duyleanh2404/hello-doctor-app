@@ -57,7 +57,14 @@ const config: Config = {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			boxShadow: {
-				"input-primary": "0px 0px 0px 2px #91caff"
+				"input-primary": "0px 0px 0px 2px #91caff",
+				"box": "0px 4px 10px rgba(0, 0, 0, 0.15)"
+			},
+			backgroundImage: {
+				"gradient-primary": "linear-gradient(71deg, rgb(44, 116, 223) -4.07%, rgb(69, 164, 255) 90.13%)"
+			},
+			backgroundPosition: {
+				"right-bottom-custom": "right 0px bottom 18px",
 			}
 		}
 	},
