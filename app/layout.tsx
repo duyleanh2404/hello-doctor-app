@@ -1,16 +1,12 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import Header from "@/components/header";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+const ibmPlexSans = localFont({
+  src: "./fonts/IBM-Plex-Sans.woff2",
+  variable: "--font-ibm-plex-sans",
+  weight: "100 700 800",
 });
 
 export const metadata: Metadata = {
@@ -25,9 +21,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${ibmPlexSans.variable} antialiased`}>
+        <Header />
         {children}
       </body>
     </html>
