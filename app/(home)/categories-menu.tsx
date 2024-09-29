@@ -1,5 +1,5 @@
-import { useCallback, memo } from "react";
 import { cn } from "@/lib/utils";
+import { useCallback, memo } from "react";
 
 import { IoClose } from "react-icons/io5";
 import { FaAngleRight } from "react-icons/fa6";
@@ -13,11 +13,10 @@ import centralPoints from "@/constants/central-points";
 import { Button } from "@/components/ui/button";
 import Hint from "@/components/hint";
 
-
 interface CategoriesMenuProps {
   tabActive: string | null;
   setMenuState: React.Dispatch<React.SetStateAction<MenuState>>;
-}
+};
 
 const CategoriesMenu = memo(({ tabActive, setMenuState }: CategoriesMenuProps) => {
   const handleCloseMenu = useCallback(() => {

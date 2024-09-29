@@ -1,6 +1,5 @@
-import { useState, memo } from "react";
 import { cn } from "@/lib/utils";
-
+import { useState, memo } from "react";
 import { FiSearch } from "react-icons/fi";
 
 import Link from "next/link";
@@ -15,7 +14,7 @@ interface MenuMobileProps {
   isOpenMenu: boolean;
   tabActive: string | null;
   handleToggleMenu: (menuName: string) => void;
-}
+};
 
 const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: MenuMobileProps) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -32,7 +31,7 @@ const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: MenuMobile
               size="22"
               className={cn(
                 "absolute top-1/2 left-4 -translate-y-1/2 transition-colors duration-500",
-                isFocused ? "text-blue-500" : "text-[#172B4C]"
+                isFocused && "text-primary"
               )}
             />
             <Input
@@ -53,7 +52,7 @@ const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: MenuMobile
               width={24}
               height={24}
             />
-            <p className="text-[15px] font-semibold text-[#172B4C] hover:text-primary transition duration-500">
+            <p className="text-[15px] font-semibold hover:text-primary transition duration-500">
               Đặt lịch với bác sĩ
             </p>
           </Link>
@@ -66,7 +65,7 @@ const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: MenuMobile
                 onClick={() => handleToggleMenu(value)}
                 className={cn(
                   "group flex items-center justify-between gap-3 text-[15px] font-semibold hover:text-primary p-0 hover:bg-transparent transition duration-500 cursor-pointer select-none",
-                  tabActive === value ? "text-primary" : "text-[#172B4C]"
+                  tabActive === value && "text-primary"
                 )}
               >
                 {label}

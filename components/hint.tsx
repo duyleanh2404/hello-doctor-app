@@ -8,7 +8,7 @@ import {
 interface HintProps {
   children: React.ReactNode;
   label: string;
-}
+};
 
 const Hint = ({ children, label }: HintProps) => {
   return (

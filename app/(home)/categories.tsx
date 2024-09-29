@@ -20,7 +20,7 @@ const Categories = () => {
               width={35}
               height={35}
             />
-            <p className="xl:text-lg font-semibold text-[#172B4C]">{title}</p>
+            <p className="xl:text-lg font-semibold">{title}</p>
           </Link>
         ))}
       </div>

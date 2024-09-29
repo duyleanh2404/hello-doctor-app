@@ -1,5 +1,4 @@
 import Image from "next/image";
-
 import introduces from "@/constants/introduces";
 
 interface Introduce {
@@ -7,11 +6,11 @@ interface Introduce {
   title: string;
   desc: string;
   image: string;
-}
+};
 
 interface IntroduceCardProps {
   introduce: Introduce;
-}
+};
 
 const IntroduceCard = ({ introduce }: IntroduceCardProps) => {
   const { title, desc, image } = introduce;

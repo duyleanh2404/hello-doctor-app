@@ -1,0 +1,39 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g clip-path="url(#top-hospital_svg__clip0_2877_598)">
+    <g filter="url(#top-hospital_svg__filter0_i_2877_598)">
+      <rect width="24" height="24" rx="6" fill="url(#top-hospital_svg__paint0_radial_2877_598)"></rect>
+    </g>
+    <g filter="url(#top-hospital_svg__filter1_d_2877_598)">
+      <path d="M10.634 13.682v.857c0 .357.125.66.375.91s.554.376.91.376c.358 0 .662-.125.912-.375s.375-.554.375-.91v-.858h.857c.357 0 .66-.125.91-.375s.375-.554.375-.91c0-.358-.125-.661-.375-.911a1.24 1.24 0 00-.91-.375h-.857v-.858c0-.357-.125-.66-.375-.91a1.24 1.24 0 00-.911-.375c-.357 0-.66.125-.91.375a1.24 1.24 0 00-.376.91v.858h-.857c-.357 0-.66.125-.91.375a1.24 1.24 0 00-.376.91c0 .357.125.661.375.911s.554.375.911.375h.857zm-3.857 5.571a1.65 1.65 0 01-1.21-.503 1.65 1.65 0 01-.504-1.21V9.824a1.702 1.702 0 01.685-1.372l5.143-3.857c.3-.228.643-.343 1.029-.343.386 0 .728.115 1.028.343l5.143 3.857a1.701 1.701 0 01.686 1.371v7.715c0 .472-.168.875-.504 1.21a1.65 1.65 0 01-1.21.504H6.777z" fill="#fff"></path>
+    </g>
+  </g>
+  <defs>
+    <filter id="top-hospital_svg__filter0_i_2877_598" x="0" y="0" width="25" height="26" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+      <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend>
+      <feColorMatrix in="SourceAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"></feColorMatrix>
+      <feOffset dx="1" dy="2"></feOffset>
+      <feGaussianBlur stdDeviation="3.5"></feGaussianBlur>
+      <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"></feComposite>
+      <feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.4 0"></feColorMatrix>
+      <feBlend in2="shape" result="effect1_innerShadow_2877_598"></feBlend>
+    </filter>
+    <filter id="top-hospital_svg__filter1_d_2877_598" x="2.063" y="1.253" width="23.714" height="25" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+      <feColorMatrix in="SourceAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"></feColorMatrix>
+      <feOffset dx="2" dy="2"></feOffset>
+      <feGaussianBlur stdDeviation="2.5"></feGaussianBlur>
+      <feComposite in2="hardAlpha" operator="out"></feComposite>
+      <feColorMatrix values="0 0 0 0 0 0 0 0 0 0.152441 0 0 0 0 0.449007 0 0 0 0.4 0"></feColorMatrix>
+      <feBlend in2="BackgroundImageFix" result="effect1_dropShadow_2877_598"></feBlend>
+      <feBlend in="SourceGraphic" in2="effect1_dropShadow_2877_598" result="shape"></feBlend>
+    </filter>
+    <radialGradient id="top-hospital_svg__paint0_radial_2877_598" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="rotate(47.911 -.798 3.892) scale(31.3299)">
+      <stop stop-color="#44D1EC"></stop>
+      <stop offset="1" stop-color="#0099B2"></stop>
+    </radialGradient>
+    <clipPath id="top-hospital_svg__clip0_2877_598">
+      <path fill="#fff" d="M0 0h24v24H0z"></path>
+    </clipPath>
+  </defs>
+</svg>

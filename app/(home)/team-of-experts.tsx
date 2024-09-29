@@ -1,9 +1,9 @@
 import Autoplay from "embla-carousel-autoplay";
-
 import { FaUserDoctor } from "react-icons/fa6";
 import { FaClinicMedical } from "react-icons/fa";
 
 import Image from "next/image";
+import teamOfExperts from "@/constants/team-of-experts";
 
 import {
   Carousel,
@@ -11,15 +11,13 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 
-import teamOfExperts from "@/constants/team-of-experts";
-
 interface Expert {
   id: number;
   name: string;
   specialty: string;
   clinic: string;
   image: string;
-}
+};
 
 const ExpertCard = ({ expert }: { expert: Expert }) => (
   <div className="flex flex-col items-center gap-8 py-6 px-4 border shadow-md rounded-md">
