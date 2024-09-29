@@ -1,8 +1,7 @@
-import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 import Image from "next/image";
-
 import { Button } from "@/components/ui/button";
 
 const BodyMassIndex = () => {
@@ -97,7 +96,7 @@ const BodyMassIndex = () => {
         <Button
           variant="default"
           disabled={!age || !height || !weight || !gender}
-          className="h-13 sm:text-[17px] font-medium text-white py-3 bg-primary hover:bg-[#2c74df] transition duration-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="h-12 sm:text-[17px] font-medium text-white py-3 bg-primary hover:bg-[#2c74df] transition duration-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Tính ngay
         </Button>

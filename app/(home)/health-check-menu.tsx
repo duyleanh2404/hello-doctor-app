@@ -1,5 +1,5 @@
-import { useCallback, memo } from "react";
 import { cn } from "@/lib/utils";
+import { useCallback, memo } from "react";
 
 import { IoClose } from "react-icons/io5";
 import { FaAngleRight } from "react-icons/fa6";
@@ -7,15 +7,15 @@ import { FaAngleRight } from "react-icons/fa6";
 import Link from "next/link";
 import Image from "next/image";
 
-import { Button } from "@/components/ui/button";
 import { MenuState } from "@/types/header-types";
 import toolsCheck from "@/constants/tools-check";
 
+import { Button } from "@/components/ui/button";
 
 interface HealthCheckMenuProps {
   tabActive: string | null;
   setMenuState: React.Dispatch<React.SetStateAction<MenuState>>;
-}
+};
 
 const HealthCheckMenu = memo(({ tabActive, setMenuState }: HealthCheckMenuProps) => {
   const handleCloseMenu = useCallback(() => {
@@ -108,7 +108,7 @@ const HealthCheckMenu = memo(({ tabActive, setMenuState }: HealthCheckMenuProps)
 
                   <div className="flex flex-col gap-3 text-start">
                     <h1 className="text-[17px] font-semibold">{title}</h1>
-                    <p className="text-sm font-medium text-[#172B4C] line-clamp-2">{desc}</p>
+                    <p className="text-sm font-medium line-clamp-2">{desc}</p>
                   </div>
                 </div>
 

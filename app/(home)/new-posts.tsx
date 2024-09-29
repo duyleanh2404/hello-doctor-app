@@ -1,5 +1,4 @@
 import Autoplay from "embla-carousel-autoplay";
-
 import { PiTrendUpDuotone } from "react-icons/pi";
 
 import Link from "next/link";

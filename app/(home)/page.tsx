@@ -1,18 +1,22 @@
 "use client";
 
+import Header from "@/components/header";
+import Footer from "@/components/footer";
+
 import Hero from "./hero";
-import Categories from "./categories";
 import NewPosts from "./new-posts";
-import PopularSpecialities from "./popular-specialties";
-import SpecialistArticle from "./specialist-article";
-import BodyMassIndex from "./body-mass-index";
-import HealthCheckTools from "./health-check-tools";
 import Introduces from "./introduces";
+import Categories from "./categories";
+import BodyMassIndex from "./body-mass-index";
 import TeamOfExperts from "./team-of-experts";
+import HealthCheckTools from "./health-check-tools";
+import SpecialistArticle from "./specialist-article";
+import PopularSpecialities from "./popular-specialties";
 
 export default function Home() {
   return (
     <main>
+      <Header />
       <Hero />
       <Categories />
       <NewPosts />
@@ -26,6 +30,7 @@ export default function Home() {
       </div>
       <Introduces />
       <TeamOfExperts />
+      <Footer />
     </main>
   );
 }

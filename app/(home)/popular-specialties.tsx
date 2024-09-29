@@ -1,5 +1,4 @@
 import Autoplay from "embla-carousel-autoplay";
-
 import { FaAngleRight } from "react-icons/fa6";
 
 import Link from "next/link";

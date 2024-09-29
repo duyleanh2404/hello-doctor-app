@@ -6,19 +6,11 @@ import {
   CarouselContent,
   CarouselItem
 } from "@/components/ui/carousel";
-
 import heroes from "@/constants/heroes";
 
 const Hero = () => {
   return (
-    <Carousel
-      className="w-full z-[-1]"
-      plugins={[
-        Autoplay({
-          delay: 3000
-        })
-      ]}
-    >
+    <Carousel className="z-[-1]" plugins={[Autoplay({ delay: 3000 })]}>
       <CarouselContent>
         {heroes.map(({ id, image }) => (
           <CarouselItem key={id} className="relative w-full pt-[30%] space-header">
