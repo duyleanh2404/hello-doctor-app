@@ -11,9 +11,9 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 
-import Breadcrumbs from "./breadcrumbs";
+import Breadcrumbs from "@/components/breadcrumbs";
 
-const Advertise = lazy(() => import("./advertise"));
+const Advertise = lazy(() => import("@/components/advertise"));
 
 const DoctorDetailsPage = () => {
   const [activeTime, setActiveTime] = useState("morning");
@@ -42,7 +42,7 @@ const DoctorDetailsPage = () => {
   return (
     <div className="flex flex-col gap-6 sm:gap-12 space-header-has-bottom">
       <div className="flex flex-col">
-        <Breadcrumbs />
+        <Breadcrumbs label="Doctor name" />
 
         <div className="wrapper w-full flex items-center gap-6 py-8 border-b">
           <div className="relative w-[100px] sm:w-[120px] h-[100px] sm:h-[120px]">
@@ -82,8 +82,16 @@ const DoctorDetailsPage = () => {
               <div className="flex">{timeButtons}</div>
 
               <div className="flex flex-col items-center gap-6 py-12">
-                <Image loading="lazy" src="/calendar.svg" alt="Calendar" width="100" height="100" />
-                <p className="font-medium text-[#595959]">Chưa có lịch nào vào thời gian này!</p>
+                <Image
+                  loading="lazy"
+                  src="/calendar.svg"
+                  alt="Calendar"
+                  width="100"
+                  height="100"
+                />
+                <p className="font-medium text-[#595959]">
+                  Chưa có lịch nào vào thời gian này!
+                </p>
               </div>
 
               <Button
