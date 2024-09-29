@@ -3,7 +3,7 @@ import { FaAngleRight } from "react-icons/fa6";
 
 import Link from "next/link";
 
-const Breadcrumbs = () => (
+const Breadcrumbs = ({ label }: { label: string }) => (
   <div className="w-full flex items-center gap-3 py-3 bg-white px-6 z-10">
     <Link href="/" className="min-w-fit flex items-center gap-3 font-medium hover:underline cursor-pointer">
       <IoHome size="18" className="text-[#595959]" /> Trang chủ
@@ -12,7 +12,7 @@ const Breadcrumbs = () => (
       <FaAngleRight size="13" /> Đặt lịch với bác sĩ
     </Link>
     <p className="hidden sm:flex items-center gap-3 font-medium text-primary cursor-default">
-      <FaAngleRight size="13" /> Doctor fullname
+      <FaAngleRight size="13" /> {label}
     </p>
   </div>
 );
