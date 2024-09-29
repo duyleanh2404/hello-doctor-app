@@ -1,6 +1,9 @@
 import { cn } from "@/lib/utils";
 import { useCallback, memo } from "react";
 
+import { RootState } from "@/store/store";
+import { useSelector } from "react-redux";
+
 import { IoClose } from "react-icons/io5";
 import { FaAngleRight } from "react-icons/fa6";
 
@@ -19,6 +22,8 @@ interface CategoriesMenuProps {
 };
 
 const CategoriesMenu = memo(({ tabActive, setMenuState }: CategoriesMenuProps) => {
+  const { isBannerVisible } = useSelector((state: RootState) => state.common);
+
   const handleCloseMenu = useCallback(() => {
     setMenuState((prev) => ({ ...prev, tabActive: null }));
   }, [setMenuState]);
@@ -26,8 +31,9 @@ const CategoriesMenu = memo(({ tabActive, setMenuState }: CategoriesMenuProps) =
   return (
     <div
       className={cn(
-        "fixed top-0 xl:top-[65px] left-0 right-0 w-full h-screen xl:h-[calc(100%-65px)] bg-white transition-opacity duration-500",
-        tabActive === "categories" ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        "fixed top-0 left-0 right-0 w-full h-screen xl:h-[calc(100%-65px)] bg-white transition-opacity duration-500",
+        tabActive === "categories" ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
+        isBannerVisible ? "xl:top-[120px]" : "xl:top-[65px]"
       )}
     >
       <div className="wrapper h-full flex flex-col md:flex-row gap-10 md:gap-6 py-6 overflow-y-auto">

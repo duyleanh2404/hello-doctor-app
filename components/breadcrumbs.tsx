@@ -4,7 +4,7 @@ import { FaAngleRight } from "react-icons/fa6";
 import Link from "next/link";
 
 const Breadcrumbs = ({ label }: { label: string }) => (
-  <div className="w-full flex items-center gap-3 py-3 bg-white px-6 z-10">
+  <div className="wrapper flex items-center gap-3 py-3 bg-white z-10">
     <Link href="/" className="min-w-fit flex items-center gap-3 font-medium hover:underline cursor-pointer">
       <IoHome size="18" className="text-[#595959]" /> Trang chủ
     </Link>

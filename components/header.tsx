@@ -5,6 +5,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 
+import { RootState } from "@/store/store";
+import { useDispatch, useSelector } from "react-redux";
+import { setIsBannerVisible } from "@/store/slices/common-slice";
+
 import { X } from "lucide-react";
 import { FiSearch } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
@@ -28,7 +32,9 @@ const Header = () => {
   const router = useRouter();
 
   const [isFocused, setIsFocused] = useState(false);
-  const [isBannerVisible, setIsBannerVisible] = useState(true);
+
+  const dispatch = useDispatch();
+  const { isBannerVisible } = useSelector((state: RootState) => state.common);
 
   const [menuState, setMenuState] = useState<MenuState>({
     tabActive: null, isOpenMenuMobile: false
@@ -57,7 +63,7 @@ const Header = () => {
           <Button
             type="button"
             variant="ghost"
-            onClick={() => setIsBannerVisible(false)}
+            onClick={() => dispatch(setIsBannerVisible(false))}
             className="absolute top-1/2 right-5 -translate-y-1/2 hover:text-white/60 hover:bg-transparent p-0 transition duration-500"
           >
             <X />
@@ -147,6 +153,7 @@ const Header = () => {
             <div className="hidden sm:flex items-center gap-3">
               <Button
                 type="button"
+                onClick={() => router.push("/register")}
                 className="w-[120px] text-[#2D87F3] font-medium border border-[#2D87F3] bg-white hover:bg-[#2D87F3]/10 rounded-md transition duration-500"
               >
                 Đăng ký
