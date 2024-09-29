@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
+import ProviderStore from "@/components/provider-store";
+
 const ibmPlexSans = localFont({
   src: "./fonts/IBM-Plex-Sans.woff2",
   variable: "--font-ibm-plex-sans",
@@ -21,7 +23,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${ibmPlexSans.variable} antialiased`}>
-        {children}
+        <ProviderStore>
+          {children}
+        </ProviderStore>
       </body>
     </html>
   );

@@ -47,9 +47,12 @@ const Header = () => {
   };
 
   return (
-    <div className={cn("flex flex-col", isBannerVisible ? "h-[120px]" : "h-[65px]")}>
+    <div className={cn(
+      "sticky top-0 left-0 right-0 flex flex-col z-50",
+      isBannerVisible ? "h-[120px]" : "h-[65px]"
+    )}>
       {isBannerVisible && (
-        <div className="flex-1 relative flex items-center justify-center text-lg text-white bg-[#284a75]">
+        <div className="flex-1 relative flex items-center justify-between sm:justify-center text-sm sm:text-lg text-white bg-[#284a75] px-6">
           <p className="animate-bounce">⏬ Tải App Hello Bacsi - Nhận ngay 100K</p>
           <Button
             type="button"
@@ -62,7 +65,7 @@ const Header = () => {
         </div>
       )}
 
-      <div className="h-[65px] sticky top-0 left-0 right-0 border-b bg-white px-6 shadow-sm z-50">
+      <div className="h-[65px] border-b bg-white px-6 shadow-sm z-50">
         <div className="h-full flex items-center justify-between gap-3">
           <div className="flex items-center gap-8">
             <Link href="/" aria-label="Home">
