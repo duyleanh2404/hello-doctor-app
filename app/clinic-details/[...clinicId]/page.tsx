@@ -3,17 +3,20 @@
 import { FaLocationDot } from "react-icons/fa6";
 
 import Image from "next/image";
-
 import BookingForm from "./booking-form";
+
 import Advertise from "@/components/advertise";
-import Breadcrumbs from "@/components/breadcrumbs";
+import Breadcrumb from "@/components/breadcrumb";
 
 const ClinicDetailsPage = () => {
   return (
     <div className="flex flex-col gap-6 sm:gap-8 space-header-has-bottom">
+      {/* Breadcrumb Navigation */}
       <div className="flex flex-col">
-        <Breadcrumbs label="Clinic name" />
+        {/* Displays the breadcrumb navigation */}
+        <Breadcrumb label="Clinic name" />
 
+        {/* Banner Image Section */}
         <div className="relative w-full pt-[30%]">
           <Image
             loading="lazy"
@@ -24,6 +27,7 @@ const ClinicDetailsPage = () => {
           />
         </div>
 
+        {/* Clinic Logo and Details Section */}
         <div className="wrapper w-full flex flex-col sm:flex-row sm:items-center sm:gap-4 border-b">
           <div className="relative w-[120px] sm:w-[180px] h-[120px] sm:h-[180px] bg-white border border-[#ccc] rounded-full shadow-md -translate-y-12">
             <Image
@@ -35,22 +39,33 @@ const ClinicDetailsPage = () => {
             />
           </div>
 
+          {/* Clinic Name and Address Section */}
           <div className="flex flex-col gap-3 -translate-y-6 sm:-translate-y-0">
+            {/* Clinic's name */}
             <h1 className="text-xl font-bold">Clinic name</h1>
+
             <div className="flex items-center gap-3">
+              {/* Location icon */}
               <FaLocationDot size="18" className="text-[#595959]" />
+              {/* Clinic's address */}
               <p className="font-medium text-[#595959]">Clinic address</p>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Description and Booking Form Section */}
       <div className="sm:wrapper w-full flex flex-col lg:flex-row gap-12 lg:gap-8 sm:pb-16">
+        {/* Placeholder for clinic description */}
         <div className="wrapper w-full lg:w-[55%] xl:w-[65%]">
           Clinic description
         </div>
+
         <div className="relative w-full lg:w-auto flex-1 flex flex-col gap-8">
+          {/* Booking form for scheduling appointments */}
           <BookingForm />
+
+          {/* Advertisements or promotional content */}
           <div className="sticky hidden lg:block top-32">
             <Advertise />
           </div>

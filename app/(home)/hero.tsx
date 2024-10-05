@@ -1,12 +1,12 @@
-import Image from "next/image";
-import Autoplay from "embla-carousel-autoplay";
-
 import {
   Carousel,
-  CarouselContent,
-  CarouselItem
+  CarouselItem,
+  CarouselContent
 } from "@/components/ui/carousel";
+
+import Image from "next/image";
 import heroes from "@/constants/heroes";
+import Autoplay from "embla-carousel-autoplay";
 
 const Hero = () => {
   return (
@@ -26,6 +26,6 @@ const Hero = () => {
       </CarouselContent>
     </Carousel>
   );
-}
+};
 
 export default Hero;

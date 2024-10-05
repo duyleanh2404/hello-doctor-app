@@ -4,37 +4,39 @@ import { FiSearch } from "react-icons/fi";
 
 import {
   Select,
-  SelectTrigger,
-  SelectContent,
   SelectItem,
-  SelectValue
+  SelectValue,
+  SelectContent,
+  SelectTrigger
 } from "@/components/ui/select";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 const SearchDoctor = ({ provinces }: { provinces: any[] }) => {
-  const [inputValue, setInputValue] = useState("");
-  const [selectedProvince, setSelectedProvince] = useState("");
+  const [inputValue, setInputValue] = useState<string>("");
+  const [selectedProvince, setSelectedProvince] = useState<string>("");
 
   return (
     <div className="wrapper p-6 sm:p-8 shadow-md rounded-2xl">
       <div className="flex flex-col lg:flex-row items-center gap-4">
+        {/* Dropdown for selecting province */}
         <div className="w-full lg:w-[27%]">
           <Select
             value={selectedProvince}
-            onValueChange={(value) => setSelectedProvince(value)}
+            onValueChange={(value) => setSelectedProvince(value)} // Update state on value change
           >
             <SelectTrigger
               className={cn(
                 "w-full py-[14px] px-4 text-[17px] placeholder:text-[17px] placeholder:text-[#595959] placeholder:font-medium border border-[#ccc] focus:border-primary focus:shadow-input-primary rounded-lg transition duration-500",
-                selectedProvince ? "text-black" : "text-[#A9A9A9]"
+                selectedProvince ? "text-black" : "text-[#A9A9A9]" // Change text color based on selection
               )}
             >
-              <SelectValue placeholder="Chọn tỉnh thành của bạn" />
+              <SelectValue placeholder="Chọn tỉnh thành của bạn" /> {/* Placeholder for the select dropdown */}
             </SelectTrigger>
             <SelectContent>
               {provinces.map(({ id, name }) => (
-                <SelectItem key={id} value={name}>
+                <SelectItem key={id} value={name}> {/* Render each province as a selectable item */}
                   {name}
                 </SelectItem>
               ))}
@@ -42,6 +44,7 @@ const SearchDoctor = ({ provinces }: { provinces: any[] }) => {
           </Select>
         </div>
 
+        {/* Input field for searching doctors by name */}
         <div className="relative w-full lg:w-auto flex-1">
           <FiSearch
             size="22"
@@ -49,14 +52,15 @@ const SearchDoctor = ({ provinces }: { provinces: any[] }) => {
           />
           <Input
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            spellCheck={false}
+            onChange={(e) => setInputValue(e.target.value)} // Update state on input change
+            spellCheck={false} // Disable spell check for the input field
             type="text"
             placeholder="Tìm kiếm theo tên bác sĩ"
             className="w-full py-3 pl-14 pr-4 text-[17px] placeholder:text-[17px] placeholder:text-[#595959] placeholder:font-medium border border-[#ccc] focus:border-primary focus:shadow-input-primary rounded-lg transition duration-500"
           />
         </div>
 
+        {/* Search button */}
         <Button
           type="button"
           variant="default"
