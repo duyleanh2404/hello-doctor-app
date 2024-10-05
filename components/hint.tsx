@@ -1,8 +1,8 @@
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
+  TooltipProvider
 } from "@/components/ui/tooltip";
 
 interface HintProps {

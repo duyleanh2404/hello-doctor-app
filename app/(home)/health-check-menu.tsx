@@ -7,13 +7,12 @@ import { useSelector } from "react-redux";
 import { IoClose } from "react-icons/io5";
 import { FaAngleRight } from "react-icons/fa6";
 
+import { Button } from "@/components/ui/button";
+import { MenuState } from "@/types/header-types";
+
 import Link from "next/link";
 import Image from "next/image";
-
-import { MenuState } from "@/types/header-types";
 import toolsCheck from "@/constants/tools-check";
-
-import { Button } from "@/components/ui/button";
 
 interface HealthCheckMenuProps {
   tabActive: string | null;
@@ -23,22 +22,30 @@ interface HealthCheckMenuProps {
 const HealthCheckMenu = memo(({ tabActive, setMenuState }: HealthCheckMenuProps) => {
   const { isBannerVisible } = useSelector((state: RootState) => state.common);
 
+  // Callback to close the menu
   const handleCloseMenu = useCallback(() => {
-    setMenuState((prev) => ({ ...prev, tabActive: null }));
+    setMenuState((prev) => ({ ...prev, tabActive: null })); // Set active tab to null
   }, [setMenuState]);
 
   return (
     <div
       className={cn(
         "fixed top-0 left-0 right-0 w-full h-screen xl:h-[calc(100%-65px)] bg-white transition duration-500",
+        // Adjust opacity and pointer events based on active tab state
         tabActive === "health-check" ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
+        // Adjust top position based on banner visibility
         isBannerVisible ? "xl:top-[120px]" : "xl:top-[65px]"
       )}
     >
+      {/* Main wrapper for the menu */}
       <div className="wrapper h-full flex flex-col md:flex-row gap-10 md:gap-6 py-6 overflow-y-auto">
+        {/* Left side: Health tools */}
         <div className="w-full md:w-[40%] lg:w-[30%] h-full flex flex-col gap-8 md:border-r">
           <div className="flex items-center justify-between">
+            {/* Section title */}
             <h1 className="text-lg font-semibold">Công cụ sức khỏe</h1>
+
+            {/* Button to close the menu on smaller screens */}
             <Button
               variant="ghost"
               onClick={handleCloseMenu}
@@ -49,14 +56,16 @@ const HealthCheckMenu = memo(({ tabActive, setMenuState }: HealthCheckMenuProps)
             </Button>
           </div>
 
+          {/* List of health tools */}
           <div className="max-h-[500px] flex flex-col gap-3 -pr-3 mr-3 overflow-y-auto">
             <div className="flex flex-col gap-6 cursor-pointer select-none">
-              {toolsCheck.slice(0, 5).map(({ id, href, image, title }) => (
+              {toolsCheck.slice(0, 5).map(({ id, href, image, title }) => ( // Render top 5 tools
                 <Link
                   key={id}
                   href={href}
                   className="group flex items-center gap-3"
                 >
+                  {/* Tool's image */}
                   <Image
                     loading="lazy"
                     src={image}
@@ -65,7 +74,9 @@ const HealthCheckMenu = memo(({ tabActive, setMenuState }: HealthCheckMenuProps)
                     height={50}
                     className="object-cover"
                   />
-                  <p className="w-full h-full flex items-center text-[15px] font-medium px-4 text-start group-hover:text-primary transition-colors duration-500">
+
+                  {/* Title of the tool */}
+                  <p className="w-full h-full flex items-center text-[15px] font-medium px-4 text-start group-hover:text-primary transition duration-500">
                     {title}
                   </p>
                 </Link>
@@ -73,6 +84,7 @@ const HealthCheckMenu = memo(({ tabActive, setMenuState }: HealthCheckMenuProps)
             </div>
           </div>
 
+          {/* Link to view all health tools */}
           <Link
             href="/health-tools"
             className="group w-fit flex items-center gap-4 text-sm xl:text-base font-semibold text-primary py-3 px-4 border border-primary rounded-md"
@@ -82,9 +94,13 @@ const HealthCheckMenu = memo(({ tabActive, setMenuState }: HealthCheckMenuProps)
           </Link>
         </div>
 
+        {/* Right side: Featured tools  */}
         <div className="flex-1 h-full flex flex-col gap-8">
           <div className="flex items-center justify-between">
+            {/* Section title */}
             <h1 className="text-lg font-semibold">Công cụ nổi bật</h1>
+
+            {/* Button to close the menu on larger screens */}
             <Button
               variant="ghost"
               onClick={handleCloseMenu}
@@ -95,14 +111,16 @@ const HealthCheckMenu = memo(({ tabActive, setMenuState }: HealthCheckMenuProps)
             </Button>
           </div>
 
+          {/* List of featured tools */}
           <div className="h-full xl:h-auto grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 pb-6 md:pb-0 pr-4 xl:pr-0 overflow-y-auto xl:overflow-y-visible">
-            {toolsCheck.slice(5).map(({ id, href, image, title, desc }) => (
+            {toolsCheck.slice(5).map(({ id, href, image, title, desc }) => ( // Render remaining tools
               <Link
                 key={id}
                 href={href}
                 className="flex flex-col justify-between gap-8 py-6 px-4 border shadow-md hover:shadow-lg rounded-xl transition-all duration-500"
               >
                 <div className="flex flex-col gap-8">
+                  {/* Tool's image */}
                   <Image
                     loading="lazy"
                     src={image}
@@ -113,15 +131,22 @@ const HealthCheckMenu = memo(({ tabActive, setMenuState }: HealthCheckMenuProps)
                   />
 
                   <div className="flex flex-col gap-3 text-start">
+                    {/* Title of the tool */}
                     <h1 className="text-[17px] font-semibold">{title}</h1>
+
+                    {/* Description of the tool */}
                     <p className="text-sm font-medium line-clamp-2">{desc}</p>
                   </div>
                 </div>
 
-                <div className="group flex items-center gap-3 mr-auto font-semibold text-primary">
+                {/* Link to view more */}
+                <Link
+                  href="/"
+                  className="group flex items-center gap-3 font-semibold text-primary mr-auto"
+                >
                   Xem thêm
                   <FaAngleRight size={15} className="group-hover:translate-x-2 transition-transform duration-500" />
-                </div>
+                </Link>
               </Link>
             ))}
           </div>
@@ -130,7 +155,5 @@ const HealthCheckMenu = memo(({ tabActive, setMenuState }: HealthCheckMenuProps)
     </div>
   );
 });
-
-HealthCheckMenu.displayName = "HealthCheckMenu";
 
 export default HealthCheckMenu;

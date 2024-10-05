@@ -5,23 +5,28 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 const SearchSpecialty = () => {
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState<string>("");
 
   return (
     <div className="wrapper p-6 sm:p-8 shadow-md rounded-2xl">
       <div className="flex flex-col sm:flex-row items-center gap-4">
+        {/* Input field for searching specialties */}
         <div className="relative w-full sm:w-auto flex-1">
-          <FiSearch size="22" className="absolute top-1/2 left-5 -translate-y-1/2 text-[#595959]" />
+          <FiSearch
+            size="22"
+            className="absolute top-1/2 left-5 -translate-y-1/2 text-[#595959]"
+          />
           <Input
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            spellCheck={false}
+            onChange={(e) => setInputValue(e.target.value)} // Update state on input change
+            spellCheck={false} // Disable spell check for the input field
             type="text"
             placeholder="Tìm kiếm theo tên chuyên khoa"
             className="w-full py-3 pl-14 pr-4 text-[17px] placeholder:text-[17px] placeholder:text-[#595959] placeholder:font-medium border border-[#ccc] focus:border-primary focus:shadow-input-primary rounded-lg transition duration-500"
           />
         </div>
 
+        {/* Search button */}
         <Button
           type="button"
           variant="default"
