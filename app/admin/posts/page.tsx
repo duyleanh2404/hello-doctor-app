@@ -1,19 +1,16 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
-import { useProvinces } from "@/api/use-provinces";
+import { useState } from "react";
 
 import { FiSearch } from "react-icons/fi";
-import { FaLocationDot } from "react-icons/fa6";
-import { FaClinicMedical } from "react-icons/fa";
 import { AiOutlineDelete } from "react-icons/ai";
 import { LuClipboardEdit } from "react-icons/lu";
+import { FaClinicMedical } from "react-icons/fa";
 import { BsClipboard2PlusFill } from "react-icons/bs";
 
 import {
   Select,
-  SelectItem,
   SelectValue,
   SelectContent,
   SelectTrigger
@@ -30,54 +27,19 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import PaginationSection from "@/components/pagination";
 
-const ManageDoctors = () => {
+const ManagePosts = () => {
   const [inputFocused, setInputFocused] = useState(false);
-  const [provinces, setProvinces] = useState<any[]>([]);
-
-  // Fetch provinces data when the component mounts
-  useEffect(() => {
-    const fetchProvinces = async () => {
-      try {
-        const { success, provinces } = await useProvinces();
-        if (!success || !provinces) return;
-
-        setProvinces(provinces);
-      } catch (error) {
-        console.error("Error fetching provinces:", error);
-      }
-    };
-
-    fetchProvinces();
-  }, []);
 
   return (
     <>
       {/* Page heading */}
-      <h1 className="text-xl font-bold mb-4">Danh sách bác sĩ</h1>
+      <h1 className="text-xl font-bold mb-4">Danh sách bài viết</h1>
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-6">
-          {/* Province selection dropdown */}
-          <Select>
-            <SelectTrigger className="w-[220px] p-3 border-none shadow-none">
-              <div className="flex items-center gap-3">
-                {/* Location icon */}
-                <FaLocationDot className="size-5" />
-                {/* Placeholder for selected province */}
-                <SelectValue placeholder="Chọn tỉnh thành" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              {provinces?.map((item) => (
-                <SelectItem key={item?.id} value={item?.name}> {/* Dynamically generated options */}
-                  {item?.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
           {/* Specialty selection dropdown */}
           <Select>
             <SelectTrigger className="w-[220px] p-3 border-none shadow-none">
@@ -109,48 +71,56 @@ const ManageDoctors = () => {
           </Select>
         </div>
 
-        {/* Search input field */}
-        <div className="relative">
-          <FiSearch
-            size="22"
-            className={cn(
-              "absolute left-2 top-1/2 -translate-y-1/2 transition duration-500",
-              inputFocused ? "text-primary" : "text-gray-500" // Change icon color on input focus
-            )}
+        <div className="flex items-center gap-6">
+          {/* Date picker */}
+          <DatePicker
+            placeholder="Chọn ngày đăng"
+            className="h-14 border-t-transparent border-x-transparent hover:bg-transparent shadow-none rounded-none"
           />
-          <Input
-            type="text"
-            spellCheck={false}
-            placeholder="Tìm kiếm theo tên bác sĩ..."
-            onFocus={() => setInputFocused(true)}
-            onBlur={() => setInputFocused(false)}
-            className="w-[420px] text-[17px] border-b border-[#ccc] focus:border-primary pl-12 rounded-none shadow-none transition duration-500"
-          />
+
+          {/* Search input field */}
+          <div className="relative">
+            <FiSearch
+              size="22"
+              className={cn(
+                "absolute left-2 top-1/2 -translate-y-1/2 transition duration-500",
+                inputFocused ? "text-primary" : "text-gray-500" // Change icon color on input focus
+              )}
+            />
+            <Input
+              type="text"
+              spellCheck={false}
+              placeholder="Tìm kiếm theo tên bài viết..."
+              onFocus={() => setInputFocused(true)}
+              onBlur={() => setInputFocused(false)}
+              className="w-[420px] text-[17px] border-b border-[#ccc] focus:border-primary pl-12 rounded-none shadow-none transition duration-500"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Table displaying doctor data */}
+      {/* Table displaying post data */}
       <div className="relative rounded-md shadow-md overflow-x-auto">
         <Table className="text-[17px]">
           {/* Table header */}
           <TableHeader className="h-12 bg-gray-100">
             <TableRow>
               <TableHead className="font-semibold text-black w-[50px]">STT</TableHead>
-              <TableHead className="font-semibold text-black text-start">Họ và tên</TableHead>
+              <TableHead className="font-semibold text-black text-start">Tên bài viết</TableHead>
+              <TableHead className="font-semibold text-black text-start">Tác giả</TableHead>
               <TableHead className="font-semibold text-black text-start">Chuyên khoa</TableHead>
-              <TableHead className="font-semibold text-black text-start">Bệnh viện</TableHead>
-              <TableHead className="font-semibold text-black text-start">Tỉnh thành</TableHead>
+              <TableHead className="font-semibold text-black text-start">Ngày đăng</TableHead>
               <TableHead className="font-semibold text-black text-start">Hành động</TableHead>
             </TableRow>
           </TableHeader>
-          {/* Table body (sample row with doctor data) */}
+          {/* Table body (sample row with post data) */}
           <TableBody>
             <TableRow>
               <TableCell className="text-center">1</TableCell>
-              <TableCell>Doctor fullname</TableCell>
-              <TableCell>Doctor specialty</TableCell>
-              <TableCell>Doctor clinic</TableCell>
-              <TableCell>Doctor province</TableCell>
+              <TableCell>Post name</TableCell>
+              <TableCell>Post author</TableCell>
+              <TableCell>Post specialty</TableCell>
+              <TableCell>Post date</TableCell>
               <TableCell className="py-6 px-4">
                 <div className="flex items-center gap-4">
                   {/* Edit button */}
@@ -176,4 +146,4 @@ const ManageDoctors = () => {
   );
 };
 
-export default ManageDoctors;
+export default ManagePosts;
