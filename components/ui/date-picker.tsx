@@ -18,7 +18,12 @@ const capitalizeFirstLetter = (string: string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
-export function DatePicker() {
+interface DatePickerProps {
+  className?: string
+  placeholder?: string
+};
+
+export function DatePicker({ className, placeholder }: DatePickerProps) {
   const [date, setDate] = React.useState<Date>();
 
   return (
@@ -28,13 +33,14 @@ export function DatePicker() {
           variant={"outline"}
           className={cn(
             "w-full h-12 justify-start text-left font-normal",
-            !date && "text-muted-foreground"
+            !date && "text-muted-foreground",
+            className && className
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           {date
             ? capitalizeFirstLetter(format(date, "PPP", { locale: vi }))
-            : <span>Chọn ngày khám</span>}
+            : <span>{placeholder ? placeholder : "Chọn ngày khám"}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">

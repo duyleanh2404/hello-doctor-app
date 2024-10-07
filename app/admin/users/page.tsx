@@ -55,45 +55,43 @@ const ManageUsers = () => {
       {/* Page heading */}
       <h1 className="text-xl font-bold mb-4">Danh sách bệnh nhân</h1>
 
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          {/* Province selection dropdown */}
-          <Select>
-            <SelectTrigger className="w-[220px] p-3 border-none shadow-none">
-              <div className="flex items-center gap-3">
-                {/* Location icon */}
-                <FaLocationDot className="size-5" />
-                {/* Placeholder for selected province */}
-                <SelectValue placeholder="Chọn tỉnh thành" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              {provinces?.map((item) => (
-                <SelectItem key={item?.id} value={item?.name}> {/* Dynamically generated options */}
-                  {item?.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <div className="flex items-center justify-between">
+        {/* Province selection dropdown */}
+        <Select>
+          <SelectTrigger className="w-[220px] p-3 border-none shadow-none">
+            <div className="flex items-center gap-3">
+              {/* Location icon */}
+              <FaLocationDot className="size-5" />
+              {/* Placeholder for selected province */}
+              <SelectValue placeholder="Chọn tỉnh thành" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            {provinces?.map((item) => (
+              <SelectItem key={item?.id} value={item?.name}> {/* Dynamically generated options */}
+                {item?.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-          {/* Search input field */}
-          <div className="relative">
-            <FiSearch
-              size="22"
-              className={cn(
-                "absolute left-2 top-1/2 -translate-y-1/2 transition duration-500",
-                inputFocused ? "text-primary" : "text-gray-500" // Change icon color on input focus
-              )}
-            />
-            <Input
-              type="text"
-              spellCheck={false}
-              placeholder="Tìm kiếm theo tên người dùng..."
-              onFocus={() => setInputFocused(true)}
-              onBlur={() => setInputFocused(false)}
-              className="w-[420px] text-[17px] border-b border-[#ccc] focus:border-primary pl-12 rounded-none shadow-none transition duration-500"
-            />
-          </div>
+        {/* Search input field */}
+        <div className="relative">
+          <FiSearch
+            size="22"
+            className={cn(
+              "absolute left-2 top-1/2 -translate-y-1/2 transition duration-500",
+              inputFocused ? "text-primary" : "text-gray-500" // Change icon color on input focus
+            )}
+          />
+          <Input
+            type="text"
+            spellCheck={false}
+            placeholder="Tìm kiếm theo tên người dùng..."
+            onFocus={() => setInputFocused(true)}
+            onBlur={() => setInputFocused(false)}
+            className="w-[420px] text-[17px] border-b border-[#ccc] focus:border-primary pl-12 rounded-none shadow-none transition duration-500"
+          />
         </div>
       </div>
 
