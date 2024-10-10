@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
-import "./globals.css";
+import { Toaster } from "react-hot-toast";
 
-import ProviderStore from "@/components/provider-store";
+import "./globals.css";
+import localFont from "next/font/local";
+
+import ProviderAuth from "@/components/providers/provider-auth";
+import ProviderStore from "@/components/providers/provider-global";
 
 const ibmPlexSans = localFont({
   src: "./fonts/IBM-Plex-Sans.woff2",
@@ -24,9 +27,18 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${ibmPlexSans.variable} antialiased`}>
         <ProviderStore>
-          {children}
+          <ProviderAuth>
+            <Toaster
+              position="top-center"
+              reverseOrder={false}
+              toastOptions={{
+                style: { maxWidth: 500 }
+              }}
+            />
+            {children}
+          </ProviderAuth>
         </ProviderStore>
       </body>
     </html>
   );
-}
+};

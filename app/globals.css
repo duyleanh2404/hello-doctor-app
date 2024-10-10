@@ -6,6 +6,10 @@ body {
   font-family: var(--font-ibm-plex-sans), sans-serif;
 }
 
+html body[data-scroll-locked] {
+  margin-right: 0 !important;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
