@@ -1,8 +1,12 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { setEmailValue } from "@/store/slices/auth-slice";
+import { register as registerService } from "@/services/auth-service";
 
 import { FaRegEye } from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
@@ -22,6 +26,7 @@ import { Button } from "@/components/ui/button";
 
 import Link from "next/link";
 import Image from "next/image";
+import Spinner from "@/components/spinner";
 
 import validateEmail from "@/utils/validate-email";
 import validateFullName from "@/utils/validate-fullname";
@@ -43,13 +48,18 @@ interface RegisterFormInputs {
 };
 
 const RegisterPage = () => {
+  const router = useRouter();
+  const dispatch = useDispatch();
+
   const {
     register,
     setValue,
+    setError,
     handleSubmit,
     formState: { errors }
   } = useForm<RegisterFormInputs>();
 
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isShowPassword, setIsShowPassword] = useState<boolean>(false);
   const [selectedProvince, setSelectedProvince] = useState<string>("");
 
@@ -90,18 +100,45 @@ const RegisterPage = () => {
     fetchDistricts();
   }, [selectedProvince]);
 
-  // Handle form submission
+  // Function to handle user registration when the form is submitted
   const handleRegister: SubmitHandler<RegisterFormInputs> = async (userData) => {
-    console.log({
+    setIsLoading(true);
+    dispatch(setEmailValue(userData.email));
+
+    // Prepare the registration data by formatting the form inputs
+    const registrationData = {
       email: userData.email,
       gender: userData.gender,
       fullname: userData.fullname,
       password: userData.password,
       phoneNumber: userData.phoneNumber,
-      dateOfBirth: `${userData.day}/${userData.month}/${userData.year}`,
-      address: `${userData.street}, ${userData.district}, ${userData.province}`
-    });
+      dateOfBirth: `${userData.day}/${userData.month}/${userData.year}`, // Format date of birth as day/month/year
+      address: `${userData.street}, ${userData.district}, ${userData.province}`, // Concatenate address fields into one string
+    };
+
+    // Call the registration service with the prepared data
+    const { statusCode } = await registerService(registrationData);
+
+    // If the email is already used, set an error message and scroll to the top of the page
+    if (statusCode === 409) {
+      setError("email", {
+        type: "manual",
+        message: "Email đã được sử dụng. Vui lòng chọn email khác!"
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    router.push("/verify-otp");
+    setIsLoading(false);
   };
+
+  // If the registration process is loading, show the loading spinner
+  if (isLoading) {
+    return (
+      <Spinner />
+    );
+  }
 
   return (
     <div className="h-auto bg-[#f7f9fc] overflow-y-auto">
@@ -459,7 +496,11 @@ const RegisterPage = () => {
             <Button
               type="submit"
               variant="default"
-              className="h-12 text-[17px] font-medium text-white py-4 mt-5 bg-primary hover:bg-[#2c74df] rounded-md shadow-md transition duration-500"
+              disabled={isLoading}
+              className={cn(
+                "h-14 text-lg font-medium text-white py-4 bg-primary hover:bg-[#2c74df] rounded-md shadow-md transition duration-500 select-none",
+                isLoading && "opacity-50 cursor-not-allowed"
+              )}
             >
               Đăng ký
             </Button>
@@ -476,7 +517,7 @@ const RegisterPage = () => {
       </div >
 
       {/* Aside images for visual appeal, hidden on smaller screens */}
-      < aside className="hidden xl:block fixed bottom-0 left-0" >
+      <aside className="hidden xl:block fixed bottom-0 left-0" >
         <Image
           loading="lazy"
           src="/auth/aside-left.svg"

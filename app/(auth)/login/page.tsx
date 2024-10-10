@@ -2,8 +2,18 @@
 
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
+import { Client, Account, OAuthProvider } from "appwrite";
+import {
+  login as loginService,
+  resendOtp as resendOtpService,
+  loginOrRegisterWithGoogle as loginOrRegisterWithGoogleService
+} from "@/services/auth-service";
+
+import { useDispatch } from "react-redux";
+import { setEmailValue, setLoginStatus } from "@/store/slices/auth-slice";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,6 +21,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 import Link from "next/link";
 import Image from "next/image";
+import Cookies from "js-cookie";
+import toast from "react-hot-toast";
+import Spinner from "@/components/spinner";
 import validateEmail from "@/utils/validate-email";
 
 interface LoginFormInputs {
@@ -19,11 +32,26 @@ interface LoginFormInputs {
 };
 
 const LoginPage = () => {
+  const router = useRouter();
+  const dispatch = useDispatch();
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  // Create a new instance of the Appwrite Client
+  const client = new Client()
+    // Set the endpoint for the Appwrite API
+    .setEndpoint("https://cloud.appwrite.io/v1") // Replace with your Appwrite server endpoint
+    // Set the project ID for your Appwrite project
+    .setProject("66827f98002b29546db2"); // Replace with your Appwrite project ID
+
+  // Create a new instance of the Account service using the client
+  const account = new Account(client);
 
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors }
   } = useForm<LoginFormInputs>();
 
@@ -32,10 +60,77 @@ const LoginPage = () => {
     setShowPassword((prev) => !prev);
   };
 
-  // Handle form submission with valid data
-  const onSubmit: SubmitHandler<LoginFormInputs> = (userData) => {
-    console.log(userData);
+  // Start the OAuth2 session for Google login
+  const handleGoogleLogin = async () => {
+    await account.createOAuth2Session(
+      OAuthProvider.Google, // Specify Google as the OAuth provider
+      "http://localhost:3000/", // Redirect URI after successful login
+      "http://localhost:3000/login" // URI to handle the login process
+    );
+
+    // Get the user's information from the OAuth session
+    const user = await account.get();
+
+    // Call the service to log in or register the user with the obtained Google user info
+    const { accessToken } = await loginOrRegisterWithGoogleService({
+      email: user.email,
+      name: user.name
+    });
+
+    Cookies.set("access_token", accessToken);
+    toast.success("Đăng nhập thành công!");
+    dispatch(setLoginStatus(true));
   };
+
+  // Handle form submission with valid data
+  const onSubmit: SubmitHandler<LoginFormInputs> = async (userData) => {
+    setIsLoading(true);
+    dispatch(setEmailValue(userData.email));
+
+    // Call the login service with the user data and destructure the response
+    const { errorCode, accessToken } = await loginService(userData);
+
+    // Check if the email is not verified
+    if (errorCode === "EMAIL_NOT_VERIFIED") {
+      router.push("/verify-otp");
+      setIsLoading(false);
+
+      // Resend OTP to the user's email
+      await resendOtpService({ email: userData.email });
+      return;
+    }
+    // Check if the user needs to log in using Google
+    else if (errorCode === "GOOGLE_LOGIN_REQUIRED") {
+      setError("email", {
+        type: "manual",
+        message: "Email này đã được đăng ký với Google!"
+      });
+      setIsLoading(false);
+      return;
+    }
+    // Check for email not found or invalid password
+    else if (errorCode === "EMAIL_NOT_FOUND" || errorCode === "INVALID_PASSWORD") {
+      setError("password", {
+        type: "manual",
+        message: "Email hoặc mật khẩu không chính xác!"
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    router.push("/");
+    setIsLoading(false);
+    dispatch(setLoginStatus(true));
+    toast.success("Đăng nhập thành công");
+    Cookies.set("access_token", accessToken);
+  };
+
+  // If the registration process is loading, show the loading spinner
+  if (isLoading) {
+    return (
+      <Spinner />
+    );
+  }
 
   return (
     <div className="h-screen py-10 bg-[#f7f9fc] overflow-y-auto">
@@ -132,7 +227,7 @@ const LoginPage = () => {
                     </label>
                   </div>
                   <Link
-                    href="/"
+                    href="/forgot-password"
                     className="text-primary hover:font-semibold hover:underline"
                   >
                     Quên mật khẩu?
@@ -145,7 +240,11 @@ const LoginPage = () => {
             <Button
               type="submit"
               variant="default"
-              className="h-14 text-[17px] font-semibold text-white py-4 bg-primary hover:bg-[#2c74df] rounded-md shadow-md transition duration-500"
+              disabled={isLoading}
+              className={cn(
+                "h-14 text-lg font-medium text-white py-4 bg-primary hover:bg-[#2c74df] rounded-md shadow-md transition duration-500 select-none",
+                isLoading && "opacity-50 cursor-not-allowed"
+              )}
             >
               Đăng nhập
             </Button>
@@ -157,7 +256,8 @@ const LoginPage = () => {
             <Button
               type="button"
               variant="outline"
-              className="h-14 flex items-center justify-center gap-4 py-4 px-4 border border-[#ccc] rounded-md transition duration-500"
+              onClick={handleGoogleLogin}
+              className="h-16 flex items-center justify-center gap-4 py-4 px-4 border border-[#ccc] rounded-md transition duration-500"
             >
               <Image
                 loading="lazy"
