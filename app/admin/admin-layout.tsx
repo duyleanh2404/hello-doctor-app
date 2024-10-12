@@ -18,16 +18,17 @@ import { SidebarButton } from "./sidebar-button";
 
 import Link from "next/link";
 import Image from "next/image";
+import Hint from "@/components/hint";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const currentPath = usePathname();
 
   return (
     <div>
-      <div className="fixed top-0 left-0 w-[17%] h-screen flex flex-col justify-between bg-[#1c3f66]">
+      <div className="fixed top-0 left-0 w-[19%] h-screen flex flex-col justify-between bg-[#1c3f66]">
         <div className="flex flex-col gap-6">
           {/* Navigation link to admin page */}
-          <Link href="/admin">
+          <Link href="/admin/users">
             <Image
               loading="lazy"
               src="/logo-admin.jpg"
@@ -95,13 +96,15 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         </Button>
       </div>
 
-      <div className="relative flex-1 h-screen flex flex-col gap-6 p-6 ml-[17%]">
+      <div className="relative flex-1 h-screen flex flex-col gap-6 p-6 ml-[19%]">
         {/* Notification bell and user profile */}
         <div className="absolute top-4 right-6 flex items-center gap-8 select-none">
           {/* Notification bell button */}
-          <Button type="button" variant="ghost">
-            <FaRegBell size="22" />
-          </Button>
+          <Hint label="Thông báo">
+            <Button type="button" variant="ghost">
+              <FaRegBell size="22" />
+            </Button>
+          </Hint>
 
           {/* User avatar and name */}
           <div className="flex items-center gap-3">
@@ -113,7 +116,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
               height="40"
               className="object-cover rounded-full"
             />
-            <p className="font-medium">User fullname</p>
+            <p className="font-medium">Admin</p>
           </div>
         </div>
 

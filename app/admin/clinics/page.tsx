@@ -60,7 +60,7 @@ const ManageClinics = () => {
           <SelectTrigger className="w-[220px] p-3 border-none shadow-none">
             <div className="flex items-center gap-3">
               {/* Location icon */}
-              <FaLocationDot className="size-5" />
+              <FaLocationDot className="size-5 text-[#1c3f66]" />
               {/* Placeholder for selected province */}
               <SelectValue placeholder="Chọn tỉnh thành" />
             </div>

@@ -123,6 +123,7 @@ const LoginPage = () => {
     dispatch(setLoginStatus(true));
     toast.success("Đăng nhập thành công");
     Cookies.set("access_token", accessToken);
+    Cookies.set("logged_in", JSON.stringify(true));
   };
 
   // If the registration process is loading, show the loading spinner

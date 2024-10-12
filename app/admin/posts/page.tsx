@@ -45,7 +45,7 @@ const ManagePosts = () => {
             <SelectTrigger className="w-[220px] p-3 border-none shadow-none">
               <div className="flex items-center gap-3">
                 {/* Location icon */}
-                <BsClipboard2PlusFill className="size-5" />
+                <BsClipboard2PlusFill className="size-5 text-[#1c3f66]" />
                 {/* Placeholder for selected specialty */}
                 <SelectValue placeholder="Chọn chuyên khoa" />
               </div>
@@ -60,7 +60,7 @@ const ManagePosts = () => {
             <SelectTrigger className="w-[220px] p-3 border-none shadow-none">
               <div className="flex items-center gap-3">
                 {/* Location icon */}
-                <FaClinicMedical className="size-5" />
+                <FaClinicMedical className="size-5 text-[#1c3f66]" />
                 {/* Placeholder for selected clinic */}
                 <SelectValue placeholder="Chọn bệnh viện" />
               </div>
