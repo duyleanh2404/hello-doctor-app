@@ -92,7 +92,7 @@ const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: MenuMobile
           <Button
             type="button"
             variant="default"
-            className="w-full text-white font-medium bg-[#2D87F3] hover:bg-[#2D87F3]/60 rounded-md transition duration-500"
+            className="w-full text-white font-medium bg-[#2D87F3] hover:bg-[#2D87F3]/80 rounded-md transition duration-500"
           >
             Đăng nhập
           </Button>
