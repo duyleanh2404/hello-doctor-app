@@ -1,14 +1,19 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { SpecialtyData } from "@/types/specialty-types";
-import { findAllSpecialties, deleteSpecialty } from "@/services/specialty-service";
+import Image from "next/image";
+import Cookies from "js-cookie";
+import toast from "react-hot-toast";
 
 import { FiSearch } from "react-icons/fi";
 import { AiOutlineDelete } from "react-icons/ai";
 import { LuClipboardEdit } from "react-icons/lu";
+
+import { cn } from "@/lib/utils";
+import { SpecialtyData } from "@/types/specialty-types";
+import { getAllSpecialties, deleteSpecialty } from "@/services/specialty-service";
+import useDebounce from "@/hooks/use-debounce";
 
 import {
   Table,
@@ -18,14 +23,8 @@ import {
   TableCell,
   TableHeader
 } from "@/components/ui/table";
-
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
-import Image from "next/image";
-import Cookies from "js-cookie";
-import toast from "react-hot-toast";
-import useDebounce from "@/hooks/use-debounce";
 import PaginationSection from "@/components/pagination";
 import DeleteConfirmationModal from "@/components/delete-confirmation-modal";
 
@@ -40,46 +39,40 @@ const ManageSpecialties = () => {
   const [specialties, setSpecialties] = useState<SpecialtyData[]>([]);
   const [specialtyToDelete, setSpecialtyToDelete] = useState<string | null>(null);
 
-  // State to manage pagination
   const [totalPages, setTotalPages] = useState<number>(1);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  // State for search query
   const [searchQuery, setSearchQuery] = useState<string>("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-  // Fetch specialties from API
   const fetchSpecialties = async (page: number, query: string) => {
     try {
       setIsLoading(true);
       const accessToken = Cookies.get("access_token");
       if (!accessToken) return;
 
-      const { specialties, total } = await findAllSpecialties({
-        accessToken,
-        page,
-        limit: 10,
-        query
+      const { specialties, total } = await getAllSpecialties({
+        accessToken, page, limit: 10, query
       });
 
       setSpecialties(specialties);
 
       const itemsPerPage = 10;
       const totalPages = Math.ceil(total / itemsPerPage);
+
       setTotalPages(totalPages);
     } catch (err: any) {
       toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
+      router.push("/");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Use effect to fetch specialties on component mount or page change
   useEffect(() => {
-    fetchSpecialties(currentPage, debouncedSearchQuery); // Use the debounced search query
-  }, [currentPage, debouncedSearchQuery]); // Fetch when current page or search query changes
+    fetchSpecialties(currentPage, debouncedSearchQuery);
+  }, [currentPage, debouncedSearchQuery]);
 
-  // Handle deleting a specialty
   const handleDeleteSpecialty = async () => {
     try {
       setIsDeleting(true);
@@ -97,8 +90,9 @@ const ManageSpecialties = () => {
 
       setModalOpen(false);
       toast.success("Xóa chuyên khoa thành công!");
-    } catch (error) {
+    } catch (err: any) {
       toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
+      router.push("/");
     } finally {
       setIsDeleting(false);
     }
@@ -107,7 +101,6 @@ const ManageSpecialties = () => {
   return (
     <>
       <h1 className="text-xl font-bold mb-4">Danh sách chuyên khoa</h1>
-
       <div className="relative ml-auto">
         <FiSearch
           size="22"
@@ -116,15 +109,16 @@ const ManageSpecialties = () => {
             inputFocused ? "text-primary" : "text-gray-500"
           )}
         />
+
         <Input
           type="text"
           spellCheck={false}
           placeholder="Tìm kiếm theo tên chuyên khoa..."
           onFocus={() => setInputFocused(true)}
           onBlur={() => setInputFocused(false)}
-          className="w-[420px] text-[17px] border-b border-[#ccc] focus:border-primary pl-12 rounded-none shadow-none transition duration-500"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-[420px] text-[17px] border-b border-[#ccc] focus:border-primary pl-12 rounded-none shadow-none transition duration-500"
         />
       </div>
 
@@ -135,10 +129,12 @@ const ManageSpecialties = () => {
         </div>
       ) : (
         <>
-          <div className={cn(
-            "relative rounded-md shadow-md overflow-x-auto",
-            specialties && specialties.length > 0 ? "h-auto" : "h-full"
-          )}>
+          <div
+            className={cn(
+              "relative rounded-md shadow-md overflow-x-auto",
+              specialties && specialties.length > 0 ? "h-auto" : "h-full"
+            )}
+          >
             <Table className="h-full text-[17px]">
               <TableHeader className="h-12 bg-gray-100 sticky top-0 z-10">
                 <TableRow>
@@ -186,6 +182,7 @@ const ManageSpecialties = () => {
                             >
                               <LuClipboardEdit size="22" />
                             </Button>
+
                             <Button
                               type="button"
                               variant="ghost"
@@ -209,8 +206,8 @@ const ManageSpecialties = () => {
           {totalPages > 1 && (
             <div className="ml-auto">
               <PaginationSection
-                currentPage={currentPage}
                 totalPages={totalPages}
+                currentPage={currentPage}
                 onPageChange={setCurrentPage}
               />
             </div>
@@ -221,8 +218,8 @@ const ManageSpecialties = () => {
       <DeleteConfirmationModal
         isOpen={isModalOpen}
         isDeleting={isDeleting}
-        onClose={() => setModalOpen(false)}
         onConfirm={handleDeleteSpecialty}
+        onClose={() => setModalOpen(false)}
       />
     </>
   );

@@ -1,10 +1,10 @@
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
-
 import { GrLocation } from "react-icons/gr";
 import { FaRegCalendarAlt } from "react-icons/fa";
 import { RiMoneyDollarCircleLine } from "react-icons/ri";
+import Image from "next/image";
+
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface InfoItemProps {
   title: string;
@@ -28,13 +28,11 @@ const InfoItem = ({ icon, title, subtitle, customStyle }: InfoItemProps) => (
 const ScheduleInfo = () => {
   return (
     <div className="flex-1 flex flex-col gap-12 p-6 border shadow-md rounded-2xl">
-      {/* Appointment Information Section */}
       <section className="flex flex-col gap-6">
         <h1 className="relative text-lg font-bold text-[#284a75] pl-3 before:absolute before:top-1/2 before:left-0 before:-translate-y-1/2 before:w-[3px] before:h-[18px] before:bg-primary">
           Lịch hẹn của bạn
         </h1>
 
-        {/* Doctor details */}
         <div className="flex items-center gap-4">
           <Image
             loading="lazy"
@@ -50,21 +48,21 @@ const ScheduleInfo = () => {
           </div>
         </div>
 
-        {/* Schedule details */}
         <div className="flex flex-col gap-2">
           <p className="text-[17px] font-semibold text-[#595959]">Thông tin lịch hẹn</p>
           <div className="flex flex-col gap-6 p-4 bg-[#f8f9fc] rounded-md">
-            {/* Info Items for Scheduling Details */}
             <InfoItem
               icon={<FaRegCalendarAlt size="18" />}
               title="Lịch hẹn: Schedule time"
               subtitle="Schedule date"
             />
+
             <InfoItem
               icon={<GrLocation size="22" />}
               title="Clinic name"
               subtitle="Clinic address"
             />
+
             <InfoItem
               icon={<RiMoneyDollarCircleLine size="22" />}
               title="Medical fee"
@@ -74,7 +72,6 @@ const ScheduleInfo = () => {
         </div>
       </section>
 
-      {/* Payment Method Section */}
       <section className="flex flex-col gap-6">
         <h1 className="relative text-lg font-bold text-[#284a75] pl-3 before:absolute before:top-1/2 before:left-0 before:-translate-y-1/2 before:w-[3px] before:h-[18px] before:bg-primary">
           Phương thức thanh toán
@@ -97,7 +94,6 @@ const ScheduleInfo = () => {
           </div>
         </div>
 
-        {/* Button for Confirmation */}
         <Button
           type="submit"
           variant="default"

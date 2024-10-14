@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import {
   Control,
   Controller,
@@ -9,13 +8,15 @@ import {
 import { MdEmail } from "react-icons/md";
 import { FaPhone } from "react-icons/fa6";
 
+import Link from "next/link";
+import Image from "next/image";
+
+import { cn } from "@/lib/utils";
+import validatePhoneNumber from "@/utils/validate-phone-number";
+
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BookingScheduleData } from "@/types/schedule-types";
-
-import Link from "next/link";
-import Image from "next/image";
-import validatePhoneNumber from "@/utils/validate-phone-number";
 
 interface UserInfoProps {
   errors: FieldErrors<BookingScheduleData>;
@@ -26,7 +27,6 @@ interface UserInfoProps {
 const UserInfo = ({ errors, control, register }: UserInfoProps) => {
   return (
     <div className="w-full lg:w-[35%] flex flex-col gap-8 p-6 border shadow-md rounded-2xl">
-      {/* User Information Section */}
       <div className="flex flex-col gap-4">
         <h1 className={cn(
           "relative text-lg font-bold text-[#284a75] pl-3",
@@ -37,7 +37,6 @@ const UserInfo = ({ errors, control, register }: UserInfoProps) => {
 
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-6 p-4 bg-[#f8f9fc] rounded-md">
-            {/* User Avatar and Info */}
             <div className="flex items-center gap-3">
               <Image
                 loading="lazy"
@@ -56,7 +55,6 @@ const UserInfo = ({ errors, control, register }: UserInfoProps) => {
               </div>
             </div>
 
-            {/* User Contact Info */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-3">
                 <FaPhone size="14" className="text-[#595959]" />
@@ -69,7 +67,6 @@ const UserInfo = ({ errors, control, register }: UserInfoProps) => {
             </div>
           </div>
 
-          {/* Customer Information Privacy Notice */}
           <div className="flex items-start gap-3">
             <Image
               loading="lazy"
@@ -93,23 +90,17 @@ const UserInfo = ({ errors, control, register }: UserInfoProps) => {
         </div>
       </div>
 
-      {/* Survey Questions Section */}
       <div className="flex flex-col gap-4">
-        <h1 className={cn(
-          "relative text-lg font-bold text-[#284a75] pl-3",
-          "before:absolute before:top-1/2 before:left-0 before:-translate-y-1/2 before:w-[3px] before:h-[18px] before:bg-primary"
-        )}>
+        <h1 className="relative text-lg font-bold text-[#284a75] pl-3 before:absolute before:top-1/2 before:left-0 before:-translate-y-1/2 before:w-[3px] before:h-[18px] before:bg-primary">
           Câu hỏi khảo sát
         </h1>
 
         <div className="flex flex-col gap-6">
-          {/* First Survey Question */}
           <div className="flex flex-col gap-4 sm:gap-2">
             <h1 className="text-[17px] font-semibold text-[#404040]">
               1. Bạn đã tới sử dụng dịch vụ của phòng khám này chưa?
             </h1>
             <div className="flex flex-col sm:flex-row items-start lg:items-center gap-4 sm:gap-8">
-              {/* Radio Button for New Patient */}
               <Controller
                 control={control}
                 name="new_patients"
@@ -130,7 +121,6 @@ const UserInfo = ({ errors, control, register }: UserInfoProps) => {
                 )}
               />
 
-              {/* Radio Button for Existing Patient */}
               <Controller
                 control={control}
                 name="new_patients"
@@ -153,7 +143,6 @@ const UserInfo = ({ errors, control, register }: UserInfoProps) => {
             </div>
           </div>
 
-          {/* Zalo Phone Input */}
           <div className="flex flex-col gap-1">
             <label className="text-[17px] font-semibold text-[#404040]">Zalo</label>
             <div className="flex flex-col gap-2">
@@ -166,8 +155,8 @@ const UserInfo = ({ errors, control, register }: UserInfoProps) => {
                   validate: validatePhoneNumber
                 })}
                 className={cn(
-                  "p-3 border rounded-lg transition duration-500",
-                  errors.zalo ? "border-red-500" : "border-[#ccc] focus:border-primary focus:shadow-input-primary"
+                  "p-3 border border-gray-300 rounded-lg transition duration-500",
+                  errors.zalo ? "border-red-500" : "focus:border-primary focus:shadow-input-primary"
                 )}
               />
 
@@ -175,7 +164,6 @@ const UserInfo = ({ errors, control, register }: UserInfoProps) => {
                 <span className="text-[13px] text-red-500">{errors.zalo.message}</span>
               )}
 
-              {/* Checkbox to use phone number in user profile */}
               <div className="flex items-center space-x-2">
                 <Checkbox id="terms" />
                 <label htmlFor="terms" className="text-sm font-medium leading-none cursor-pointer">
@@ -185,7 +173,6 @@ const UserInfo = ({ errors, control, register }: UserInfoProps) => {
             </div>
           </div>
 
-          {/* Detailed Address Input */}
           <div className="flex flex-col gap-1">
             <label className="text-[17px] font-semibold text-[#404040]">Địa chỉ chi tiết</label>
             <Input
@@ -194,8 +181,8 @@ const UserInfo = ({ errors, control, register }: UserInfoProps) => {
               placeholder="Nhập địa chỉ chi tiết..."
               {...register("address", { required: "Vui lòng nhập địa chỉ chi tiết của bạn" })}
               className={cn(
-                "p-3 border border-[#ccc] rounded-lg transition duration-500",
-                errors.address ? "border-red-500" : "border-[#ccc] focus:border-primary focus:shadow-input-primary"
+                "p-3 border border-gray-300 rounded-lg transition duration-500",
+                errors.address ? "border-red-500" : "focus:border-primary focus:shadow-input-primary"
               )}
             />
 
@@ -205,11 +192,11 @@ const UserInfo = ({ errors, control, register }: UserInfoProps) => {
           </div>
         </div>
 
-        {/* Second Survey Question */}
         <div className="flex flex-col gap-2">
           <h1 className="text-[17px] font-semibold text-[#404040]">
             2. Lí do tới thăm khám của bạn?
           </h1>
+
           <textarea
             rows={5}
             spellCheck={false}
@@ -219,8 +206,8 @@ const UserInfo = ({ errors, control, register }: UserInfoProps) => {
               minLength: { value: 10, message: "Vui lòng nhập ít nhất 10 ký tự" }
             })}
             className={cn(
-              "p-3 border rounded-lg transition duration-500 resize-none",
-              errors.reasons ? "border-red-500" : "border-[#ccc] focus:border-primary focus:shadow-input-primary"
+              "p-3 border border-gray-300 rounded-lg transition duration-500 resize-none",
+              errors.reasons ? "border-red-500" : "focus:border-primary focus:shadow-input-primary"
             )}
           />
 

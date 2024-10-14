@@ -1,12 +1,12 @@
 export interface User {
-  email: string;
   role: string;
+  otp?: string;
+  email: string;
+  image?: string;
+  gender?: string;
+  address?: string;
   fullname: string;
   password?: string;
-  address?: string;
   phoneNumber?: string;
   dateOfBirth?: string;
-  gender?: string;
-  image?: string;
-  otp?: string;
 };

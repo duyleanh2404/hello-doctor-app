@@ -16,23 +16,17 @@ interface DeleteConfirmationModalProps {
 };
 
 const DeleteConfirmationModal = ({
-  isOpen,
-  isDeleting,
-  onClose,
-  onConfirm
+  isOpen, isDeleting, onClose, onConfirm
 }: DeleteConfirmationModalProps) => {
   return (
-    // Dialog component to show the modal
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
-        {/* Title of the modal */}
         <DialogTitle className="text-xl">Xác nhận xóa</DialogTitle>
-        {/* Description of the action being confirmed */}
         <DialogDescription className="text-base">
-          Bạn có chắc chắn muốn xóa chuyên khoa này? Hành động này không thể hoàn tác.
+          Bạn có chắc chắn muốn xóa? Hành động này không thể hoàn tác.
         </DialogDescription>
-        <div className="flex justify-end gap-4">
-          {/* Cancel button to close the modal */}
+
+        <div className="flex justify-end gap-4 mt-6">
           <Button
             type="button"
             variant="outline"
@@ -42,7 +36,6 @@ const DeleteConfirmationModal = ({
             Hủy
           </Button>
 
-          {/* Confirm button to proceed with deletion */}
           <Button
             type="button"
             variant="default"

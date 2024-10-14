@@ -113,6 +113,7 @@ const ManagePosts = () => {
               <TableHead className="font-semibold text-black text-start">Hành động</TableHead>
             </TableRow>
           </TableHeader>
+
           {/* Table body (sample row with post data) */}
           <TableBody>
             <TableRow>
@@ -139,9 +140,9 @@ const ManagePosts = () => {
       </div>
 
       {/* Navigate to next page */}
-      <div className="ml-auto">
+      {/* <div className="ml-auto">
         <PaginationSection />
-      </div>
+      </div> */}
     </>
   );
 };

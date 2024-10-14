@@ -111,6 +111,7 @@ const ManageSchedules = () => {
               <TableHead className="font-semibold text-black text-start">Hành động</TableHead>
             </TableRow>
           </TableHeader>
+
           {/* Table body (sample row with schedule data) */}
           <TableBody>
             <TableRow>
@@ -138,9 +139,9 @@ const ManageSchedules = () => {
       </div>
 
       {/* Navigate to next page */}
-      <div className="ml-auto">
+      {/* <div className="ml-auto">
         <PaginationSection />
-      </div>
+      </div> */}
     </>
   );
 };

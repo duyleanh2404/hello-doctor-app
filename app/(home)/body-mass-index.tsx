@@ -1,10 +1,10 @@
-import { cn } from "@/lib/utils";
 import { useState, FormEvent } from "react";
+import Image from "next/image";
+
+import { cn } from "@/lib/utils";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
-import Image from "next/image";
 
 interface InputFieldProps {
   id: string;
@@ -71,7 +71,6 @@ const BodyMassIndex = () => {
   const [height, setHeight] = useState<number | null>(null);
   const [weight, setWeight] = useState<number | null>(null);
 
-  // Handle form submission
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log({
@@ -88,11 +87,8 @@ const BodyMassIndex = () => {
       className="border rounded-2xl sm:rounded-md shadow-lg"
     >
       <div className="flex items-center justify-between gap-6 py-8 px-6 text-white bg-gradient-primary rounded-t-2xl sm:rounded-t-md">
-        {/* Header section with title, doctor consultation info, and an image */}
         <div className="flex flex-col gap-1">
-          {/* Main form title */}
           <h1 className="sm:text-lg font-bold">Tính chỉ số BMI - Chỉ số khối cơ thể</h1>
-          {/* Consultation info */}
           <p className="text-[12px] sm:text-sm">
             Tham vấn y khoa: {""}
             <span className="font-semibold">Bác sĩ Nguyễn Thường Hanh</span> ngày 15/06/2021
@@ -108,14 +104,10 @@ const BodyMassIndex = () => {
         />
       </div>
 
-      {/* Main form body */}
       <div className="flex flex-col gap-6 pt-6 pb-8 px-6 sm:pt-8 sm:pb-10 sm:px-6">
-        {/* Gender selection section */}
         <div className="flex flex-col gap-2">
-          {/* Label for gender */}
           <label className="text-[15px] font-semibold">Giới tính của bạn</label>
           <div className="flex items-center gap-4">
-            {/* Gender selection options */}
             <GenderOption
               value="male"
               label="Nam"
@@ -123,6 +115,7 @@ const BodyMassIndex = () => {
               gender={gender}
               setGender={setGender}
             />
+
             <GenderOption
               value="female"
               label="Nữ"
@@ -133,7 +126,6 @@ const BodyMassIndex = () => {
           </div>
         </div>
 
-        {/* Age input field */}
         <InputField
           id="age"
           label="Số tuổi"
@@ -142,7 +134,6 @@ const BodyMassIndex = () => {
           onChange={(e) => setAge(e.target.value ? Number(e.target.value) : null)}
         />
 
-        {/* Height input field */}
         <InputField
           id="height"
           label="Chiều cao (cm)"
@@ -151,7 +142,6 @@ const BodyMassIndex = () => {
           onChange={(e) => setHeight(e.target.value ? Number(e.target.value) : null)}
         />
 
-        {/* Weight input field */}
         <InputField
           id="weight"
           label="Cân nặng (kg)"
@@ -160,7 +150,6 @@ const BodyMassIndex = () => {
           onChange={(e) => setWeight(e.target.value ? Number(e.target.value) : null)}
         />
 
-        {/* Submit button */}
         <Button
           type="submit"
           variant="default"

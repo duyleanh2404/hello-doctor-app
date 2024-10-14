@@ -1,22 +1,22 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { useProvinces } from "@/api/use-provinces";
+import { useRouter } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
+import Image from "next/image";
+import toast from "react-hot-toast";
+import Autoplay from "embla-carousel-autoplay";
+
+import { getProvinces } from "@/services/auth-service";
+import bookingDoctorBanners from "@/constants/booking-doctor-banners";
+import bookingDoctorOptions from "@/constants/booking-doctor-options";
 
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-
-import Image from "next/image";
-import Autoplay from "embla-carousel-autoplay";
-
-import bookingDoctorBanners from "@/constants/booking-doctor-banners";
-import bookingDoctorOptions from "@/constants/booking-doctor-options";
-
+import { Button } from "@/components/ui/button";
 import HealthGuide from "./health-guide";
 import SearchClinic from "./search-clinic";
 import SearchDoctor from "./search-doctor";
@@ -28,24 +28,21 @@ import OutstandingClinic from "./outstanding-clinic";
 type Tab = "clinic" | "doctor" | "specialty";
 
 const BookingDoctorPage = () => {
+  const router = useRouter();
+
   const [provinces, setProvinces] = useState<any[]>([]);
   const [tabActive, setTabActive] = useState<Tab>("clinic");
 
-  // Effect to fetch provinces on component mount
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
-        const { success, provinces } = await useProvinces();
-        if (!success || !provinces) {
-          return;
-        }
-
+        const provinces = await getProvinces();
         setProvinces(provinces);
-      } catch (error) {
-        console.error("Error fetching provinces:", error);
+      } catch (err: any) {
+        router.push("/");
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       }
     };
-
     fetchProvinces();
   }, []);
 
@@ -58,7 +55,7 @@ const BookingDoctorPage = () => {
   return (
     <>
       <div className="relative">
-        <Carousel plugins={[Autoplay({ delay: 3000 })]}> {/* Carousel for banners */}
+        <Carousel plugins={[Autoplay({ delay: 3000 })]}>
           <CarouselContent>
             {bookingDoctorBanners.map(({ id, image }) => (
               <CarouselItem key={id}>
@@ -78,17 +75,16 @@ const BookingDoctorPage = () => {
 
         <div className="absolute bottom-0 left-0 w-full bg-[#ffffffa3] shadow-sm overflow-y-auto z-10">
           <div className="wrapper flex items-center">
-            {/* Render buttons for each tab */}
             {bookingDoctorOptions.map(({ id, type, title }) => (
               <Button
                 key={id}
                 type="button"
                 variant="ghost"
-                onClick={() => setTabActive(type as Tab)} // Update active tab on click
+                onClick={() => setTabActive(type as Tab)}
                 className={cn(
                   "relative min-w-fit py-3 xl:py-4 px-10 xl:px-12 rounded-none",
-                  tabActive === type ? "bg-white border-t-[3px] border-primary" : "", // Active tab styles
-                  type !== "clinic" && "before:absolute before:top-1/2 before:left-0 before:-translate-y-1/2 before:w-[1px] before:h-[25px] before:bg-[#ccc]" // Separator styles for tabs
+                  tabActive === type ? "bg-white border-t-[3px] border-primary" : "",
+                  type !== "clinic" && "before:absolute before:top-1/2 before:left-0 before:-translate-y-1/2 before:w-[1px] before:h-[25px] before:bg-[#ccc]"
                 )}
               >
                 <p className="lg:text-lg font-medium">{title}</p>
@@ -98,10 +94,8 @@ const BookingDoctorPage = () => {
         </div>
       </div >
 
-      {/* Render the active tab component */}
       {tabComponents[tabActive]}
 
-      {/* Additional components below the tabbed interface */}
       <OutstandingDoctor provinces={provinces} />
       <OutstandingClinic provinces={provinces} />
       <MedicalExperts />

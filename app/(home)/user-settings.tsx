@@ -1,9 +1,12 @@
-import { User } from "@/types/user-types";
-import { RootState } from "@/store/store";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { useDispatch, useSelector } from "react-redux";
+import Image from "next/image";
+import Cookies from "js-cookie";
+import toast from "react-hot-toast";
+
+import { User } from "@/types/user-types";
+import { RootState } from "@/store/store";
 import { getCurrentUser } from "@/services/user-serivce";
 import { setLoginStatus } from "@/store/slices/auth-slice";
 
@@ -12,7 +15,6 @@ import {
   AvatarImage,
   AvatarFallback,
 } from "@/components/ui/avatar";
-
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -20,10 +22,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-
-import Image from "next/image";
-import Cookies from "js-cookie";
-import toast from "react-hot-toast";
+import { Button } from "@/components/ui/button";
+import Spinner from "@/components/spinner";
 
 const UserSettings = () => {
   const router = useRouter();
@@ -34,12 +34,10 @@ const UserSettings = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
-  // Effect to mark that the client has mounted
   useEffect(() => {
-    setIsMounted(true); // Mark that the client has rendered
+    setIsMounted(true);
   }, []);
 
-  // Effect to fetch the current user data
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
@@ -48,8 +46,9 @@ const UserSettings = () => {
 
         const userData = await getCurrentUser(accessToken);
         setUser(userData.user);
-      } catch (err) {
-        console.error(err);
+      } catch (err: any) {
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
+        router.push("/");
       }
     };
 
@@ -58,24 +57,18 @@ const UserSettings = () => {
     }
   }, [isLoggedIn]);
 
-  // Handle logout account
   const handleLogout = () => {
     Cookies.remove("access_token");
-    Cookies.remove("logged_in");
     dispatch(setLoginStatus(false));
     toast.success("Tài khoản của bạn đã được đăng xuất!");
   };
 
-  // Prevent rendering until mounted
   if (!isMounted) {
-    return (
-      <div className="border-t-4 border-primary border-solid rounded-full w-6 h-6 animate-spin" />
-    );
+    return <Spinner />
   };
 
   return (
     isLoggedIn ? (
-      // Rendered when the user is logged in
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <div className="flex items-center gap-3 cursor-pointer select-none">
@@ -88,6 +81,7 @@ const UserSettings = () => {
             <p className="font-medium">{user?.fullname}</p>
           </div>
         </DropdownMenuTrigger>
+
         <DropdownMenuContent className="w-[300px] -translate-x-5">
           <div className="flex items-center gap-3 cursor-pointer select-none p-3">
             <Avatar>
@@ -101,7 +95,9 @@ const UserSettings = () => {
               <p className="text-sm text-primary">{user?.email}</p>
             </div>
           </div>
+
           <DropdownMenuSeparator />
+
           <DropdownMenuItem className="flex items-center gap-3 p-3 cursor-pointer select-none">
             <Image
               src="/profile.svg"
@@ -111,6 +107,7 @@ const UserSettings = () => {
             />
             <p>Hồ sơ của tôi</p>
           </DropdownMenuItem>
+
           <DropdownMenuItem className="flex items-center gap-3 p-3 cursor-pointer select-none">
             <Image
               src="/history-booking.svg"
@@ -120,7 +117,9 @@ const UserSettings = () => {
             />
             <p>Lịch sử đặt chỗ</p>
           </DropdownMenuItem>
+
           <DropdownMenuSeparator />
+
           <DropdownMenuItem
             onClick={handleLogout}
             className="flex items-center gap-3 p-3 cursor-pointer select-none"
@@ -136,18 +135,19 @@ const UserSettings = () => {
         </DropdownMenuContent>
       </DropdownMenu>
     ) : (
-      // Registration and login buttons (visible only on larger screens)
       <div className="hidden sm:flex items-center gap-3">
         <Button
           type="button"
-          onClick={() => router.push("/register")} // Navigate to register page
+          variant="default"
+          onClick={() => router.push("/register")}
           className="w-[120px] text-[#2D87F3] font-medium border border-[#2D87F3] bg-white hover:bg-[#2D87F3]/10 rounded-md transition duration-500"
         >
           Đăng ký
         </Button>
         <Button
           type="button"
-          onClick={() => router.push("/login")} // Navigate to login page
+          variant="default"
+          onClick={() => router.push("/login")}
           className="w-[120px] text-white font-medium bg-[#2D87F3] hover:bg-[#2D87F3]/80 rounded-md transition duration-500"
         >
           Đăng nhập
