@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { useProvinces } from "@/api/use-provinces";
+import { getProvinces } from "@/services/auth-service";
 
 import { FiSearch } from "react-icons/fi";
 import { FaLocationDot } from "react-icons/fa6";
@@ -34,13 +34,11 @@ const ManageUsers = () => {
   const [inputFocused, setInputFocused] = useState(false);
   const [provinces, setProvinces] = useState<any[]>([]);
 
-  // Fetch provinces data when the component mounts
+  // Fetch provinces on component mount
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
-        const { success, provinces } = await useProvinces();
-        if (!success || !provinces) return;
-
+        const provinces = await getProvinces();
         setProvinces(provinces);
       } catch (error) {
         console.error("Error fetching provinces:", error);
@@ -110,6 +108,7 @@ const ManageUsers = () => {
               <TableHead className="font-semibold text-black text-start">Hành động</TableHead>
             </TableRow>
           </TableHeader>
+
           {/* Table body (sample row with user data) */}
           <TableBody>
             <TableRow>
@@ -137,9 +136,9 @@ const ManageUsers = () => {
       </div>
 
       {/* Navigate to next page */}
-      <div className="ml-auto">
+      {/* <div className="ml-auto">
         <PaginationSection />
-      </div>
+      </div> */}
     </>
   );
 };

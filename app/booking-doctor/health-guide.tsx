@@ -1,24 +1,24 @@
+import Autoplay from "embla-carousel-autoplay";
+
+import Link from "next/link";
+import Image from "next/image";
+
 import {
   Carousel,
   CarouselItem,
   CarouselContent
 } from "@/components/ui/carousel";
 
-import Link from "next/link";
-import Image from "next/image";
-import Autoplay from "embla-carousel-autoplay";
-
 interface HealthGuideItem {
   id: number;
   link: string;
   title: string;
   doctor: string;
-  specialty: string;
   imageSrc: string;
   avatarSrc: string;
+  specialty: string;
 };
 
-// Sample health guide items data
 const healthGuideItems: HealthGuideItem[] = [
   {
     id: 1,
@@ -28,8 +28,7 @@ const healthGuideItems: HealthGuideItem[] = [
     specialty: "Specialty name",
     imageSrc: "/post-1.png",
     avatarSrc: "/avatar-default.png"
-  },
-  // Add more health guide items data...
+  }
 ];
 
 const HealthGuideItemComponent = ({
@@ -37,7 +36,6 @@ const HealthGuideItemComponent = ({
 }: HealthGuideItem) => (
   <CarouselItem className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
     <Link href={link} className="flex flex-col gap-6">
-      {/* Aspect ratio box for image */}
       <div className="relative w-full pt-[60%]">
         <Image
           loading="lazy"
@@ -49,14 +47,11 @@ const HealthGuideItemComponent = ({
       </div>
 
       <div className="flex flex-col gap-3">
-        {/* Specialty name */}
         <p className="text-[15px] font-bold text-primary">{specialty}</p>
-        {/* Title of the health guide */}
         <h1 className="text-lg font-bold line-clamp-2">{title}</h1>
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Doctor's image */}
         <Image
           loading="lazy"
           src={avatarSrc}
@@ -65,7 +60,6 @@ const HealthGuideItemComponent = ({
           height="35"
           className="rounded-full"
         />
-        {/* Doctor's name */}
         <p className="text-sm">
           Tham vấn y khoa: {""}
           <span className="font-semibold">{doctor}</span>
@@ -78,9 +72,7 @@ const HealthGuideItemComponent = ({
 const HealthGuide = () => {
   return (
     <div className="wrapper flex flex-col gap-8 pt-12 pb-20">
-      {/* Header for health guide */}
       <h1 className="text-xl font-bold">Cẩm nang sức khỏe</h1>
-      {/* Carousel with autoplay plugin */}
       <Carousel plugins={[Autoplay({ delay: 3000 })]}>
         <CarouselContent>
           {healthGuideItems.map((item) => (

@@ -1,13 +1,14 @@
-import { cn } from "@/lib/utils";
 import { useState, memo } from "react";
 import { FiSearch } from "react-icons/fi";
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-
 import Link from "next/link";
 import Image from "next/image";
+
+import { cn } from "@/lib/utils";
 import menuMobile from "@/constants/menu-mobile";
+
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface MenuMobileProps {
   isOpenMenu: boolean;
@@ -16,7 +17,7 @@ interface MenuMobileProps {
 };
 
 const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: MenuMobileProps) => {
-  const [isFocused, setIsFocused] = useState(false); // State to track if the search input is focused
+  const [isFocused, setIsFocused] = useState(false);
 
   return (
     <div className={cn(
@@ -26,16 +27,14 @@ const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: MenuMobile
       <div className="h-full flex flex-col justify-between">
         <div className="flex flex-col gap-8">
           <div className="relative w-full">
-            {/* Search icon */}
             <FiSearch
               size="22"
               className={cn(
                 "absolute top-1/2 left-4 -translate-y-1/2 transition duration-500",
-                isFocused && "text-primary" // Change color when focused
+                isFocused && "text-primary"
               )}
             />
 
-            {/* Search input */}
             <Input
               type="text"
               spellCheck={false}
@@ -46,7 +45,6 @@ const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: MenuMobile
             />
           </div>
 
-          {/* Link to booking page */}
           <Link href="/booking-doctor" className="w-full flex items-center gap-3">
             <Image
               loading="lazy"
@@ -61,7 +59,6 @@ const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: MenuMobile
           </Link>
 
           <div className="flex flex-col gap-3">
-            {/* Render mobile menu buttons */}
             {menuMobile.map(({ value, label }) => (
               <Button
                 key={value}
@@ -79,7 +76,6 @@ const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: MenuMobile
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Registration button */}
           <Button
             type="button"
             variant="default"
@@ -88,7 +84,6 @@ const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: MenuMobile
             Đăng ký
           </Button>
 
-          {/* Login button */}
           <Button
             type="button"
             variant="default"

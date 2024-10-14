@@ -1,6 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 
 import {
   FaUserEdit,
@@ -8,16 +10,12 @@ import {
   FaClinicMedical,
   FaRegCalendarAlt
 } from "react-icons/fa";
-
 import { FiLogOut } from "react-icons/fi";
 import { BsClipboard2PlusFill } from "react-icons/bs";
 import { FaRegBell, FaUserDoctor } from "react-icons/fa6";
 
 import { Button } from "@/components/ui/button";
 import { SidebarButton } from "./sidebar-button";
-
-import Link from "next/link";
-import Image from "next/image";
 import Hint from "@/components/hint";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
@@ -27,7 +25,6 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
     <div>
       <div className="fixed top-0 left-0 w-[19%] h-screen flex flex-col justify-between bg-[#1c3f66]">
         <div className="flex flex-col gap-6">
-          {/* Navigation link to admin page */}
           <Link href="/admin/users">
             <Image
               loading="lazy"
@@ -39,7 +36,6 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
             />
           </Link>
 
-          {/* Sidebar buttons */}
           <div className="flex flex-col">
             <SidebarButton
               text="Bệnh nhân"
@@ -52,6 +48,8 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
               text="Bác sĩ"
               path="/admin/doctors"
               currentPath={currentPath}
+              addLabel="Thêm bác sĩ mới"
+              addPath="/admin/doctors/create-new-doctor"
               icon={<FaUserDoctor size="18" className="text-white" />}
             />
 
@@ -59,6 +57,8 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
               text="Chuyên khoa"
               path="/admin/specialties"
               currentPath={currentPath}
+              addLabel="Thêm chuyên khoa mới"
+              addPath="/admin/specialties/create-new-specialty"
               icon={<BsClipboard2PlusFill size="18" className="text-white" />}
             />
 
@@ -66,6 +66,8 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
               text="Bệnh viện"
               path="/admin/clinics"
               currentPath={currentPath}
+              addLabel="Thêm bệnh viện mới"
+              addPath="/admin/clinics/create-new-clinic"
               icon={<FaClinicMedical size="18" className="text-white" />}
             />
 
@@ -73,6 +75,8 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
               text="Lịch trình của bác sĩ"
               path="/admin/schedules"
               currentPath={currentPath}
+              addLabel="Thêm lịch trình mới"
+              addPath="/admin/schedules/create-new-schedule"
               icon={<FaRegCalendarAlt size="17" className="text-white" />}
             />
 
@@ -80,12 +84,13 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
               text="Bài viết/ tin tức"
               path="/admin/posts"
               currentPath={currentPath}
+              addLabel="Thêm bài viết mới"
+              addPath="/admin/posts/create-new-post"
               icon={<FaRegNewspaper size="17" className="text-white" />}
             />
           </div>
         </div>
 
-        {/* Logout button */}
         <Button
           type="button"
           variant="default"
@@ -97,16 +102,13 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       </div>
 
       <div className="relative flex-1 h-screen flex flex-col gap-6 p-6 ml-[19%]">
-        {/* Notification bell and user profile */}
         <div className="absolute top-4 right-6 flex items-center gap-8 select-none">
-          {/* Notification bell button */}
           <Hint label="Thông báo">
             <Button type="button" variant="ghost">
               <FaRegBell size="22" />
             </Button>
           </Hint>
 
-          {/* User avatar and name */}
           <div className="flex items-center gap-3">
             <Image
               loading="lazy"
@@ -120,7 +122,6 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </div>
 
-        {/* Render child components (content) below the header */}
         {children}
       </div>
     </div>

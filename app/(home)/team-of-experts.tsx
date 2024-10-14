@@ -1,5 +1,9 @@
 import { FaUserDoctor } from "react-icons/fa6";
 import { FaClinicMedical } from "react-icons/fa";
+import Image from "next/image";
+import Autoplay from "embla-carousel-autoplay";
+
+import teamOfExperts from "@/constants/team-of-experts";
 
 import {
   Carousel,
@@ -7,21 +11,16 @@ import {
   CarouselContent
 } from "@/components/ui/carousel";
 
-import Image from "next/image";
-import Autoplay from "embla-carousel-autoplay";
-import teamOfExperts from "@/constants/team-of-experts";
-
 interface Expert {
   id: number;
   name: string;
-  specialty: string;
-  clinic: string;
   image: string;
+  clinic: string;
+  specialty: string;
 };
 
 const ExpertCard = ({ expert }: { expert: Expert }) => (
   <div className="flex flex-col items-center gap-8 py-6 px-4 border rounded-md shadow-md">
-    {/* Expert's avatar */}
     <div className="relative">
       <Image
         loading="lazy"
@@ -31,7 +30,7 @@ const ExpertCard = ({ expert }: { expert: Expert }) => (
         height={140}
         className="rounded-full"
       />
-      {/* Icon overlay on the avatar */}
+
       <Image
         loading="lazy"
         src="/article-medical.svg"
@@ -42,17 +41,16 @@ const ExpertCard = ({ expert }: { expert: Expert }) => (
       />
     </div>
 
-    {/* Expert details */}
     <div className="w-full flex flex-col gap-10 p-4 bg-[#e3f2ff] rounded-md">
       <h1 className="h-[40px] text-[17px] font-semibold text-center">{expert.name}</h1>
       <div className="h-[70px] flex flex-col gap-3 text-sm">
         <p className="flex items-center gap-3">
-          <FaUserDoctor size={15} /> {/* Specialty icon */}
-          {expert.specialty} {/* Displaying specialty */}
+          <FaUserDoctor size={15} />
+          {expert.specialty}
         </p>
         <p className="flex items-center gap-3">
-          <FaClinicMedical size={15} /> {/* Clinic icon */}
-          {expert.clinic} {/* Displaying clinic name */}
+          <FaClinicMedical size={15} />
+          {expert.clinic}
         </p>
       </div>
     </div>
@@ -60,11 +58,10 @@ const ExpertCard = ({ expert }: { expert: Expert }) => (
 );
 
 const TeamOfExperts = () => {
-  const [firstExpert, secondExpert, ...otherExperts] = teamOfExperts || []; // Destructuring experts data
+  const [firstExpert, secondExpert, ...otherExperts] = teamOfExperts || [];
 
   return (
     <div className="wrapper flex flex-col gap-14 py-12">
-      {/* Section for heading and first two experts */}
       <div className="flex gap-12">
         <div className="flex-1 flex flex-col gap-6">
           <h1 className="text-[22px] font-bold text-center sm:text-start">
@@ -80,21 +77,15 @@ const TeamOfExperts = () => {
           </div>
         </div>
 
-        {/* Displaying first two experts in a column for large screens */}
         <div className="flex-1 hidden xl:flex items-center gap-6">
-          {firstExpert && <ExpertCard expert={firstExpert} />} {/* Render first expert card */}
-          {secondExpert && <ExpertCard expert={secondExpert} />} {/* Render second expert card */}
+          {firstExpert && <ExpertCard expert={firstExpert} />}
+          {secondExpert && <ExpertCard expert={secondExpert} />}
         </div>
       </div>
 
-      {/* Carousel for other experts */}
       <Carousel
         className="w-full"
-        plugins={[
-          Autoplay({
-            delay: 3000, // Delay for autoplay
-          }),
-        ]}
+        plugins={[Autoplay({ delay: 3000 })]}
       >
         <CarouselContent>
           {otherExperts.map((expert) => (
@@ -102,7 +93,7 @@ const TeamOfExperts = () => {
               key={expert.id}
               className="md:basis-1/2 lg:basis-1/3 xl:basis-1/4"
             >
-              <ExpertCard expert={expert} /> {/* Render expert card */}
+              <ExpertCard expert={expert} />
             </CarouselItem>
           ))}
         </CarouselContent>

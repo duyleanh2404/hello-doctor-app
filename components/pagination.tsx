@@ -4,31 +4,26 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationContent,
-  PaginationEllipsis,
-  PaginationPrevious,
+  PaginationPrevious
 } from "@/components/ui/pagination";
 
 interface PaginationSectionProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-}
+};
 
 const PaginationSection = ({
-  currentPage,
-  totalPages,
-  onPageChange,
+  currentPage, totalPages, onPageChange,
 }: PaginationSectionProps) => {
+  const maxVisiblePages = 5;
+
   const handlePageChange = (page: number) => {
     if (page !== currentPage && page > 0 && page <= totalPages) {
       onPageChange(page);
     }
   };
 
-  // Calculate the range of pages to display
-  const maxVisiblePages = 5; // Number of pages to display
-
-  // If totalPages is less than or equal to maxVisiblePages, show all pages
   if (totalPages <= maxVisiblePages) {
     return (
       <Pagination>
@@ -37,11 +32,10 @@ const PaginationSection = ({
             <PaginationPrevious
               href="#"
               onClick={() => handlePageChange(currentPage - 1)}
-              className={currentPage === 1 ? 'disabled' : ''}
+              className={currentPage === 1 ? "disabled" : ""}
             />
           </PaginationItem>
 
-          {/* Dynamic Page Links for all available pages */}
           {Array.from({ length: totalPages }, (_, index) => {
             const page = index + 1;
             return (
@@ -49,7 +43,7 @@ const PaginationSection = ({
                 <PaginationLink
                   href="#"
                   onClick={() => handlePageChange(page)}
-                  isActive={page === currentPage} // Highlight current page
+                  isActive={page === currentPage}
                 >
                   {page}
                 </PaginationLink>
@@ -61,7 +55,7 @@ const PaginationSection = ({
             <PaginationNext
               href="#"
               onClick={() => handlePageChange(currentPage + 1)}
-              className={currentPage === totalPages ? 'disabled' : ''}
+              className={currentPage === totalPages ? "disabled" : ""}
             />
           </PaginationItem>
         </PaginationContent>
@@ -69,12 +63,10 @@ const PaginationSection = ({
     );
   }
 
-  // Calculate the range of pages to display for more than maxVisiblePages
   const halfVisible = Math.floor(maxVisiblePages / 2);
   let startPage = Math.max(1, currentPage - halfVisible);
   let endPage = Math.min(totalPages, currentPage + halfVisible);
 
-  // Adjust the range if the start or end exceeds limits
   if (endPage - startPage < maxVisiblePages - 1) {
     if (startPage === 1) {
       endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
@@ -90,11 +82,10 @@ const PaginationSection = ({
           <PaginationPrevious
             href="#"
             onClick={() => handlePageChange(currentPage - 1)}
-            className={currentPage === 1 ? 'disabled' : ''}
+            className={currentPage === 1 ? "disabled" : ""}
           />
         </PaginationItem>
 
-        {/* Dynamic Page Links */}
         {Array.from({ length: endPage - startPage + 1 }, (_, index) => {
           const page = startPage + index;
           return (
@@ -102,7 +93,7 @@ const PaginationSection = ({
               <PaginationLink
                 href="#"
                 onClick={() => handlePageChange(page)}
-                isActive={page === currentPage} // Highlight current page
+                isActive={page === currentPage}
               >
                 {page}
               </PaginationLink>
@@ -114,7 +105,7 @@ const PaginationSection = ({
           <PaginationNext
             href="#"
             onClick={() => handlePageChange(currentPage + 1)}
-            className={currentPage === totalPages ? 'disabled' : ''}
+            className={currentPage === totalPages ? "disabled" : ""}
           />
         </PaginationItem>
       </PaginationContent>

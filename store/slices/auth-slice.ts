@@ -1,27 +1,49 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface AuthState {
+  verificationEmail: string;
   isLoggedIn: boolean;
-  emailValue: string;
-}
+  isVerifyingAuth: boolean;
+  isResettingPassword: boolean;
+  isVerifyingForgotPassword: boolean;
+};
 
 const initialState: AuthState = {
+  verificationEmail: "",
   isLoggedIn: false,
-  emailValue: ""
+  isVerifyingAuth: false,
+  isResettingPassword: false,
+  isVerifyingForgotPassword: false
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    setVerificationEmail: (state, action: PayloadAction<string>) => {
+      state.verificationEmail = action.payload;
+    },
     setLoginStatus: (state, action: PayloadAction<boolean>) => {
       state.isLoggedIn = action.payload;
     },
-    setEmailValue: (state, action: PayloadAction<string>) => {
-      state.emailValue = action.payload;
+    setVerifyingAuthStatus: (state, action: PayloadAction<boolean>) => {
+      state.isVerifyingAuth = action.payload;
+    },
+    setVerifyingForgotPasswordStatus: (state, action: PayloadAction<boolean>) => {
+      state.isVerifyingForgotPassword = action.payload;
+    },
+    setResettingPasswordStatus: (state, action: PayloadAction<boolean>) => {
+      state.isResettingPassword = action.payload;
     }
   }
 });
 
-export const { setLoginStatus, setEmailValue } = authSlice.actions;
+export const {
+  setLoginStatus,
+  setVerificationEmail,
+  setVerifyingAuthStatus,
+  setResettingPasswordStatus,
+  setVerifyingForgotPasswordStatus
+} = authSlice.actions;
+
 export default authSlice.reducer;

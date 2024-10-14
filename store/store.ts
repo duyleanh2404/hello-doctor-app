@@ -1,12 +1,10 @@
-// store.ts
 import { combineReducers } from "redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
 
 import authReducer from "./slices/auth-slice";
-import storage from "redux-persist/lib/storage";
 import commonReducer from "./slices/common-slice";
-import specialtyReducer from "./slices/specialty-slice";
 
 const persistConfig = {
   key: "root",
@@ -16,8 +14,7 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   auth: authReducer,
-  common: commonReducer,
-  specialty: specialtyReducer
+  common: commonReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
