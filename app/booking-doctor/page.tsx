@@ -36,8 +36,8 @@ const BookingDoctorPage = () => {
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
-        const provinces = await getProvinces();
-        setProvinces(provinces);
+        const { data } = await getProvinces();
+        setProvinces(data);
       } catch (err: any) {
         router.push("/");
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");

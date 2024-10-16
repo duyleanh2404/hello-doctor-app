@@ -18,17 +18,17 @@ import { RegisterFormInputs } from "@/types/auth-types";
 import { setVerificationEmail, setVerifyingAuthStatus } from "@/store/slices/auth-slice";
 import useToggle from "@/hooks/use-toggle";
 
+import { validateEmail } from "@/utils/validate-email";
+import { validateFullName } from "@/utils/validate-fullname";
+import { validatePassword } from "@/utils/validate-password";
+import { validatePhoneNumber } from "@/utils/validate-phone-number";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Spinner from "@/components/spinner";
-import SelectAddress from "./select-address";
-import SelectDateOfBirth from "./select-date-of-birth";
+import SelectAddress from "@/components/select-address";
+import SelectDateOfBirth from "@/components/select-date-of-birth";
 import ContinueWithGoogle from "@/components/continue-with-google";
-
-import validateEmail from "@/utils/validate-email";
-import validateFullName from "@/utils/validate-fullname";
-import validatePassword from "@/utils/validate-password";
-import validatePhoneNumber from "@/utils/validate-phone-number";
 
 const RegisterPage = () => {
   const router = useRouter();
@@ -37,6 +37,7 @@ const RegisterPage = () => {
   const { isVerifyingAuth } = useSelector((state: RootState) => state.auth);
 
   const {
+    watch,
     register,
     setValue,
     setError,
@@ -64,7 +65,7 @@ const RegisterPage = () => {
       password: userData.password,
       phoneNumber: userData.phoneNumber,
       dateOfBirth: `${userData.day}/${userData.month}/${userData.year}`,
-      address: `${userData.street}, ${userData.district}, ${userData.province}`
+      address: `${userData.street}, ${userData.ward}, ${userData.district}, ${userData.province}`
     };
 
     const { errorCode } = await registerUser(userDetails);
@@ -149,18 +150,22 @@ const RegisterPage = () => {
             </div>
 
             <SelectAddress
+              watch={watch}
               errors={errors}
               register={register}
               setValue={setValue}
               clearErrors={clearErrors}
             />
 
-            <SelectDateOfBirth
-              errors={errors}
-              register={register}
-              setValue={setValue}
-              clearErrors={clearErrors}
-            />
+            <div className="flex flex-col gap-2">
+              <label className="text-[15px] font-medium">Ngày sinh</label>
+              <SelectDateOfBirth
+                errors={errors}
+                register={register}
+                setValue={setValue}
+                clearErrors={clearErrors}
+              />
+            </div>
 
             <div className="flex flex-col gap-2">
               <label className="text-[15px] font-medium">Số điện thoại</label>

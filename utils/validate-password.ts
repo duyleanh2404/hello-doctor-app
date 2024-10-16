@@ -1,4 +1,4 @@
-const validatePassword = (value: string) => {
+export const validatePassword = (value: string) => {
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[a-zA-Z\d\W_]{8,}$/;
 
   const result =
@@ -7,5 +7,3 @@ const validatePassword = (value: string) => {
 
   return result;
 };
-
-export default validatePassword;

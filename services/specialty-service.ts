@@ -28,29 +28,6 @@ export const createNewSpecialty = async ({
   return await response.json();
 };
 
-export const getAllSpecialties = async ({
-  accessToken, page = 1, limit = 10, query = ""
-}: GetAllSpecialtiesData) => {
-  const queryParams = new URLSearchParams({
-    page: page.toString(),
-    limit: limit.toString()
-  });
-
-  if (query) {
-    queryParams.append("query", query);
-  }
-
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/specialty?${queryParams.toString()}`, {
-    method: "GET",
-    headers: {
-      "Authorization": `Bearer ${accessToken}`
-    }
-  });
-
-  return await response.json();
-};
-
 export const updateSpecialty = async ({
   accessToken, id, name, imageName, image, desc
 }: UpdateSpecialtyData) => {
@@ -94,6 +71,29 @@ export const searchSpecialties = async ({
 
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/specialty/search?${queryParams.toString()}`, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`
+    }
+  });
+
+  return await response.json();
+};
+
+export const getAllSpecialties = async ({
+  accessToken, page = 1, limit = 10, query = ""
+}: GetAllSpecialtiesData) => {
+  const queryParams = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString()
+  });
+
+  if (query) {
+    queryParams.append("query", query);
+  }
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/specialty?${queryParams.toString()}`, {
     method: "GET",
     headers: {
       "Authorization": `Bearer ${accessToken}`

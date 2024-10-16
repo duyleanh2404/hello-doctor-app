@@ -76,7 +76,6 @@ const EditSpecialty = () => {
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-
     if (file) {
       clearErrors("image");
       setImageName(file.name);
@@ -112,7 +111,7 @@ const EditSpecialty = () => {
 
     setIsLoading(false);
     router.push("/admin/specialties");
-    toast.success("Cập nhật chuyên khoa thành công!");
+    toast.success("Cập nhật thông tin chuyên khoa thành công!");
   };
 
   return (

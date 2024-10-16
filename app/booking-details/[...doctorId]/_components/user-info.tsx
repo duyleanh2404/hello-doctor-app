@@ -12,11 +12,11 @@ import Link from "next/link";
 import Image from "next/image";
 
 import { cn } from "@/lib/utils";
-import validatePhoneNumber from "@/utils/validate-phone-number";
+import { BookingScheduleData } from "@/types/schedule-types";
+import { validatePhoneNumber } from "@/utils/validate-phone-number";
 
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { BookingScheduleData } from "@/types/schedule-types";
 
 interface UserInfoProps {
   errors: FieldErrors<BookingScheduleData>;

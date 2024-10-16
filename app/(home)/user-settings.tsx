@@ -5,7 +5,7 @@ import Image from "next/image";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 
-import { User } from "@/types/user-types";
+import { UserData } from "@/types/user-types";
 import { RootState } from "@/store/store";
 import { getCurrentUser } from "@/services/user-serivce";
 import { setLoginStatus } from "@/store/slices/auth-slice";
@@ -31,7 +31,7 @@ const UserSettings = () => {
   const dispatch = useDispatch();
   const { isLoggedIn } = useSelector((state: RootState) => state.auth);
 
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {

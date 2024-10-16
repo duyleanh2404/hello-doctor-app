@@ -42,7 +42,6 @@ const CreateNewSpecialty = () => {
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-
     if (file) {
       clearErrors("image");
       setImageName(file.name);
@@ -58,10 +57,9 @@ const CreateNewSpecialty = () => {
 
   const handleValidateEditor = () => {
     if (contentValue.trim() !== "") return;
-
     setError("desc", {
       type: "manual",
-      message: "Vui lòng nhập mô tả của bệnh viện!"
+      message: "Vui lòng nhập mô tả của chuyên khoa!"
     });
   };
 
