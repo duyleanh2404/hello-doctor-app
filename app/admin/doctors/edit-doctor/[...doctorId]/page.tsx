@@ -1,8 +1,8 @@
 "use client";
 
 import { FiUpload } from "react-icons/fi";
-import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Image from "next/image";
 import Cookies from "js-cookie";
@@ -15,8 +15,8 @@ import { ClinicData } from "@/types/clinic-types";
 import { getProvinces } from "@/services/auth-service";
 import { SpecialtyData } from "@/types/specialty-types";
 import { getAllClinics } from "@/services/clinic-service";
-import { createNewDoctor } from "@/services/doctor-service";
 import { getAllSpecialties } from "@/services/specialty-service";
+import { getDoctorById, updateDoctor } from "@/services/doctor-service";
 import medicalFees from "@/constants/medical-fees";
 
 import {
@@ -28,9 +28,11 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { formatVietnameseCurrency } from "@/utils/format-currency";
 
-const CreateNewDoctor = () => {
+const EditDoctor = () => {
   const router = useRouter();
+  const { doctorId } = useParams<{ doctorId: string }>();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [contentValue, setContentValue] = useState<string>("");
@@ -38,11 +40,15 @@ const CreateNewDoctor = () => {
   const [imageName, setImageName] = useState<string>("");
   const [imageURL, setImageURL] = useState<string | null>(null);
 
+  const [clinicName, setClinicName] = useState<string>("");
+  const [specialtyName, setspecialtyName] = useState<string>("");
+
   const [provinces, setProvinces] = useState<any[]>([]);
   const [clinics, setClinics] = useState<ClinicData[]>([]);
   const [specialties, setSpecialties] = useState<SpecialtyData[]>([]);
 
   const {
+    watch,
     register,
     setValue,
     setError,
@@ -96,6 +102,40 @@ const CreateNewDoctor = () => {
     fetchClinics();
   }, []);
 
+  useEffect(() => {
+    const fetchDoctorData = async () => {
+      try {
+        setIsLoading(true);
+        const accessToken = Cookies.get("access_token");
+        if (!accessToken) return;
+
+        const { doctor } = await getDoctorById({ accessToken, id: doctorId });
+
+        if (doctor) {
+          setValue("desc", doctor.desc);
+          setValue("clinic", doctor.clinic_id._id);
+          setValue("fullname", doctor.fullname);
+          setValue("province", doctor.province);
+          setValue("medicalFee", doctor.medical_fee);
+          setValue("specialty", doctor.specialty_id._id);
+
+          setImageURL(doctor.image);
+          setContentValue(doctor.desc);
+          setImageName(doctor.imageName);
+          setClinicName(doctor.clinic_id.name);
+          setspecialtyName(doctor.specialty_id.name);
+        }
+      } catch (err: any) {
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
+        router.push("/");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDoctorData();
+  }, [doctorId, setValue]);
+
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -119,38 +159,40 @@ const CreateNewDoctor = () => {
     });
   };
 
-  const handleCreateMewDoctor: SubmitHandler<DoctorData> = async (doctorData) => {
+  const handleEditDoctor: SubmitHandler<DoctorData> = async (doctorData) => {
     try {
       setIsLoading(true);
       const accessToken = Cookies.get("access_token");
       if (!accessToken) return;
 
-      const imageFile = doctorData.image?.[0];
+      const file = doctorData.image?.[0];
 
-      await createNewDoctor({
+      await updateDoctor({
         imageName,
         accessToken,
-        image: imageFile,
+        image: file,
+        id: doctorId,
         desc: contentValue,
-        medical_fee: doctorData.medicalFee,
-        clinic_id: doctorData.clinic,
         fullname: doctorData.fullname,
         province: doctorData.province,
+        clinic_id: doctorData.clinic,
+        medical_fee: doctorData.medicalFee,
         specialty_id: doctorData.specialty
       });
 
       setIsLoading(false);
-      router.push("/admin/doctors");
-      toast.success("Thêm bác sĩ thành công!");
+      toast.success("Cập nhật thông tin bác sĩ thành công!");
     } catch (err: any) {
       toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
+    } finally {
+      router.push("/admin/doctors");
     }
   };
 
   return (
     <>
-      <h1 className="text-xl font-bold mb-4">Đăng ký tài khoản mới cho bác sĩ</h1>
-      <form onSubmit={handleSubmit(handleCreateMewDoctor)}>
+      <h1 className="text-xl font-bold mb-4">Cập nhật thông tin bác sĩ</h1>
+      <form onSubmit={handleSubmit(handleEditDoctor)}>
         <div className="flex flex-col gap-8 pb-6">
           <div className="flex flex-col gap-8 -mx-4 px-4">
             <div className="flex flex-col gap-2">
@@ -181,7 +223,7 @@ const CreateNewDoctor = () => {
                 }}
               >
                 <SelectTrigger className={cn("w-full", errors.province && "border-red-500")}>
-                  <SelectValue placeholder="Chọn tỉnh/thành phố" />
+                  <SelectValue placeholder={watch("province") || "Chọn tỉnh/thành phố"} />
                 </SelectTrigger>
                 <SelectContent>
                   {provinces?.map((province) => (
@@ -207,7 +249,7 @@ const CreateNewDoctor = () => {
                 }}
               >
                 <SelectTrigger className={cn("w-full", errors.specialty && "border-red-500")}>
-                  <SelectValue placeholder="Chọn chuyên khoa" />
+                  <SelectValue placeholder={`${specialtyName}` || "Chọn chuyên khoa"} />
                 </SelectTrigger>
                 <SelectContent>
                   {specialties?.map((specialty) => (
@@ -233,7 +275,7 @@ const CreateNewDoctor = () => {
                 }}
               >
                 <SelectTrigger className={cn("w-full", errors.clinic && "border-red-500")}>
-                  <SelectValue placeholder="Chọn bệnh viện" />
+                  <SelectValue placeholder={`${clinicName}` || "Chọn bệnh viện"} />
                 </SelectTrigger>
                 <SelectContent>
                   {clinics?.map((clinic) => (
@@ -259,7 +301,7 @@ const CreateNewDoctor = () => {
                 }}
               >
                 <SelectTrigger className={cn("w-full", errors.medicalFee && "border-red-500")}>
-                  <SelectValue placeholder="Chọn giá khám bệnh" />
+                  <SelectValue placeholder={formatVietnameseCurrency(watch("medicalFee")) || "Chọn giá khám bệnh"} />
                 </SelectTrigger>
                 <SelectContent>
                   {medicalFees.map((item) => (
@@ -281,9 +323,7 @@ const CreateNewDoctor = () => {
                 <Input
                   type="file"
                   accept="image/*"
-                  {...register("image", {
-                    required: "Vui lòng tải tải ảnh đại diện của bác sĩ!"
-                  })}
+                  {...register("image")}
                   onChange={handleImageChange}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
@@ -358,4 +398,4 @@ const CreateNewDoctor = () => {
   );
 };
 
-export default CreateNewDoctor;
+export default EditDoctor;

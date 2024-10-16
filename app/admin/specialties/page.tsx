@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import Spinner from "@/components/spinner";
 import PaginationSection from "@/components/pagination";
 import DeleteConfirmationModal from "@/components/delete-confirmation-modal";
 
@@ -84,7 +85,7 @@ const ManageSpecialties = () => {
       await deleteSpecialty({ accessToken, id: specialtyToDelete });
       await fetchSpecialties(currentPage, debouncedSearchQuery);
 
-      if (currentPage > 1 && specialties.length === 1) {
+      if (currentPage > 1 && specialties?.length === 1) {
         setCurrentPage(1);
       }
 
@@ -123,20 +124,17 @@ const ManageSpecialties = () => {
       </div>
 
       {isLoading ? (
-        <div className="h-full flex flex-col items-center justify-center gap-8">
-          <div className="border-t-4 border-primary border-solid rounded-full w-10 h-10 animate-spin" />
-          <p>Đang tải...</p>
-        </div>
+        <Spinner table />
       ) : (
         <>
           <div
             className={cn(
               "relative rounded-md shadow-md overflow-x-auto",
-              specialties && specialties.length > 0 ? "h-auto" : "h-full"
+              specialties && specialties?.length > 0 ? "h-auto" : "h-full"
             )}
           >
-            <Table className="h-full text-[17px]">
-              <TableHeader className="h-12 bg-gray-100 sticky top-0 z-10">
+            <Table className="relative h-full text-[17px]">
+              <TableHeader className="sticky top-0 left-0 right-0 h-12 bg-gray-100">
                 <TableRow>
                   <TableHead className="font-semibold text-black w-[50px]">STT</TableHead>
                   <TableHead className="font-semibold text-black text-start">Ảnh đại diện</TableHead>
@@ -147,7 +145,7 @@ const ManageSpecialties = () => {
               </TableHeader>
 
               <TableBody>
-                {specialties.length === 0 ? (
+                {specialties?.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center align-middle">
                       <span className="flex justify-center items-center h-full">
@@ -156,7 +154,7 @@ const ManageSpecialties = () => {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  specialties.map((specialty, index) => {
+                  specialties?.map((specialty, index) => {
                     const startIndex = (currentPage - 1) * 10;
 
                     return (

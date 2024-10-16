@@ -71,8 +71,8 @@ const EditClinic = () => {
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
-        const provinces = await getProvinces();
-        setProvinces(provinces);
+        const { data } = await getProvinces();
+        setProvinces(data);
       } catch (err: any) {
         router.push("/");
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
@@ -150,7 +150,6 @@ const EditClinic = () => {
 
   const handleValidateEditor = () => {
     if (contentValue.trim() !== "") return;
-
     setError("desc", {
       type: "manual",
       message: "Vui lòng nhập mô tả của bệnh viện!"

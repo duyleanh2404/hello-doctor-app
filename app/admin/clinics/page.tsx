@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import Spinner from "@/components/spinner";
 import PaginationSection from "@/components/pagination";
 import DeleteConfirmationModal from "@/components/delete-confirmation-modal";
 
@@ -59,8 +60,8 @@ const ManageClinics = () => {
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
-        const provinces = await getProvinces();
-        setProvinces(provinces);
+        const { data } = await getProvinces();
+        setProvinces(data);
       } catch (err: any) {
         router.push("/");
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
@@ -167,10 +168,7 @@ const ManageClinics = () => {
       </div>
 
       {isLoading ? (
-        <div className="h-full flex flex-col items-center justify-center gap-8">
-          <div className="border-t-4 border-primary border-solid rounded-full w-10 h-10 animate-spin" />
-          <p>Đang tải...</p>
-        </div>
+        <Spinner table />
       ) : (
         <>
           <div
@@ -179,8 +177,8 @@ const ManageClinics = () => {
               clinics && clinics.length > 0 ? "h-auto" : "h-full"
             )}
           >
-            <Table className="h-full text-[17px]">
-              <TableHeader className="h-12 bg-gray-100 sticky top-0 z-10">
+            <Table className="relative h-full text-[17px]">
+              <TableHeader className="sticky top-0 left-0 right-0 h-12 bg-gray-100">
                 <TableRow>
                   <TableHead className="font-semibold text-black w-[50px]">STT</TableHead>
                   <TableHead className="font-semibold text-black text-start">Tên bệnh viện</TableHead>

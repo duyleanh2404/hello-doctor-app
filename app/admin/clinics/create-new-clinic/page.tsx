@@ -61,8 +61,8 @@ const CreateNewClinic = () => {
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
-        const provinces = await getProvinces();
-        setProvinces(provinces);
+        const { data } = await getProvinces();
+        setProvinces(data);
       } catch (err: any) {
         router.push("/");
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
@@ -91,6 +91,14 @@ const CreateNewClinic = () => {
     setValue("desc", newContent);
   };
 
+  const handleValidateEditor = () => {
+    if (contentValue.trim() !== "") return;
+    setError("desc", {
+      type: "manual",
+      message: "Vui lòng nhập mô tả của bệnh viện!"
+    });
+  };
+
   const handleProvinceChange = (provinceName: any) => {
     const province = provinces.find((province) => province.name === provinceName);
     if (!province) return;
@@ -98,15 +106,6 @@ const CreateNewClinic = () => {
     clearErrors("province");
     setSelectedProvince(province);
     setValue("province", provinceName);
-  };
-
-  const handleValidateEditor = () => {
-    if (contentValue.trim() !== "") return;
-
-    setError("desc", {
-      type: "manual",
-      message: "Vui lòng nhập mô tả của bệnh viện!"
-    });
   };
 
   const handleCreateNewClinic: SubmitHandler<ClinicData> = async (clinicData) => {
@@ -193,6 +192,7 @@ const CreateNewClinic = () => {
             <div className="flex flex-col gap-2">
               <label className="text-[17px] font-semibold">Quận/Huyện</label>
               <Select
+                disabled={!selectedProvince}
                 {...register("district", { required: "Vui lòng chọn quận/huyện!" })}
                 onValueChange={(value) => {
                   clearErrors("district");

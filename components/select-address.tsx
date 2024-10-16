@@ -1,15 +1,14 @@
 import {
+  UseFormWatch,
   UseFormRegister,
   UseFormSetValue,
   UseFormClearErrors
 } from "react-hook-form";
-import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
 import { cn } from "@/lib/utils";
-import { getProvinces } from "@/services/auth-service";
-import { RegisterFormInputs } from "@/types/auth-types";
+import { getDisctricts, getProvinces, getWards } from "@/services/auth-service";
 
 import {
   Select,
@@ -21,30 +20,64 @@ import {
 import { Input } from "@/components/ui/input";
 
 interface SelectAddressProps {
+  watch: UseFormWatch<any>;
   errors: Record<string, any>;
-  register: UseFormRegister<RegisterFormInputs>;
-  setValue: UseFormSetValue<RegisterFormInputs>;
-  clearErrors: UseFormClearErrors<RegisterFormInputs>;
+  register: UseFormRegister<any>;
+  setValue: UseFormSetValue<any>;
+  clearErrors: UseFormClearErrors<any>;
 };
 
-const SelectAddress = ({ errors, register, setValue, clearErrors }: SelectAddressProps) => {
-  const router = useRouter();
-
+const SelectAddress = ({
+  watch, errors, register, setValue, clearErrors
+}: SelectAddressProps) => {
+  const [wards, setWards] = useState<any[]>([]);
   const [provinces, setProvinces] = useState<any[]>([]);
+  const [districts, setDistricts] = useState<any[]>([]);
+
   const [selectedProvince, setSelectedProvince] = useState<any | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<any | null>(null);
 
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
-        const provinces = await getProvinces();
-        setProvinces(provinces);
+        const { data } = await getProvinces();
+        setProvinces(data);
       } catch (err: any) {
-        router.push("/");
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       }
     };
     fetchProvinces();
   }, []);
+
+  useEffect(() => {
+    const fetchDistricts = async () => {
+      try {
+        const { data } = await getDisctricts(selectedProvince?.id);
+        setDistricts(data);
+      } catch (err: any) {
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
+      }
+    };
+
+    if (selectedProvince) {
+      fetchDistricts();
+    }
+  }, [selectedProvince]);
+
+  useEffect(() => {
+    const fetchWards = async () => {
+      try {
+        const { data } = await getWards(selectedDistrict?.id);
+        setWards(data);
+      } catch (err: any) {
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
+      }
+    };
+
+    if (selectedDistrict) {
+      fetchWards();
+    }
+  }, [selectedDistrict]);
 
   const handleProvinceChange = (provinceName: any) => {
     const province = provinces.find((province) => province.name === provinceName);
@@ -53,6 +86,18 @@ const SelectAddress = ({ errors, register, setValue, clearErrors }: SelectAddres
     clearErrors("province");
     setSelectedProvince(province);
     setValue("province", provinceName);
+    setValue("ward", "Chọn phường/xã");
+    setValue("district", "Chọn quận/huyện");
+  };
+
+  const handleDistrictChange = (districtName: any) => {
+    const district = districts.find((district) => district.name === districtName);
+    if (!district) return;
+
+    clearErrors("province");
+    setSelectedDistrict(district);
+    setValue("ward", "Chọn phường/xã");
+    setValue("district", districtName);
   };
 
   return (
@@ -69,7 +114,7 @@ const SelectAddress = ({ errors, register, setValue, clearErrors }: SelectAddres
               errors.province ? "border-[#ff4d4f]" : "focus:border-primary focus:shadow-input-primary"
             )}
           >
-            <SelectValue placeholder="Chọn tỉnh/thành phố" />
+            <SelectValue placeholder={watch("province") || "Chọn tỉnh/thành phố"} />
           </SelectTrigger>
           <SelectContent className="h-[300px]">
             {provinces?.map((province) => (
@@ -85,15 +130,12 @@ const SelectAddress = ({ errors, register, setValue, clearErrors }: SelectAddres
         )}
       </div>
 
-      <div className={cn("flex flex-col gap-2", !selectedProvince && "cursor-not-allowed")}>
+      <div className="flex flex-col gap-2">
         <label className="text-[15px] font-medium">Quận/Huyện</label>
         <Select
           disabled={!selectedProvince}
           {...register("district", { required: "Vui lòng chọn quận/huyện!" })}
-          onValueChange={(value) => {
-            clearErrors("district");
-            setValue("district", value);
-          }}
+          onValueChange={(value) => handleDistrictChange(value)}
         >
           <SelectTrigger
             className={cn(
@@ -101,10 +143,10 @@ const SelectAddress = ({ errors, register, setValue, clearErrors }: SelectAddres
               errors.district ? "border-[#ff4d4f]" : "focus:border-primary focus:shadow-input-primary"
             )}
           >
-            <SelectValue placeholder="Chọn quận/huyện" />
+            <SelectValue placeholder={watch("district") || "Chọn quận/huyện"} />
           </SelectTrigger>
           <SelectContent>
-            {selectedProvince?.districts?.map((district: any) => (
+            {districts?.map((district: any) => (
               <SelectItem key={district?.name} value={district?.name}>
                 {district?.name}
               </SelectItem>
@@ -114,6 +156,32 @@ const SelectAddress = ({ errors, register, setValue, clearErrors }: SelectAddres
 
         {errors.district && (
           <p className="text-sm text-red-500">{errors.district.message}</p>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label className="text-[15px] font-medium">Phường/Xã</label>
+        <Select
+          disabled={!selectedDistrict}
+          {...register("ward", {
+            required: "Vui lòng chọn phường/xã!"
+          })}
+          onValueChange={(value) => setValue("ward", value)}
+        >
+          <SelectTrigger className={cn("w-full", errors.ward && "border-red-500")}>
+            <SelectValue placeholder={watch("ward") || "Chọn phường/xã"} />
+          </SelectTrigger>
+          <SelectContent>
+            {wards?.map((ward: any) => (
+              <SelectItem key={ward?._id} value={ward?.name}>
+                {ward?.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {errors.ward && (
+          <p className="text-red-500 text-sm">{errors.ward.message}</p>
         )}
       </div>
 

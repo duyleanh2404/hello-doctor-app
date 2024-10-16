@@ -1,6 +1,7 @@
 export interface RegisterFormInputs {
   day: string;
   year: string;
+  ward: string;
   email: string;
   month: string;
   gender: string;

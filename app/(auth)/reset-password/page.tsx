@@ -17,8 +17,8 @@ import {
 } from "@/store/slices/auth-slice";
 import { RootState } from "@/store/store";
 import { resetPassword } from "@/services/auth-service";
+import { validatePassword } from "@/utils/validate-password";
 import useToggle from "@/hooks/use-toggle";
-import validatePassword from "@/utils/validate-password";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

@@ -18,9 +18,9 @@ import {
   setVerificationEmail
 } from "@/store/slices/auth-slice";
 import { RootState } from "@/store/store";
+import { validateEmail } from "@/utils/validate-email";
 import { loginUser, resendOtp } from "@/services/auth-service";
 import useToggle from "@/hooks/use-toggle";
-import validateEmail from "@/utils/validate-email";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

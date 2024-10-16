@@ -84,10 +84,30 @@ export const resetPassword = async ({ email, newPassword }: ResetPasswordData) =
 };
 
 export const getProvinces = async () => {
-  const response = await fetch("https://provinces.open-api.vn/api?depth=2");
+  const response = await fetch("https://open.oapi.vn/location/provinces?size=100");
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.message || "An error occurred while fetching provinces!");
+  }
+
+  return await response.json();
+};
+
+export const getDisctricts = async (provinceId: string) => {
+  const response = await fetch(`https://open.oapi.vn/location/districts?size=100&provinceId=${provinceId}`);
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "An error occurred while fetching districts!");
+  }
+
+  return await response.json();
+};
+
+export const getWards = async (districtId: string) => {
+  const response = await fetch(`https://open.oapi.vn/location/wards?size=100&districtId=${districtId}`);
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "An error occurred while fetching wards!");
   }
 
   return await response.json();
