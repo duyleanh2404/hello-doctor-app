@@ -19,13 +19,22 @@ const capitalizeFirstLetter = (string: string) => {
 };
 
 interface DatePickerProps {
-  className?: string
-  placeholder?: string
-};
+  className?: string;
+  placeholder?: string;
+  dateError?: string;
+  setDateError?: (dateError: string) => void;
+  selectedDate?: Date | undefined;
+  setSelectedDate: (selectedDate: Date | undefined) => void;
+}
 
-export function DatePicker({ className, placeholder }: DatePickerProps) {
-  const [date, setDate] = React.useState<Date>();
-
+export function DatePicker({
+  dateError,
+  className,
+  placeholder,
+  selectedDate,
+  setSelectedDate,
+  setDateError,
+}: DatePickerProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -33,24 +42,28 @@ export function DatePicker({ className, placeholder }: DatePickerProps) {
           variant={"outline"}
           className={cn(
             "w-full h-12 justify-start text-left font-normal",
-            !date && "text-muted-foreground",
-            className && className
+            !selectedDate && "text-muted-foreground",
+            dateError && "border border-red-500",
+            className
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date
-            ? capitalizeFirstLetter(format(date, "PPP", { locale: vi }))
+          {selectedDate
+            ? capitalizeFirstLetter(format(selectedDate, "PPP", { locale: vi }))
             : <span>{placeholder ? placeholder : "Chọn ngày khám"}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
         <Calendar
           mode="single"
-          selected={date}
-          onSelect={setDate}
+          selected={selectedDate}
+          onSelect={(value) => {
+            setSelectedDate(value);
+            setDateError && setDateError("");
+          }}
           initialFocus
         />
       </PopoverContent>
     </Popover>
   );
-}
+};

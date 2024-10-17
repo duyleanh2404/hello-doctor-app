@@ -1,8 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { FiUpload } from "react-icons/fi";
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Image from "next/image";
 import Cookies from "js-cookie";
@@ -10,14 +10,7 @@ import toast from "react-hot-toast";
 import JoditEditor from "jodit-react";
 
 import { cn } from "@/lib/utils";
-import { DoctorData } from "@/types/doctor-types";
-import { ClinicData } from "@/types/clinic-types";
-import { getProvinces } from "@/services/auth-service";
-import { SpecialtyData } from "@/types/specialty-types";
-import { getAllClinics } from "@/services/clinic-service";
 import { getAllSpecialties } from "@/services/specialty-service";
-import { getDoctorById, updateDoctor } from "@/services/doctor-service";
-import medicalFees from "@/constants/medical-fees";
 
 import {
   Select,
@@ -28,47 +21,36 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { formatVietnameseCurrency } from "@/utils/format-currency";
+import { getAllDoctors } from "@/services/doctor-service";
+import { DoctorData } from "@/types/doctor-types";
+import { SpecialtyData } from "@/types/specialty-types";
+import { createNewPost } from "@/services/post-service";
+import { DatePicker } from "@/components/ui/date-picker";
+import { format } from "date-fns";
+import { PostData } from "@/types/post-types";
 
-const EditDoctor = () => {
+const CreateNewPost = () => {
   const router = useRouter();
-  const { doctorId } = useParams<{ doctorId: string }>();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [dateError, setDateError] = useState<string>("");
   const [contentValue, setContentValue] = useState<string>("");
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
 
   const [imageName, setImageName] = useState<string>("");
   const [imageURL, setImageURL] = useState<string | null>(null);
 
-  const [clinicName, setClinicName] = useState<string>("");
-  const [specialtyName, setspecialtyName] = useState<string>("");
-
-  const [provinces, setProvinces] = useState<any[]>([]);
-  const [clinics, setClinics] = useState<ClinicData[]>([]);
+  const [doctors, setDoctors] = useState<DoctorData[]>([]);
   const [specialties, setSpecialties] = useState<SpecialtyData[]>([]);
 
   const {
-    watch,
     register,
     setValue,
     setError,
     clearErrors,
     handleSubmit,
     formState: { errors }
-  } = useForm<DoctorData>();
-
-  useEffect(() => {
-    const fetchProvinces = async () => {
-      try {
-        const { data } = await getProvinces();
-        setProvinces(data);
-      } catch (err: any) {
-        router.push("/");
-        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
-      }
-    };
-    fetchProvinces();
-  }, []);
+  } = useForm<PostData>();
 
   useEffect(() => {
     const fetchSpecialties = async () => {
@@ -87,53 +69,20 @@ const EditDoctor = () => {
   }, []);
 
   useEffect(() => {
-    const fetchClinics = async () => {
+    const fetchDoctors = async () => {
       try {
         const accessToken = Cookies.get("access_token");
         if (!accessToken) return;
 
-        const { clinics } = await getAllClinics({ accessToken });
-        setClinics(clinics);
+        const { doctors } = await getAllDoctors({ accessToken });
+        setDoctors(doctors);
       } catch (err: any) {
         router.push("/");
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       }
     };
-    fetchClinics();
+    fetchDoctors();
   }, []);
-
-  useEffect(() => {
-    const fetchDoctorData = async () => {
-      try {
-        setIsLoading(true);
-        const accessToken = Cookies.get("access_token");
-        if (!accessToken) return;
-
-        const { doctor } = await getDoctorById({ accessToken, id: doctorId });
-
-        if (doctor) {
-          setValue("clinic", doctor.clinic_id._id);
-          setValue("fullname", doctor.fullname);
-          setValue("province", doctor.province);
-          setValue("medicalFee", doctor.medical_fee);
-          setValue("specialty", doctor.specialty_id._id);
-
-          setImageURL(doctor.image);
-          setContentValue(doctor.desc);
-          setImageName(doctor.imageName);
-          setClinicName(doctor.clinic_id.name);
-          setspecialtyName(doctor.specialty_id.name);
-        }
-      } catch (err: any) {
-        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
-        router.push("/");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchDoctorData();
-  }, [doctorId, setValue]);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -151,90 +100,66 @@ const EditDoctor = () => {
   };
 
   const handleValidateEditor = () => {
+    if (!selectedDate) {
+      setDateError("Vui lòng chọn ngày đăng!");
+    }
+
     if (contentValue.trim() !== "") return;
     setError("desc", {
       type: "manual",
-      message: "Vui lòng nhập mô tả của bác sĩ!"
+      message: "Vui lòng nhập mô tả của bài viết!"
     });
   };
 
-  const handleEditDoctor: SubmitHandler<DoctorData> = async (doctorData) => {
+  const handleCreateNewPost: SubmitHandler<PostData> = async (postData) => {
     try {
       setIsLoading(true);
       const accessToken = Cookies.get("access_token");
       if (!accessToken) return;
 
-      const file = doctorData.image?.[0];
+      const file = postData.image?.[0];
 
-      await updateDoctor({
+      await createNewPost({
         imageName,
-        accessToken,
         image: file,
-        id: doctorId,
+        accessToken,
         desc: contentValue,
-        fullname: doctorData.fullname,
-        province: doctorData.province,
-        clinic_id: doctorData.clinic,
-        medical_fee: doctorData.medicalFee,
-        specialty_id: doctorData.specialty
+        title: postData.title,
+        doctor_id: postData.doctor,
+        specialty_id: postData.specialty,
+        release_date: selectedDate && format(selectedDate, "dd/MM/yyyy")
       });
 
       setIsLoading(false);
-      toast.success("Cập nhật thông tin bác sĩ thành công!");
+      toast.success("Thêm chuyên khoa thành công!");
     } catch (err: any) {
       toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
     } finally {
-      router.push("/admin/doctors");
+      router.push("/admin/posts");
     }
   };
 
   return (
     <>
-      <h1 className="text-xl font-bold mb-4">Cập nhật thông tin bác sĩ</h1>
-      <form onSubmit={handleSubmit(handleEditDoctor)}>
+      <h1 className="text-xl font-bold mb-4">Thêm bài viết mới</h1>
+      <form onSubmit={handleSubmit(handleCreateNewPost)}>
         <div className="flex flex-col gap-8 pb-6">
           <div className="flex flex-col gap-8 -mx-4 px-4">
             <div className="flex flex-col gap-2">
-              <label className="text-[17px] font-semibold">Họ tên bác sĩ</label>
+              <label className="text-[17px] font-semibold">Tiêu đề bài viết</label>
               <Input
                 type="text"
                 spellCheck={false}
-                placeholder="Nhập họ tên bác sĩ"
-                {...register("fullname", { required: "Vui lòng nhập họ tên bác sĩ!" })}
+                placeholder="Nhập tiêu đề bài viết"
+                {...register("title", { required: "Vui lòng nhập tiêu đề bài viết!" })}
                 className={cn(
                   "border border-gray-300 rounded-md p-[14px] transition duration-500",
-                  errors.fullname ? "border-red-500" : "focus:border-primary focus:shadow-input-primary"
+                  errors.title ? "border-red-500" : "focus:border-primary focus:shadow-input-primary"
                 )}
               />
 
-              {errors.fullname && (
-                <p className="text-red-500 text-sm">{errors.fullname.message}</p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="text-[17px] font-semibold">Tỉnh/Thành phố</label>
-              <Select
-                {...register("province", { required: "Vui lòng chọn tỉnh/thành phố!" })}
-                onValueChange={(value) => {
-                  clearErrors("province");
-                  setValue("province", value);
-                }}
-              >
-                <SelectTrigger className={cn("w-full", errors.province && "border-red-500")}>
-                  <SelectValue placeholder={watch("province") || "Chọn tỉnh/thành phố"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {provinces?.map((province) => (
-                    <SelectItem key={province?._id} value={province?.name}>
-                      {province?.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {errors.province && (
-                <p className="text-red-500 text-sm">{errors.province.message}</p>
+              {errors.title && (
+                <p className="text-red-500 text-sm">{errors.title.message}</p>
               )}
             </div>
 
@@ -248,7 +173,7 @@ const EditDoctor = () => {
                 }}
               >
                 <SelectTrigger className={cn("w-full", errors.specialty && "border-red-500")}>
-                  <SelectValue placeholder={`${specialtyName}` || "Chọn chuyên khoa"} />
+                  <SelectValue placeholder="Chọn chuyên khoa" />
                 </SelectTrigger>
                 <SelectContent>
                   {specialties?.map((specialty) => (
@@ -265,54 +190,44 @@ const EditDoctor = () => {
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-[17px] font-semibold">Bệnh viện</label>
+              <label className="text-[17px] font-semibold">Bác sĩ</label>
               <Select
-                {...register("clinic", { required: "Vui lòng chọn bệnh viện!" })}
+                {...register("doctor", { required: "Vui lòng chọn bác sĩ!" })}
                 onValueChange={(value) => {
-                  clearErrors("clinic");
-                  setValue("clinic", value);
+                  clearErrors("doctor");
+                  setValue("doctor", value);
                 }}
               >
-                <SelectTrigger className={cn("w-full", errors.clinic && "border-red-500")}>
-                  <SelectValue placeholder={`${clinicName}` || "Chọn bệnh viện"} />
+                <SelectTrigger className={cn("w-full", errors.doctor && "border-red-500")}>
+                  <SelectValue placeholder="Chọn bác sĩ" />
                 </SelectTrigger>
                 <SelectContent>
-                  {clinics?.map((clinic) => (
-                    <SelectItem key={clinic?._id} value={clinic?._id}>
-                      {clinic?.name}
+                  {doctors?.map((doctor) => (
+                    <SelectItem key={doctor?._id} value={doctor?._id}>
+                      {doctor?.fullname}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
-              {errors.clinic && (
-                <p className="text-red-500 text-sm">{errors.clinic.message}</p>
+              {errors.doctor && (
+                <p className="text-red-500 text-sm">{errors.doctor.message}</p>
               )}
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-[17px] font-semibold">Giá khám bệnh</label>
-              <Select
-                {...register("medicalFee", { required: "Vui lòng chọn giá khám bệnh!" })}
-                onValueChange={(value) => {
-                  clearErrors("medicalFee");
-                  setValue("medicalFee", Number(value));
-                }}
-              >
-                <SelectTrigger className={cn("w-full", errors.medicalFee && "border-red-500")}>
-                  <SelectValue placeholder={formatVietnameseCurrency(watch("medicalFee")) || "Chọn giá khám bệnh"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {medicalFees.map((item) => (
-                    <SelectItem key={item.id} value={item.amount.toString()}>
-                      {item.formattedAmount}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <label className="text-[17px] font-semibold">Chọn ngày đăng</label>
+              <DatePicker
+                dateError={dateError}
+                setDateError={setDateError}
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
+                placeholder="Chọn ngày đăng"
+                className="h-14"
+              />
 
-              {errors.medicalFee && (
-                <p className="text-red-500 text-sm">{errors.medicalFee.message}</p>
+              {dateError && (
+                <p className="text-red-500 text-sm">{dateError}</p>
               )}
             </div>
 
@@ -322,7 +237,9 @@ const EditDoctor = () => {
                 <Input
                   type="file"
                   accept="image/*"
-                  {...register("image")}
+                  {...register("image", {
+                    required: "Vui lòng tải tải ảnh đại diện của chuyên khoa!"
+                  })}
                   onChange={handleImageChange}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
@@ -358,7 +275,7 @@ const EditDoctor = () => {
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-[17px] font-semibold">Mô tả bác sĩ</label>
+              <label className="text-[17px] font-semibold">Mô tả chuyên khoa</label>
               <JoditEditor
                 value={contentValue}
                 onChange={handleEditorChange}
@@ -375,7 +292,7 @@ const EditDoctor = () => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push("/admin/doctors")}
+              onClick={() => router.push("/admin/specialties")}
               className="min-w-[130px] h-[3.2rem] shadow-md transition duration-500"
             >
               Hủy
@@ -388,7 +305,7 @@ const EditDoctor = () => {
               onClick={handleValidateEditor}
               className="min-w-[130px] h-[3.2rem] shadow-md transition duration-500"
             >
-              {isLoading ? "Đang cập nhật..." : "Cập nhật"}
+              {isLoading ? "Đang tạo..." : "Tạo mới"}
             </Button>
           </div>
         </div>
@@ -397,4 +314,4 @@ const EditDoctor = () => {
   );
 };
 
-export default EditDoctor;
+export default CreateNewPost;

@@ -324,17 +324,17 @@ const ManageDoctors = () => {
               </TableBody>
             </Table>
           </div >
-        </>
-      )}
 
-      {totalPages > 1 && (
-        <div className="ml-auto">
-          <PaginationSection
-            totalPages={totalPages}
-            currentPage={currentPage}
-            onPageChange={setCurrentPage}
-          />
-        </div>
+          {totalPages > 1 && (
+            <div className="ml-auto">
+              <PaginationSection
+                totalPages={totalPages}
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
+        </>
       )}
 
       <DeleteConfirmationModal
