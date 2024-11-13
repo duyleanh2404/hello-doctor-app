@@ -5,42 +5,38 @@ export interface SpecialtyData {
   image: string;
 };
 
-export interface SpecialtyBaseData {
+export interface CreateSpecialtyForm {
+  _id?: string;
   name: string;
   desc: string;
-  imageName: string;
-  accessToken: string;
+  image: FileList;
 };
 
-export interface CreateSpecialtyData extends SpecialtyBaseData {
+export interface EditSpecialtyForm {
+  _id?: string;
+  name: string;
+  desc: string;
+  image?: FileList;
+};
+
+export interface CreateSpecialtyData {
+  name: string;
+  desc: string;
   image?: File;
+  imageName: string;
 };
 
-export interface UpdateSpecialtyData extends Partial<SpecialtyBaseData> {
+export interface EditSpecialtyData {
   id: string;
-  image?: File | null;
-};
-
-export interface DeleteSpecialtyData {
-  id: string;
-  accessToken: string;
+  name?: string;
+  desc?: string;
+  image?: File;
+  imageName?: string;
 };
 
 export interface GetAllSpecialtiesData {
   page?: number;
   limit?: number;
   query?: string;
-  accessToken: string;
-};
-
-export interface SearchSpecialtiesData {
-  name: string;
-  page?: number;
-  limit?: number;
-  accessToken: string;
-};
-
-export interface GetSpecialtyByIdData {
-  id: string;
-  accessToken: string;
+  exclude?: string;
 };

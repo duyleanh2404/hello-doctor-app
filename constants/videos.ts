@@ -1,4 +1,4 @@
-const videos = [
+export const videos = [
   {
     id: "video-1",
     title: "Thụ tinh trong ống nghiệm (IVF): Quy trình chuyển phôi vào tử cung diễn ra như thế nào?",
@@ -18,5 +18,3 @@ const videos = [
     image: "/medical-experts/medical-expert-3.jpg"
   }
 ];
-
-export default videos;

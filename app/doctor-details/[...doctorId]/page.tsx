@@ -1,117 +1,304 @@
 "use client";
 
-import { Suspense, lazy } from "react";
-import { useState, useCallback } from "react";
-import { IoLocationOutline } from "react-icons/io5";
+import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 
-import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import Swal from "sweetalert2";
+import Cookies from "js-cookie";
+import NProgress from "nprogress";
+import toast from "react-hot-toast";
+import "nprogress/nprogress.css";
+
+import { BiClinic } from "react-icons/bi";
+import { IoLocationOutline } from "react-icons/io5";
+
+import { RootState } from "@/store/store";
+import { useSelector } from "react-redux";
+
+import { ActiveTime, timeRanges } from "@/constants/time-ranges";
+import useDoctor from "@/hooks/fetch/user-doctor";
+
+import { UserData } from "@/types/user-types";
+import { ScheduleData } from "@/types/schedule-types";
+
+import { getCurrentUser } from "@/services/user-serivce";
+import { getSchedule } from "@/services/schedule-service";
 
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
+import Hint from "@/components/hint";
+import Spinner from "@/components/spinner";
 import Breadcrumb from "@/components/breadcrumb";
-
-const Advertise = lazy(() => import("@/components/advertise"));
+import Billboard from "@/components/advertises/billboard";
+import TimeButtons from "../../../components/time-buttons";
 
 const DoctorDetailsPage = () => {
-  const [activeTime, setActiveTime] = useState("morning");
+  const router = useRouter();
 
-  const handleTimeChange = useCallback((time: string) => {
-    setActiveTime(time);
+  const today = new Date();
+  today.setUTCHours(-7, 0, 0, 0);
+
+  const { isLoggedIn } = useSelector((state: RootState) => state.auth);
+
+  const { doctorId } = useParams<{ doctorId: string }>();
+  const doctor = useDoctor(atob(doctorId));
+
+  const [showBillboard, setShowBillboard] = useState<boolean>(false);
+  const [isLoading, setLoading] = useState({ schedule: false, booking: false });
+
+  const [user, setUser] = useState<UserData | null>(null);
+  const [schedule, setSchedule] = useState<ScheduleData | null>(null);
+
+  const [activeTime, setActiveTime] = useState<ActiveTime>("morning");
+  const [filteredTimeSlots, setFilteredTimeSlots] = useState<any[]>([]);
+
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(today);
+
+  useEffect(() => {
+    NProgress.done();
   }, []);
 
-  const TimeButtons = () => {
-    return ["morning", "afternoon", "evening"].map((time) => (
-      <Button
-        key={time}
-        type="button"
-        variant="ghost"
-        onClick={() => handleTimeChange(time)}
-        className={cn(
-          "flex-1 text-base sm:text-[17px] font-semibold pb-2 rounded-none",
-          activeTime === time ? "text-primary border-b-[3px] border-primary" : "hover:text-primary"
-        )}
-      >
-        {time === "morning" ? "Sáng" : time === "afternoon" ? "Chiều" : "Tối"}
-      </Button>
-    ));
+  useEffect(() => {
+    const shouldShowBillboard = Math.random() > 0.5;
+    setShowBillboard(shouldShowBillboard);
+  }, []);
+
+  useEffect(() => {
+    if (!selectedDate) setFilteredTimeSlots([]);
+  }, [selectedDate]);
+
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      if (!selectedDate) return;
+
+      resetState();
+      setLoading({ ...isLoading, schedule: true });
+
+      try {
+        const { schedule } = await getSchedule({
+          doctor_id: atob(doctorId),
+          date: selectedDate
+        });
+
+        setSchedule(schedule);
+      } catch (error: any) {
+        resetState();
+      } finally {
+        setLoading({ ...isLoading, schedule: false });
+      }
+    };
+
+    fetchSchedule();
+  }, [selectedDate]);
+
+  useEffect(() => {
+    if (!schedule?.timeSlots) return;
+
+    const filteredSlots = schedule.timeSlots.filter((slot) => {
+      const { start, end } = timeRanges[activeTime];
+      return slot.timeline >= start && slot.timeline < end;
+    });
+
+    setFilteredTimeSlots(filteredSlots);
+  }, [activeTime, schedule]);
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      if (!isLoggedIn) return;
+
+      const accessToken = Cookies.get("access_token");
+      if (!accessToken) return;
+
+      try {
+        const userData = await getCurrentUser(accessToken);
+        setUser(userData.user);
+      } catch (error: any) {
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
+
+  const resetState = () => {
+    setSchedule(null);
+    setSelectedSlot(null);
+    setActiveTime("morning");
+    setFilteredTimeSlots([]);
+  };
+
+  const handleBooking = async () => {
+    if (user?.role !== "user") {
+      Swal.fire({
+        icon: "error",
+        title: "Đây là chức năng dành cho bệnh nhân!",
+        confirmButtonText: "Đã hiểu",
+        text: "Nhấn vào nút bên dưới để tiếp tục!"
+      });
+      return;
+    }
+
+    setLoading({ ...isLoading, booking: true });
+
+    if (!isLoggedIn) {
+      router.replace("/login");
+      return;
+    }
+
+    NProgress.start();
+    const formattedDate = format(selectedDate!, "dd/MM/yyyy");
+    const encodedDate = btoa(formattedDate);
+    const encodedTime = btoa(selectedSlot!);
+    router.replace(`/booking-details?time=${encodedTime}&date=${encodedDate}&doctorId=${doctorId}`);
+  };
+
+  if (!doctor) {
+    return <Spinner center />;
   }
 
   return (
-    <div className="flex flex-col gap-6 sm:gap-12 space-header-has-bottom">
+    <div className="flex flex-col gap-6 sm:gap-12">
       <div className="flex flex-col">
-        <Breadcrumb label="Doctor name" />
+        <Breadcrumb
+          labels={[
+            { label: "Đặt lịch khám bệnh", href: "/booking-doctor" },
+            { label: doctor?.fullname || "Đang tải..." }
+          ]}
+        />
 
-        <div className="wrapper w-full flex items-center gap-6 py-8 border-b">
-          <div className="relative w-[100px] sm:w-[120px] h-[100px] sm:h-[120px]">
+        <div className="wrapper w-full flex flex-col sm:flex-row items-center gap-6 py-8 border-b">
+          <div className="relative w-[120px] h-[120px]">
             <Image
-              loading="lazy"
-              src="/avatar-default.png"
-              alt="Avatar"
               fill
+              alt="Avatar"
+              loading="lazy"
               sizes="(max-width: 768px) 100px, 120px"
+              src={doctor?.image || "/avatar-default.png"}
               className="w-full h-full object-cover rounded-full"
             />
           </div>
-          <div className="flex flex-col gap-4">
-            <h1 className="text-base sm:text-lg font-bold">Doctor fullname</h1>
-            <p className="text-[15px] font-medium text-[#595959]">Specialty name</p>
+
+          <div className="flex flex-col items-center sm:items-start gap-4">
+            <h1 className="text-xl sm:text-2xl font-bold">{doctor?.fullname}</h1>
+            <div className="flex items-center gap-2">
+              <Image
+                src={doctor?.specialty_id?.image}
+                alt="Specialty"
+                width={28}
+                height={28}
+              />
+              <p className="text-base font-semibold text-primary">
+                {doctor?.specialty_id?.name}
+              </p>
+            </div>
+            <div className="flex items-center gap-4 mt-4 sm:mt-0">
+              <div className="w-fit py-2 px-4 text-primary border border-[#2d87f3] bg-[#e3f2ff] rounded-full">
+                Đặt lịch khám
+              </div>
+              <p className="w-fit py-2 px-4 bg-[#f8f9fc] rounded-full">Dành cho người lớn</p>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="sm:wrapper w-full flex flex-col lg:flex-row gap-12 lg:gap-8 sm:pb-16">
-        <div className="wrapper w-full lg:w-[65%]">Doctor description</div>
+        <div
+          className="wrapper w-full lg:w-[65%]"
+          dangerouslySetInnerHTML={{ __html: doctor?.desc }}
+        />
 
         <div className="relative w-full lg:w-auto flex-1 flex flex-col gap-8">
           <div className="h-fit flex flex-col gap-8 pt-6 pb-10 px-6 sm:pt-6 sm:pb-10 sm:px-6 bg-[#F8F9FC] shadow-xl sm:shadow-lg rounded-t-3xl sm:rounded-2xl">
-            <h1 className="text-lg font-bold">Đặt lịch hẹn</h1>
+            <h1 className="text-lg font-bold border-l-4 border-primary pl-4">Đặt lịch hẹn</h1>
 
-            <div className="flex items-center gap-3">
-              <IoLocationOutline className="text-2xl sm:text-[28px]" />
-              <p className="text-[15px] font-medium">Clinic address</p>
+            <div className="flex flex-col text-[#404040]">
+              <Hint label="Xem chi tiết bệnh viện">
+                <Link
+                  href={`/clinic-details/${doctor?.clinic_id?._id}`}
+                  className="group flex items-center gap-3 p-3 hover:bg-[#e3f2ff] rounded-md transition duration-500"
+                >
+                  <BiClinic className="flex-shrink-0 size-5 group-hover:text-primary transition duration-500" />
+                  <p className="text-sm font-medium">{doctor?.clinic_id?.name}</p>
+                </Link>
+              </Hint>
+
+              <div className="flex items-center gap-3 p-3">
+                <IoLocationOutline className="flex-shrink-0 size-5" />
+                <p className="text-sm font-medium">{doctor?.clinic_id?.address}</p>
+              </div>
             </div>
 
-            <div className="flex flex-col gap-6 pt-6 pb-10 px-6 sm:pt-6 sm:pb-10 sm:px-6 bg-white rounded-2xl shadow-md">
+            <div className="flex flex-col gap-8 pt-6 pb-10 px-6 sm:pt-6 sm:pb-10 sm:px-6 bg-white rounded-2xl shadow-md">
               <h1 className="text-lg font-bold">Tư vấn trực tiếp</h1>
-
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-[#595959]">Ngày khám</label>
-                <DatePicker />
-              </div>
-
-              <div className="flex">
-                <TimeButtons />
-              </div>
-
-              <div className="flex flex-col items-center gap-6 py-12">
-                <Image
-                  loading="lazy"
-                  src="/calendar.svg"
-                  alt="Calendar Icon"
-                  width={100}
-                  height={100}
+                <DatePicker
+                  placeholder="Chọn ngày khám"
+                  selectedDate={selectedDate}
+                  setSelectedDate={setSelectedDate}
                 />
-                <p className="font-medium text-[#595959]">
-                  Chưa có lịch nào vào thời gian này!
-                </p>
               </div>
+
+              <TimeButtons activeTime={activeTime} setActiveTime={setActiveTime} />
+
+              {isLoading.schedule ? (
+                <Spinner table className="py-16" />
+              ) : (
+                filteredTimeSlots?.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-4">
+                    {filteredTimeSlots?.map((slot) => (
+                      <Button
+                        type="button"
+                        variant="default"
+                        key={slot?.timeline}
+                        disabled={slot?.isBooked}
+                        onClick={() => setSelectedSlot(slot?.timeline)}
+                        className={cn(
+                          "h-14 p-3 font-medium text-black hover:text-white border border-transparent rounded-md shadow-md hover:shadow-lg text-center transition duration-500",
+                          selectedSlot === slot?.timeline
+                            ? "text-white"
+                            : "bg-[#f8f9fc] hover:bg-[#8f9fc] hover:text-black hover:border-primary"
+                        )}
+                      >
+                        {slot?.timeline}
+                      </Button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-12 py-16">
+                    <Image loading="lazy" src="/calendar.svg" alt="Calendar Icon" width={110} height={110} />
+                    <p className="font-medium text-[#595959] text-center">
+                      Không tìm thấy lịch nào vào thời gian này!
+                    </p>
+                  </div>
+                )
+              )}
+
+              <p className="text-base sm:text-[17px] font-medium select-none">
+                Giá từ: {""}
+                <span className="text-[17px] sm:text-lg font-semibold text-[#009e5c]">200.000₫ - 1.000.000₫</span>
+              </p>
 
               <Button
                 type="button"
-                variant="default"
-                className="h-14 relative text-[17px] font-semibold text-white py-[14px] bg-primary hover:bg-[#2c74df] rounded-lg transition duration-500 select-none"
+                size="xl"
+                variant="submit"
+                onClick={handleBooking}
+                disabled={isLoading.booking || !selectedDate || !selectedSlot}
               >
-                Tiếp tục đặt lịch
+                {isLoading.booking ? "Đang xử lý..." : "Tiếp tục đặt lịch"}
               </Button>
             </div>
           </div>
-
-          <Suspense fallback={<div>Loading...</div>}>
-            <Advertise />
-          </Suspense>
         </div>
       </div>
+
+      {showBillboard && <Billboard />}
     </div>
   );
 };

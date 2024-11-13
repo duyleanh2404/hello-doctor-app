@@ -1,9 +1,8 @@
-import { useState, useMemo } from "react";
-
+import { cn } from "@/lib/utils";
+import { useState } from "react";
 import Image from "next/image";
 
-import { cn } from "@/lib/utils";
-import videos from "@/constants/videos";
+import { videos } from "@/constants/videos";
 
 interface Video {
   id: string;
@@ -26,9 +25,7 @@ const VideoIframe = ({ src }: { src: string }) => {
 const MedicalExperts = () => {
   const [video, setVideo] = useState<string>("video-1");
 
-  const activeVideo: Video | undefined = useMemo(() =>
-    videos.find(({ id }) => id === video), [video]
-  );
+  const activeVideo: Video | undefined = videos.find(({ id }) => id === video);
 
   return (
     <div className="bg-[#192e4a] py-12">
@@ -73,4 +70,4 @@ const MedicalExperts = () => {
   );
 };
 
-export default MedicalExperts;
+export default MedicalExperts; 

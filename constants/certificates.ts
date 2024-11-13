@@ -1,4 +1,4 @@
-const certificates = [
+export const certificates = [
   {
     id: 1,
     src: "/certificates/certificate-1.png",
@@ -18,5 +18,3 @@ const certificates = [
     height: 32
   }
 ];
-
-export default certificates;

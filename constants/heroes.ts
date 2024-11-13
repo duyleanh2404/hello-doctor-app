@@ -1,4 +1,4 @@
-const heroes = [
+export const heroes = [
   {
     id: 1,
     image: "/hero/hero-1.png"
@@ -16,5 +16,3 @@ const heroes = [
     image: "/hero/hero-4.png"
   }
 ];
-
-export default heroes;

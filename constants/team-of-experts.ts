@@ -1,4 +1,4 @@
-const teamOfExperts = [
+export const teamOfExperts = [
   {
     id: 1,
     name: "Thạc sĩ - Bác sĩ - Giảng viên Nguyễn Hữu Đức Minh",
@@ -42,5 +42,3 @@ const teamOfExperts = [
     image: "/team-of-experts/expert-6.png"
   }
 ];
-
-export default teamOfExperts;

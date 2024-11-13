@@ -1,46 +1,61 @@
 export interface ClinicData {
   _id: string;
   name: string;
+  address: string;
   desc: string;
   avatar: string;
   banner: string;
-  address: string;
 };
 
-export interface ClinicBaseData {
+export interface CreateClinicForm {
+  _id?: string;
   name: string;
+  street: string;
+  ward: string;
+  district: string;
+  province: string;
   desc: string;
+  avatar?: FileList;
+  banner?: FileList;
+};
+
+export interface EditClinicForm {
+  _id?: string;
+  name: string;
+  street: string;
+  ward: string;
+  district: string;
+  province: string;
+  desc: string;
+  avatar?: FileList;
+  banner?: FileList;
+};
+
+export interface CreateClinicData {
+  name: string;
   address: string;
+  desc: string;
   avatarName: string;
   bannerName: string;
-  accessToken: string;
-};
-
-export interface CreateClinicData extends ClinicBaseData {
   avatar?: File;
   banner?: File;
 };
 
-export interface UpdateClinicData extends Partial<ClinicBaseData> {
+export interface EditClinicData {
   id: string;
-  avatar?: File | null;
-  banner?: File | null;
-};
-
-export interface DeleteClinicData {
-  id: string;
-  accessToken: string;
+  name?: string;
+  address?: string;
+  desc?: string;
+  avatarName?: string;
+  bannerName?: string;
+  avatar?: File;
+  banner?: File;
 };
 
 export interface GetAllClinicsData {
   page?: number;
   limit?: number;
   query?: string;
+  exclude?: string;
   province?: string;
-  accessToken: string;
-};
-
-export interface GetClinicByIdData {
-  id: string;
-  accessToken: string;
 };

@@ -1,49 +1,71 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
+
+import toast from "react-hot-toast";
 import Autoplay from "embla-carousel-autoplay";
 
 import { DoctorData } from "@/types/doctor-types";
+import { getAllDoctors } from "@/services/doctor-service";
 
-import {
-  Carousel,
-  CarouselItem,
-  CarouselContent
-} from "@/components/ui/carousel";
 import {
   Select,
   SelectItem,
   SelectContent,
   SelectTrigger
 } from "@/components/ui/select";
+import {
+  Carousel,
+  CarouselItem,
+  CarouselContent
+} from "@/components/ui/carousel";
 import DoctorCard from "./doctor-card";
+import Spinner from "@/components/spinner";
+import PaginationSection from "@/components/pagination";
 
-const doctors: DoctorData[] = [
-  {
-    _id: "Doctor id",
-    fullname: "Doctor fullname",
-    province: "Doctor province",
-    desc: "Doctor desc",
-    image: "/doctor-1.jpg",
-    medical_fee: 150000,
-    clinic_data: {
-      _id: "Clinic id",
-      name: "Clinic name",
-      address: "Clinic address",
-      desc: "Clinic desc",
-      avatar: "/avatar",
-      banner: "/banner"
-    },
-    specialty_data: {
-      _id: "Specialty id",
-      name: "Specialty name",
-      desc: "Specialty desc",
-      image: "/image"
-    }
-  }
-];
+interface OutstandingDoctorProps {
+  provinces: any[],
+  specialty_id?: string;
+};
 
-const OutstandingDoctor = ({ provinces }: { provinces: any[] }) => {
+const OutstandingDoctor = ({ provinces, specialty_id }: OutstandingDoctorProps) => {
+  const [isLoading, setLoading] = useState<boolean>(false);
+
+  const [doctors, setDoctors] = useState<DoctorData[]>([]);
   const [selectedProvince, setSelectedProvince] = useState<string>("");
+
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
+  const fetchDoctors = async (
+    page: number, province?: string, specialty_id?: string
+  ) => {
+    setLoading(true);
+
+    try {
+      const provinceFilter = province && province !== "Tất cả" ? province : "all";
+      const { doctors, total } = await getAllDoctors({
+        page,
+        limit: 8,
+        exclude: "desc",
+        province: provinceFilter,
+        ...(specialty_id && { specialty_id: atob(specialty_id) })
+      });
+
+      const itemsPerPage = 8;
+      const totalPages = Math.ceil(total / itemsPerPage);
+
+      setDoctors(doctors);
+      setTotalPages(totalPages);
+    } catch (error: any) {
+      toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDoctors(currentPage, selectedProvince, specialty_id);
+  }, [currentPage, selectedProvince, specialty_id]);
 
   return (
     <div className="wrapper flex flex-col gap-12 py-12">
@@ -64,36 +86,103 @@ const OutstandingDoctor = ({ provinces }: { provinces: any[] }) => {
             value={selectedProvince}
             onValueChange={setSelectedProvince}
           >
-            <SelectTrigger className="p-3 border border-[#ccc] hover:border-primary hover:shadow-input-primary rounded-lg transition duration-500 cursor-pointer">
+            <SelectTrigger className="p-3 bg-white border border-[#ccc] hover:border-primary hover:shadow-input-primary rounded-lg transition duration-500 cursor-pointer">
               <span>{selectedProvince || "Tất cả vị trí"}</span>
             </SelectTrigger>
             <SelectContent>
-              {provinces?.map((province) => (
-                <SelectItem key={province?.id} value={province?.name}>
-                  {province?.name}
-                </SelectItem>
-              ))}
+              {provinces?.length > 0 ? (
+                <>
+                  <SelectItem value="Tất cả">Tất cả</SelectItem>
+                  {provinces?.map((province) => (
+                    <SelectItem key={province?.id} value={province?.name}>
+                      {province?.name}
+                    </SelectItem>
+                  ))}
+                </>
+              ) : (
+                <p className="text-sm font-medium text-[#595959] text-center py-4 px-2 mx-auto">
+                  Không tìm thấy tỉnh thành nào!
+                </p>
+              )}
             </SelectContent>
           </Select>
         </div>
       </div>
 
-      <div className="hidden lg:grid grid-cols-3 xl:grid-cols-4 gap-6">
-        {doctors?.map((doctor) => (
-          <DoctorCard key={doctor?._id} doctor={doctor} />
-        ))}
-      </div>
+      <div className="flex flex-col-reverse sm:flex-col gap-6 sm:gap-12">
+        <div className="hidden lg:flex flex-col gap-6">
+          {isLoading ? (
+            <Spinner center />
+          ) : (
+            doctors?.length > 0 ? (
+              <div className="grid grid-cols-3 xl:grid-cols-4 gap-6">
+                {doctors?.slice(0, 8)?.map((doctor: DoctorData) => (
+                  <DoctorCard key={doctor?._id} doctor={doctor} />
+                ))}
+              </div>
+            ) : (
+              <div className="w-full flex flex-col items-center justify-center gap-12 pt-8">
+                <Image
+                  loading="lazy"
+                  src="/not-found.png"
+                  alt="Not found"
+                  width="240"
+                  height="240"
+                />
+                <h1 className="text-xl font-semibold text-[#262626] text-center">
+                  Rất tiếc, hiện tại không tìm thấy bác sĩ nào tại tỉnh thành này!
+                </h1>
+              </div>
+            )
+          )}
 
-      <div className="block lg:hidden">
-        <Carousel plugins={[Autoplay({ delay: 3000 })]}>
-          <CarouselContent>
-            {doctors?.map((doctor) => (
-              <CarouselItem key={doctor?._id} className="sm:basis-1/2">
-                <DoctorCard doctor={doctor} />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
+          {totalPages > 1 && (
+            <div className="sm:ml-auto">
+              <PaginationSection
+                totalPages={totalPages}
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
+        </div>
+
+        {doctors?.length > 0 ? (
+          <div className="block lg:hidden">
+            <Carousel plugins={[Autoplay({ delay: 3000 })]}>
+              <CarouselContent>
+                {doctors?.slice(0, 8)?.map((doctor: DoctorData) => (
+                  <CarouselItem key={doctor?._id} className="sm:basis-1/2">
+                    <DoctorCard doctor={doctor} />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+
+            {totalPages > 1 && (
+              <div className="pt-10">
+                <PaginationSection
+                  totalPages={totalPages}
+                  currentPage={currentPage}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="w-full flex lg:hidden flex-col items-center justify-center gap-12 pt-8">
+            <Image
+              loading="lazy"
+              src="/not-found.png"
+              alt="Not found"
+              width="240"
+              height="240"
+            />
+            <h1 className="text-xl font-semibold text-[#262626] text-center">
+              Rất tiếc, hiện tại không tìm thấy bác sĩ nào tại tỉnh thành này!
+            </h1>
+          </div>
+        )}
       </div>
     </div>
   );

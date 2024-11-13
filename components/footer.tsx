@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 
-import socials from "@/constants/socials";
-import certificates from "@/constants/certificates";
+import { socials } from "@/constants/socials";
+import { certificates } from "@/constants/certificates";
 
 const healthTopics = [
   "Chuyên đề sức khỏe",

@@ -1,4 +1,4 @@
-const bookingDoctorBanners = [
+export const bookingDoctorBanners = [
   {
     id: 1,
     image: "/booking-doctor/banner-1.jpg"
@@ -12,5 +12,3 @@ const bookingDoctorBanners = [
     image: "/booking-doctor/banner-3.jpg"
   }
 ];
-
-export default bookingDoctorBanners;

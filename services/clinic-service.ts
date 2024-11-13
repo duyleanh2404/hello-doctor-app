@@ -1,122 +1,106 @@
 import {
-  UpdateClinicData,
+  EditClinicData,
   CreateClinicData,
-  DeleteClinicData,
-  GetAllClinicsData,
-  GetClinicByIdData
+  GetAllClinicsData
 } from "@/types/clinic-types";
 
-export const createNewClinic = async ({
-  name,
-  avatar,
-  banner,
-  desc,
-  address,
-  avatarName,
-  bannerName,
-  accessToken
-}: CreateClinicData) => {
+import { handleResponse } from "@/utils/handle-response";
+import { appendFormData } from "@/utils/append-form-data";
+
+export const createClinic = async (
+  accessToken: string,
+  { name, address, desc, avatarName, bannerName, avatar, banner }: CreateClinicData
+) => {
   const formData = new FormData();
-  formData.append("name", name);
-  formData.append("desc", desc);
-  formData.append("address", address);
-  formData.append("avatarName", avatarName);
-  formData.append("bannerName", bannerName);
+  appendFormData(formData, { name, address, desc, avatarName, bannerName });
 
   if (avatar) formData.append("files", avatar);
   if (banner) formData.append("files", banner);
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clinic/create`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${accessToken}`
-    },
-    body: formData
-  });
-
-  return response.json();
-};
-
-export const updateClinic = async ({
-  id,
-  name,
-  desc,
-  avatar,
-  banner,
-  address,
-  avatarName,
-  bannerName,
-  accessToken
-}: UpdateClinicData) => {
-  const formData = new FormData();
-  if (name) formData.append("name", name);
-  if (desc) formData.append("desc", desc);
-  if (avatar) formData.append("avatar", avatar);
-  if (banner) formData.append("banner", banner);
-  if (address) formData.append("address", address);
-  if (avatarName) formData.append("avatarName", avatarName);
-  if (bannerName) formData.append("bannerName", bannerName);
-
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clinic/${id}`, {
-    method: "PUT",
-    headers: {
-      "Authorization": `Bearer ${accessToken}`
-    },
-    body: formData
-  });
-
-  return await response.json();
-};
-
-export const deleteClinic = async ({ accessToken, id }: DeleteClinicData) => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clinic/${id}`, {
-    method: "DELETE",
-    headers: {
-      "Authorization": `Bearer ${accessToken}`
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/clinic/create`,
+    {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${accessToken}` },
+      body: formData
     }
-  });
+  );
 
-  return await response.json();
+  const responseData = await response.json();
+  if (!response.ok) {
+    throw responseData.statusCode;
+  }
+
+  return responseData;
+};
+
+export const editClinic = async (
+  accessToken: string,
+  { id, name, address, desc, avatarName, bannerName, avatar, banner }: EditClinicData
+) => {
+  const formData = new FormData();
+  appendFormData(formData, { name, address, desc, avatarName, bannerName });
+
+  if (avatar) formData.append("files", avatar);
+  if (banner) formData.append("files", banner);
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/clinic/${id}`,
+    {
+      method: "PUT",
+      headers: { "Authorization": `Bearer ${accessToken}` },
+      body: formData
+    }
+  );
+
+  const responseData = await response.json();
+  if (!response.ok) {
+    throw responseData.statusCode;
+  }
+
+  return responseData;
+};
+
+export const deleteClinic = async (accessToken: string, id: string) => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/clinic/${id}`,
+    {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${accessToken}` }
+    }
+  );
+
+  return handleResponse(response);
 };
 
 export const getAllClinics = async ({
-  accessToken,
-  page = 1,
-  limit = 10,
-  query = "",
-  province = ""
+  page = 1, limit = 10, query, exclude, province = "all"
 }: GetAllClinicsData) => {
   const queryParams = new URLSearchParams({
     page: page.toString(),
-    limit: limit.toString()
+    limit: limit.toString(),
+    ...(query && { query }),
+    ...(exclude && { exclude }),
+    ...(province && { province })
   });
-
-  if (query) {
-    queryParams.append("query", query);
-  }
-
-  if (province) {
-    queryParams.append("province", province);
-  }
 
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/clinic?${queryParams.toString()}`, {
-    method: "GET",
-    headers: {
-      "Authorization": `Bearer ${accessToken}`
+    `${process.env.NEXT_PUBLIC_API_URL}/clinic?${queryParams.toString()}`,
+    {
+      method: "GET"
     }
-  });
+  );
 
-  return await response.json();
+  return handleResponse(response);
 };
 
-export const getClinicById = async ({ accessToken, id }: GetClinicByIdData) => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clinic/${id}`, {
-    method: "GET",
-    headers: {
-      "Authorization": `Bearer ${accessToken}`
+export const getClinicById = async (id: string) => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/clinic/${id}`,
+    {
+      method: "GET"
     }
-  });
+  );
 
-  return await response.json();
+  return handleResponse(response);
 };

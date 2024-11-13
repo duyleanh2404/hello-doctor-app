@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import { Toaster } from "react-hot-toast";
-
-import "./globals.css";
 import localFont from "next/font/local";
+
+import { Toaster } from "react-hot-toast";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import ProviderAuth from "@/components/providers/provider-auth";
 import ProviderStore from "@/components/providers/provider-global";
+
+import "./globals.css";
 
 const ibmPlexSans = localFont({
   src: "./fonts/IBM-Plex-Sans.woff2",
@@ -28,14 +30,14 @@ export default function RootLayout({
       <body className={`${ibmPlexSans.variable} antialiased`}>
         <ProviderStore>
           <ProviderAuth>
-            <Toaster
-              position="top-center"
-              reverseOrder={false}
-              toastOptions={{
-                style: { maxWidth: 500 }
-              }}
-            />
-            {children}
+            <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID!}>
+              <Toaster
+                position="top-center"
+                reverseOrder={false}
+                toastOptions={{ style: { maxWidth: 800 } }}
+              />
+              {children}
+            </GoogleOAuthProvider>
           </ProviderAuth>
         </ProviderStore>
       </body>
