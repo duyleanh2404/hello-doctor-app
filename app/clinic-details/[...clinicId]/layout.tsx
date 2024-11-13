@@ -4,7 +4,7 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 
 export const metadata: Metadata = {
-  title: "Chi tiết phòng khám, bệnh viện | Hello Bacsi"
+  title: "Chi tiết bệnh viện/ phòng khám | Hello Bacsi"
 };
 
 export default function ClinicDetailsLayout({

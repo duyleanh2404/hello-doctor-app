@@ -1,7 +1,20 @@
-import { useState } from "react";
-import { FiSearch } from "react-icons/fi";
+"use client";
 
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
+
+import { FiSearch } from "react-icons/fi";
+import NProgress from "nprogress";
+import toast from "react-hot-toast";
+import "nprogress/nprogress.css";
+
+import { ClinicData } from "@/types/clinic-types";
+import { getAllClinics } from "@/services/clinic-service";
+
+import useDebounce from "@/hooks/use-debounce";
+import useClickOutside from "@/hooks/use-click-outside";
 
 import {
   Select,
@@ -12,58 +25,168 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import Spinner from "@/components/spinner";
 
-const SearchClinic = ({ provinces }: { provinces: any[] }) => {
+const SearchClinic = ({ provinces }: { provinces: { id: string; name: string }[] }) => {
+  const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
+  const [isLoading, setLoading] = useState({ clinics: false, routing: false });
+
+  const [clinics, setClinics] = useState<ClinicData[]>([]);
+  const [selectedClinic, setSelectedClinic] = useState<ClinicData | null>(null);
+
   const [inputValue, setInputValue] = useState<string>("");
   const [selectedProvince, setSelectedProvince] = useState<string>("");
 
+  const [query, setQuery] = useState<string>("");
+  const debouncedQuery = useDebounce(query, 500);
+
+  useClickOutside(dropdownRef, () => setIsDropdownVisible(false));
+
+  const fetchClinics = async (query?: string, province?: string) => {
+    setLoading({ ...isLoading, clinics: true });
+
+    try {
+      const { clinics } = await getAllClinics({
+        query,
+        exclude: "address, desc, banner",
+        province
+      });
+      setClinics(clinics);
+    } catch (error: any) {
+      toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
+    } finally {
+      setLoading({ ...isLoading, clinics: false });
+
+    }
+  };
+
+  useEffect(() => {
+    if (selectedProvince) setIsDropdownVisible(true);
+    fetchClinics(debouncedQuery, selectedProvince);
+  }, [debouncedQuery, selectedProvince]);
+
+  useEffect(() => {
+    if (selectedClinic) setInputValue(selectedClinic?.name);
+  }, [selectedClinic]);
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setQuery(value);
+    setInputValue(value);
+    setIsDropdownVisible(!!value);
+  };
+
+  const handleRoute = () => {
+    NProgress.start();
+    setLoading({ ...isLoading, routing: true });
+    router.replace(`/clinic-details/${btoa(selectedClinic?._id!)}`);
+  };
+
   return (
-    <div className="wrapper p-6 sm:p-8 shadow-md rounded-2xl">
+    <div className="wrapper p-6 sm:p-8 bg-white shadow-md rounded-b-2xl">
       <div className="flex flex-col lg:flex-row items-center gap-4">
-        <div className="w-full lg:w-[27%]">
+        <div className="w-full lg:w-[20%]">
           <Select
             value={selectedProvince}
             onValueChange={(value) => setSelectedProvince(value)}
           >
             <SelectTrigger
               className={cn(
-                "w-full py-[14px] px-4 text-[17px] placeholder:text-[17px] placeholder:text-[#595959] placeholder:font-medium border border-[#ccc] focus:border-primary focus:shadow-input-primary rounded-lg transition duration-500",
+                "w-full py-[14px] px-4 text-[17px] placeholder:text-[17px] placeholder:text-[#595959] placeholder:font-medium border border-gray-300 focus:border-primary focus:shadow-input-primary rounded-lg transition duration-500",
                 selectedProvince ? "text-black" : "text-[#A9A9A9]"
               )}
             >
-              <SelectValue placeholder="Chọn tỉnh thành của bạn" />
+              <SelectValue placeholder="Chọn tỉnh thành" />
             </SelectTrigger>
             <SelectContent>
-              {provinces.map((province) => (
-                <SelectItem key={province?.id} value={province?.name}>
-                  {province?.name}
-                </SelectItem>
-              ))}
+              {provinces?.length > 0 ? (
+                <>
+                  <SelectItem value="all">Tất cả</SelectItem>
+                  {provinces?.map((province) => (
+                    <SelectItem key={province?.id} value={province?.name}>
+                      {province?.name}
+                    </SelectItem>
+                  ))}
+                </>
+              ) : (
+                <p className="text-[15px] font-medium text-[#595959] text-center py-4 px-2 mx-auto">
+                  Không tìm thấy tỉnh thành nào!
+                </p>
+              )}
             </SelectContent>
           </Select>
         </div>
 
-        <div className="relative w-full lg:w-auto flex-1">
+        <div ref={dropdownRef} className="relative w-full lg:w-auto flex-1">
           <FiSearch
             size="22"
             className="absolute top-1/2 left-5 -translate-y-1/2 text-[#595959]"
           />
           <Input
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
             spellCheck={false}
-            type="text"
-            placeholder="Tìm kiếm theo tên phòng khám"
-            className="w-full py-3 pl-14 pr-4 text-[17px] placeholder:text-[17px] placeholder:text-[#595959] placeholder:font-medium border border-[#ccc] focus:border-primary focus:shadow-input-primary rounded-lg transition duration-500"
+            onChange={handleInputChange}
+            placeholder="Tìm kiếm theo tên bệnh viện/ phòng khám"
+            onFocus={() => setIsDropdownVisible(true)}
+            className="pl-14"
           />
+
+          <div
+            onClick={(event) => event.stopPropagation()}
+            className={cn(
+              "absolute top-[calc(100%+10px)] left-0 w-full max-h-[400px] py-2 bg-white border rounded-lg shadow-md z-10 transition duration-500 overflow-y-auto select-none",
+              isDropdownVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+            )}
+          >
+            {isLoading.clinics ? (
+              <Spinner table className="py-12" />
+            ) : (
+              clinics?.length > 0 ? (
+                clinics?.map((clinic: ClinicData) => (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    key={clinic?._id}
+                    onClick={() => {
+                      setIsDropdownVisible(false);
+                      setInputValue(clinic?.name);
+                      setSelectedClinic(clinic);
+                    }}
+                    className="w-full h-14 flex items-center justify-start gap-4 hover:text-primary transition duration-500"
+                  >
+                    <Image
+                      loading="lazy"
+                      src={clinic?.avatar}
+                      alt={clinic?.name}
+                      width="30"
+                      height="30"
+                      className="object-cover rounded-full"
+                    />
+                    <p className="w-fit font-medium text-ellipsis overflow-hidden">
+                      {clinic?.name}
+                    </p>
+                  </Button>
+                ))
+              ) : (
+                <p className="text-[15px] font-medium text-[#595959] text-center p-12 mx-auto">
+                  Không tìm thấy bệnh viện nào!
+                </p>
+              )
+            )}
+          </div>
         </div>
 
         <Button
           type="button"
-          variant="default"
-          className="relative w-[125px] lg:w-[13%] h-14 p-3 ml-auto lg:ml-0 text-[17px] font-semibold text-white bg-primary rounded-lg"
+          size="lg"
+          variant="search"
+          disabled={isLoading.routing}
+          onClick={handleRoute}
         >
-          Tìm kiếm
+          {isLoading.routing ? "Đang tìm kiếm..." : "Tìm kiếm"}
         </Button>
       </div>
     </div>

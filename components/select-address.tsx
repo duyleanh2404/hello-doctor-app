@@ -1,14 +1,15 @@
+import { cn } from "@/lib/utils";
+
 import {
   UseFormWatch,
   UseFormRegister,
   UseFormSetValue,
   UseFormClearErrors
 } from "react-hook-form";
-import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
 
-import { cn } from "@/lib/utils";
-import { getDisctricts, getProvinces, getWards } from "@/services/auth-service";
+import useWards from "@/hooks/fetch/use-wards";
+import useProvinces from "@/hooks/fetch/use-provinces";
+import useDistricts from "@/hooks/fetch/use-districts";
 
 import {
   Select,
@@ -19,85 +20,56 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 
-interface SelectAddressProps {
-  watch: UseFormWatch<any>;
+interface IProps {
   errors: Record<string, any>;
+  selectedProvince: any | null;
+  selectedDistrict: any | null;
+  watch: UseFormWatch<any>;
   register: UseFormRegister<any>;
   setValue: UseFormSetValue<any>;
   clearErrors: UseFormClearErrors<any>;
+  setSelectedProvince: (province: any | null) => void;
+  setSelectedDistrict: (district: any | null) => void;
 };
 
 const SelectAddress = ({
-  watch, errors, register, setValue, clearErrors
-}: SelectAddressProps) => {
-  const [wards, setWards] = useState<any[]>([]);
-  const [provinces, setProvinces] = useState<any[]>([]);
-  const [districts, setDistricts] = useState<any[]>([]);
+  errors,
+  watch,
+  register,
+  setValue,
+  clearErrors,
+  selectedProvince,
+  selectedDistrict,
+  setSelectedProvince,
+  setSelectedDistrict
+}: IProps) => {
+  const provinces: any[] = useProvinces();
+  const wards: any[] = useWards(selectedDistrict);
+  const districts: any[] = useDistricts(selectedProvince);
 
-  const [selectedProvince, setSelectedProvince] = useState<any | null>(null);
-  const [selectedDistrict, setSelectedDistrict] = useState<any | null>(null);
-
-  useEffect(() => {
-    const fetchProvinces = async () => {
-      try {
-        const { data } = await getProvinces();
-        setProvinces(data);
-      } catch (err: any) {
-        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
-      }
-    };
-    fetchProvinces();
-  }, []);
-
-  useEffect(() => {
-    const fetchDistricts = async () => {
-      try {
-        const { data } = await getDisctricts(selectedProvince?.id);
-        setDistricts(data);
-      } catch (err: any) {
-        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
-      }
-    };
-
-    if (selectedProvince) {
-      fetchDistricts();
-    }
-  }, [selectedProvince]);
-
-  useEffect(() => {
-    const fetchWards = async () => {
-      try {
-        const { data } = await getWards(selectedDistrict?.id);
-        setWards(data);
-      } catch (err: any) {
-        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
-      }
-    };
-
-    if (selectedDistrict) {
-      fetchWards();
-    }
-  }, [selectedDistrict]);
-
-  const handleProvinceChange = (provinceName: any) => {
-    const province = provinces.find((province) => province.name === provinceName);
+  const handleProvinceChange = (provinceName: string) => {
+    const province = provinces.find((province: any) => province.name === provinceName);
     if (!province) return;
 
     clearErrors("province");
-    setSelectedProvince(province);
+
+    setValue("ward", "");
+    setValue("district", "");
     setValue("province", provinceName);
-    setValue("ward", "Chọn phường/xã");
-    setValue("district", "Chọn quận/huyện");
+
+    setSelectedDistrict(null);
+    setSelectedProvince(province);
   };
 
-  const handleDistrictChange = (districtName: any) => {
-    const district = districts.find((district) => district.name === districtName);
+  const handleDistrictChange = (districtName: string) => {
+    const district = districts.find((district: any) => district.name === districtName);
     if (!district) return;
 
-    clearErrors("province");
-    setSelectedDistrict(district);
-    setValue("ward", "Chọn phường/xã");
+    setValue("ward", "");
     setValue("district", districtName);
+
+    clearErrors("district");
+    setSelectedDistrict(district);
   };
 
   return (
@@ -105,84 +77,90 @@ const SelectAddress = ({
       <div className="flex flex-col gap-2">
         <label className="text-[15px] font-medium">Tỉnh/Thành phố</label>
         <Select
-          {...register("province", { required: "Vui lòng chọn tỉnh/thành phố!" })}
+          value={watch("province")}
           onValueChange={(value) => handleProvinceChange(value)}
+          {...register("province", { required: "Vui lòng chọn tỉnh/thành phố!" })}
         >
-          <SelectTrigger
-            className={cn(
-              "border border-gray-300 rounded-md transition duration-500",
-              errors.province ? "border-[#ff4d4f]" : "focus:border-primary focus:shadow-input-primary"
-            )}
-          >
-            <SelectValue placeholder={watch("province") || "Chọn tỉnh/thành phố"} />
+          <SelectTrigger className={cn(
+            "border rounded-md transition duration-500",
+            errors.province ? "border-[#ff4d4f]" : "border-gray-300"
+          )}>
+            <SelectValue placeholder="Chọn tỉnh/thành phố" />
           </SelectTrigger>
           <SelectContent className="h-[300px]">
-            {provinces?.map((province) => (
-              <SelectItem key={province?.name} value={province?.name}>
-                {province?.name}
-              </SelectItem>
-            ))}
+            {provinces?.length > 0 ? (
+              provinces?.map((province) => (
+                <SelectItem key={province?.name} value={province?.name}>{province?.name}</SelectItem>
+              ))
+            ) : (
+              <p className="text-[15px] font-medium text-[#595959] text-center py-4 px-2 mx-auto">
+                Không tìm thấy tỉnh thành nào!
+              </p>
+            )}
           </SelectContent>
         </Select>
-
-        {errors.province && (
-          <p className="text-sm text-red-500">{errors.province.message}</p>
-        )}
+        {errors.province && <p className="text-sm text-red-500">{errors.province.message}</p>}
       </div>
 
       <div className="flex flex-col gap-2">
         <label className="text-[15px] font-medium">Quận/Huyện</label>
         <Select
+          value={watch("district")}
           disabled={!selectedProvince}
-          {...register("district", { required: "Vui lòng chọn quận/huyện!" })}
           onValueChange={(value) => handleDistrictChange(value)}
+          {...register("district", { required: "Vui lòng chọn quận/huyện!" })}
         >
-          <SelectTrigger
-            className={cn(
-              "border border-gray-300 rounded-md transition duration-500",
-              errors.district ? "border-[#ff4d4f]" : "focus:border-primary focus:shadow-input-primary"
-            )}
-          >
-            <SelectValue placeholder={watch("district") || "Chọn quận/huyện"} />
+          <SelectTrigger className={cn(
+            "border rounded-md transition duration-500",
+            errors.district ? "border-[#ff4d4f]" : "border-gray-300"
+          )}>
+            <SelectValue placeholder="Chọn quận/huyện" />
           </SelectTrigger>
           <SelectContent>
-            {districts?.map((district: any) => (
-              <SelectItem key={district?.name} value={district?.name}>
-                {district?.name}
-              </SelectItem>
-            ))}
+            {districts?.length > 0 ? (
+              districts?.map((district: any) => (
+                <SelectItem key={district?.name} value={district?.name}>{district?.name}</SelectItem>
+              ))
+            ) : (
+              <p className="text-[15px] font-medium text-[#595959] text-center py-4 px-2 mx-auto">
+                Không tìm thấy quận/ huyện nào!
+              </p>
+            )}
           </SelectContent>
         </Select>
-
-        {errors.district && (
-          <p className="text-sm text-red-500">{errors.district.message}</p>
-        )}
+        {errors.district && <p className="text-sm text-red-500">{errors.district.message}</p>}
       </div>
 
       <div className="flex flex-col gap-2">
         <label className="text-[15px] font-medium">Phường/Xã</label>
         <Select
+          value={watch("ward")}
           disabled={!selectedDistrict}
-          {...register("ward", {
-            required: "Vui lòng chọn phường/xã!"
-          })}
-          onValueChange={(value) => setValue("ward", value)}
+          onValueChange={(value) => {
+            clearErrors("ward");
+            setValue("ward", value);
+          }}
+          {...register("ward", { required: "Vui lòng chọn phường/xã!" })}
         >
-          <SelectTrigger className={cn("w-full", errors.ward && "border-red-500")}>
-            <SelectValue placeholder={watch("ward") || "Chọn phường/xã"} />
+          <SelectTrigger className={cn(
+            "border rounded-md transition duration-500",
+            errors.ward ? "border-[#ff4d4f]" : "border-gray-300"
+          )}>
+            <SelectValue placeholder="Chọn phường/xã" />
           </SelectTrigger>
           <SelectContent>
-            {wards?.map((ward: any) => (
-              <SelectItem key={ward?._id} value={ward?.name}>
-                {ward?.name}
-              </SelectItem>
-            ))}
+            {wards?.length > 0 ? (
+              wards?.map((ward: any) => (
+                <SelectItem key={ward?._id} value={ward?.name}>{ward?.name}</SelectItem>
+              ))
+            ) : (
+              <p className="text-[15px] font-medium text-[#595959] text-center py-4 px-2 mx-auto">
+                Không tìm thấy phường/ xã nào!
+              </p>
+            )}
           </SelectContent>
         </Select>
-
-        {errors.ward && (
-          <p className="text-red-500 text-sm">{errors.ward.message}</p>
-        )}
+        {errors.ward && <p className="text-red-500 text-sm">{errors.ward.message}</p>}
       </div>
 
       <div className="flex flex-col gap-2">
@@ -193,14 +171,11 @@ const SelectAddress = ({
           placeholder="Nhập địa chỉ của bạn"
           {...register("street", { required: "Vui lòng nhập địa chỉ (số nhà, đường)!" })}
           className={cn(
-            "placeholder:text-[#A9A9A9] p-3 border border-gray-300 rounded-md transition duration-500",
-            errors.street ? "border-[#ff4d4f]" : "focus:border-primary focus:shadow-input-primary"
+            "placeholder:text-[#A9A9A9] p-3 border rounded-md transition duration-500",
+            errors.street ? "border-[#ff4d4f]" : "border-gray-300"
           )}
         />
-
-        {errors.street && (
-          <p className="text-sm text-red-500">{errors.street.message}</p>
-        )}
+        {errors.street && <p className="text-sm text-red-500">{errors.street.message}</p>}
       </div>
     </>
   );

@@ -1,4 +1,4 @@
-const introduces = [
+export const introduces = [
   {
     id: 1,
     title: "Dựa trên nguồn thông tin xác thực",
@@ -24,5 +24,3 @@ const introduces = [
     image: "/introduces/introduce-4.png"
   }
 ];
-
-export default introduces;

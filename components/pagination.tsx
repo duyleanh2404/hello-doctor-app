@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 import {
   Pagination,
   PaginationItem,
@@ -30,9 +32,10 @@ const PaginationSection = ({
         <PaginationContent>
           <PaginationItem>
             <PaginationPrevious
-              href="#"
               onClick={() => handlePageChange(currentPage - 1)}
-              className={currentPage === 1 ? "disabled" : ""}
+              className={cn(
+                "cursor-pointer", currentPage === 1 ? "disabled" : ""
+              )}
             />
           </PaginationItem>
 
@@ -41,9 +44,9 @@ const PaginationSection = ({
             return (
               <PaginationItem key={page}>
                 <PaginationLink
-                  href="#"
                   onClick={() => handlePageChange(page)}
                   isActive={page === currentPage}
+                  className="cursor-pointer"
                 >
                   {page}
                 </PaginationLink>
@@ -53,9 +56,10 @@ const PaginationSection = ({
 
           <PaginationItem>
             <PaginationNext
-              href="#"
               onClick={() => handlePageChange(currentPage + 1)}
-              className={currentPage === totalPages ? "disabled" : ""}
+              className={cn(
+                "cursor-pointer", currentPage === totalPages ? "disabled" : ""
+              )}
             />
           </PaginationItem>
         </PaginationContent>
@@ -80,9 +84,10 @@ const PaginationSection = ({
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious
-            href="#"
             onClick={() => handlePageChange(currentPage - 1)}
-            className={currentPage === 1 ? "disabled" : ""}
+            className={cn(
+              "cursor-pointer", currentPage === 1 ? "disabled" : ""
+            )}
           />
         </PaginationItem>
 
@@ -91,9 +96,9 @@ const PaginationSection = ({
           return (
             <PaginationItem key={page}>
               <PaginationLink
-                href="#"
                 onClick={() => handlePageChange(page)}
                 isActive={page === currentPage}
+                className="cursor-pointer"
               >
                 {page}
               </PaginationLink>
@@ -103,9 +108,10 @@ const PaginationSection = ({
 
         <PaginationItem>
           <PaginationNext
-            href="#"
             onClick={() => handlePageChange(currentPage + 1)}
-            className={currentPage === totalPages ? "disabled" : ""}
+            className={cn(
+              "cursor-pointer", currentPage === totalPages ? "disabled" : ""
+            )}
           />
         </PaginationItem>
       </PaginationContent>

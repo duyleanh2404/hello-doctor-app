@@ -1,4 +1,4 @@
-const healthCheckTools = [
+export const healthCheckTools = [
   {
     id: 1,
     title: "5 phút biết ngay bé có đang TIÊU HÓA KHỎE - ĐỀ KHÁNG TỐT!",
@@ -40,5 +40,3 @@ const healthCheckTools = [
     image: "/tools-check/tool-12.png"
   }
 ];
-
-export default healthCheckTools;

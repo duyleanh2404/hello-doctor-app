@@ -3,58 +3,68 @@ import { SpecialtyData } from "./specialty-types";
 
 export interface DoctorData {
   _id: string;
-  desc: string;
-  clinic: string;
-  fullname: string;
-  province: string;
-  specialty: string;
-  medicalFee: number;
   clinic_id: ClinicData;
-  image: FileList | null;
   specialty_id: SpecialtyData;
-};
-
-export interface CreateNewDoctorData {
-  desc: string;
+  clinic: string;
+  specialty: string;
   fullname: string;
+  desc: string;
   province: string;
-  clinic_id: string;
-  imageName: string;
-  medical_fee: number;
-  accessToken: string;
-  specialty_id: string;
-  image: File | undefined;
+  medicalFee: number;
+  image: string;
 };
 
-export interface DeleteDoctorData {
+export interface CreateDoctorForm {
+  clinic_id: string;
+  specialty_id: string;
+  fullname: string;
+  desc: string;
+  province: string;
+  medicalFee: number;
+  imageName: string;
+  image: FileList;
+};
+
+export interface EditDoctorForm {
+  clinic_id: string;
+  specialty_id: string;
+  fullname: string;
+  desc: string;
+  province: string;
+  medicalFee: number;
+  imageName?: string;
+  image?: FileList;
+};
+
+export interface CreateDoctorData {
+  clinic_id: string;
+  specialty_id: string;
+  fullname: string;
+  desc: string;
+  province: string;
+  medicalFee: number;
+  imageName: string;
+  image: File;
+};
+
+export interface EditDoctorData {
   id: string;
-  accessToken: string;
+  clinic_id: string;
+  specialty_id: string;
+  fullname?: string;
+  desc?: string;
+  province?: string;
+  medicalFee?: number;
+  imageName?: string;
+  image?: File;
 };
 
 export interface GetAllDoctorsData {
   page?: number;
   limit?: number;
+  clinic_id?: string;
+  specialty_id?: string;
   query?: string;
-  clinic?: string;
+  exclude?: string;
   province?: string;
-  specialty?: string;
-  accessToken: string;
-};
-
-export interface GetDoctorByIdData {
-  id: string;
-  accessToken: string;
-};
-
-export interface UpdateDoctorData {
-  id: string;
-  image?: File;
-  desc?: string;
-  fullname?: string;
-  province?: string;
-  clinic_id: string;
-  imageName?: string;
-  accessToken: string;
-  medical_fee?: number;
-  specialty_id: string;
 };

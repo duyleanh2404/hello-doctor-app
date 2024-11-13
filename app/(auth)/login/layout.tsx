@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Đăng nhập | Hello Bacsi"
+  title: "Đăng nhập tài khoản | Hello Bacsi"
 };
 
 export default function LoginLayout({

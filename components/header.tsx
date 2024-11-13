@@ -1,9 +1,15 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
+import Link from "next/link";
+import Image from "next/image";
 import dynamic from "next/dynamic";
+
+import { useDispatch, useSelector } from "react-redux";
+import NProgress from "nprogress";
+import "nprogress/nprogress.css";
 
 import { X } from "lucide-react";
 import { IoClose } from "react-icons/io5";
@@ -11,22 +17,23 @@ import { FiSearch } from "react-icons/fi";
 import { FaAngleDown } from "react-icons/fa";
 import { FaBarsStaggered } from "react-icons/fa6";
 
-import Link from "next/link";
-import Image from "next/image";
-
-import { cn } from "@/lib/utils";
 import { RootState } from "@/store/store";
-import { MenuState } from "@/types/header-types";
 import { setIsBannerVisible } from "@/store/slices/common-slice";
-import menuMobile from "@/constants/menu-mobile";
+
+import { menuMobile } from "@/constants/menu-mobile";
 
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import UserSettings from "@/app/(home)/user-settings";
+import UserSettings from "@/app/(home)/_components/user-settings";
 
-const MenuMobile = dynamic(() => import("@/app/(home)/menu-mobile"), { ssr: false });
-const CategoriesMenu = dynamic(() => import("@/app/(home)/categories-menu"), { ssr: false });
-const HealthCheckMenu = dynamic(() => import("@/app/(home)/health-check-menu"), { ssr: false });
+const MenuMobile = dynamic(() => import("@/app/(home)/menu/menu-mobile"), { ssr: false });
+const CategoriesMenu = dynamic(() => import("@/app/(home)/menu/categories-menu"), { ssr: false });
+const HealthCheckMenu = dynamic(() => import("@/app/(home)/menu/health-check-menu"), { ssr: false });
+
+interface MenuState {
+  tabActive: string | null;
+  isOpenMenuMobile: boolean;
+};
 
 const Header = () => {
   const router = useRouter();
@@ -36,14 +43,13 @@ const Header = () => {
   const { isBannerVisible } = useSelector((state: RootState) => state.common);
 
   const [menuState, setMenuState] = useState<MenuState>({
-    tabActive: null,
-    isOpenMenuMobile: false
+    tabActive: null, isOpenMenuMobile: false
   });
 
   const handleToggleMenuMobile = () => {
     setMenuState((prev) => ({
       ...prev,
-      isOpenMenuMobile: !prev.isOpenMenuMobile,
+      isOpenMenuMobile: !prev.isOpenMenuMobile
     }));
   };
 
@@ -78,7 +84,10 @@ const Header = () => {
       <div className="h-[65px] border-b bg-white px-6 shadow-sm z-50">
         <div className="h-full flex items-center justify-between gap-3">
           <div className="flex items-center gap-8">
-            <Link href="/">
+            <Link
+              href="/"
+              onClick={() => NProgress.start()}
+            >
               <div>
                 <Image
                   loading="lazy"
@@ -91,7 +100,7 @@ const Header = () => {
             </Link>
 
             <div className="hidden xl:flex items-center gap-6">
-              <div className="relative w-[280px]">
+              <div className="relative w-[360px]">
                 <FiSearch
                   size="22"
                   className={cn(
@@ -105,7 +114,7 @@ const Header = () => {
                   placeholder="Tìm kiếm..."
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
-                  className="w-full h-12 text-[15px] pl-12 pr-4 border focus:border-primary focus:shadow-input-primary transition duration-500"
+                  className="!h-12 pl-12"
                 />
               </div>
 
@@ -134,10 +143,13 @@ const Header = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-6">
             <Button
               variant="ghost"
-              onClick={() => router.push("/booking-doctor")}
+              onClick={() => {
+                NProgress.start();
+                router.replace("/booking-doctor");
+              }}
               className="hidden md:flex items-center gap-3 hover:bg-[#e3f2ff] transition duration-500"
             >
               <Image

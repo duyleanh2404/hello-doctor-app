@@ -1,15 +1,17 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, lazy } from "react";
 import Image from "next/image";
-import toast from "react-hot-toast";
-import Autoplay from "embla-carousel-autoplay";
 
-import { getProvinces } from "@/services/auth-service";
-import bookingDoctorBanners from "@/constants/booking-doctor-banners";
-import bookingDoctorOptions from "@/constants/booking-doctor-options";
+import NProgress from "nprogress";
+import Autoplay from "embla-carousel-autoplay";
+import "nprogress/nprogress.css";
+
+import { bookingDoctorBanners } from "@/constants/booking-doctor-banners";
+import { bookingDoctorOptions } from "@/constants/booking-doctor-options";
+
+import useProvinces from "@/hooks/fetch/use-provinces";
 
 import {
   Carousel,
@@ -18,42 +20,45 @@ import {
 } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
 import HealthGuide from "./health-guide";
+import Chatbot from "@/components/chatbot";
 import SearchClinic from "./search-clinic";
 import SearchDoctor from "./search-doctor";
 import MedicalExperts from "./medical-experts";
 import SearchSpecialty from "./search-specialty";
-import OutstandingDoctor from "./outstanding-doctor";
-import OutstandingClinic from "./outstanding-clinic";
+import Billboard from "@/components/advertises/billboard";
+import LazyLoadComponent from "@/components/lazyload-component";
+
+const OutstandingDoctor = lazy(() => import("./outstanding-doctor"));
+const OutstandingClinic = lazy(() => import("./outstanding-clinic"));
 
 type Tab = "clinic" | "doctor" | "specialty";
 
 const BookingDoctorPage = () => {
-  const router = useRouter();
+  const provinces = useProvinces();
 
-  const [provinces, setProvinces] = useState<any[]>([]);
   const [tabActive, setTabActive] = useState<Tab>("clinic");
+  const [showBillboard, setShowBillboard] = useState<boolean>(false);
 
   useEffect(() => {
-    const fetchProvinces = async () => {
-      try {
-        const { data } = await getProvinces();
-        setProvinces(data);
-      } catch (err: any) {
-        router.push("/");
-        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
-      }
-    };
-    fetchProvinces();
+    NProgress.done();
   }, []);
 
-  const tabComponents = useMemo(() => ({
-    clinic: <SearchClinic provinces={provinces} />,
-    doctor: <SearchDoctor provinces={provinces} />,
-    specialty: <SearchSpecialty />
-  }), [provinces]);
+  useEffect(() => {
+    const shouldShowBillboard = Math.random() > 0.5;
+    setShowBillboard(shouldShowBillboard);
+  }, []);
+
+  const tabComponents = useMemo(
+    () => ({
+      specialty: <SearchSpecialty />,
+      clinic: <SearchClinic provinces={provinces} />,
+      doctor: <SearchDoctor provinces={provinces} />,
+    }),
+    [provinces]
+  );
 
   return (
-    <>
+    <div className="bg-[#f8f9fc]">
       <div className="relative">
         <Carousel plugins={[Autoplay({ delay: 3000 })]}>
           <CarouselContent>
@@ -83,8 +88,11 @@ const BookingDoctorPage = () => {
                 onClick={() => setTabActive(type as Tab)}
                 className={cn(
                   "relative min-w-fit py-3 xl:py-4 px-10 xl:px-12 rounded-none",
-                  tabActive === type ? "bg-white border-t-[3px] border-primary" : "",
-                  type !== "clinic" && "before:absolute before:top-1/2 before:left-0 before:-translate-y-1/2 before:w-[1px] before:h-[25px] before:bg-[#ccc]"
+                  tabActive === type
+                    ? "bg-white border-t-[3px] border-primary"
+                    : "",
+                  type !== "clinic" &&
+                  "before:absolute before:top-1/2 before:left-0 before:-translate-y-1/2 before:w-[1px] before:h-[25px] before:bg-[#ccc]"
                 )}
               >
                 <p className="lg:text-lg font-medium">{title}</p>
@@ -92,15 +100,30 @@ const BookingDoctorPage = () => {
             ))}
           </div>
         </div>
-      </div >
+      </div>
 
       {tabComponents[tabActive]}
 
-      <OutstandingDoctor provinces={provinces} />
-      <OutstandingClinic provinces={provinces} />
-      <MedicalExperts />
-      <HealthGuide />
-    </>
+      <LazyLoadComponent>
+        <OutstandingDoctor provinces={provinces} />
+      </LazyLoadComponent>
+
+      <LazyLoadComponent>
+        <OutstandingClinic provinces={provinces} />
+      </LazyLoadComponent>
+
+      <LazyLoadComponent>
+        <MedicalExperts />
+      </LazyLoadComponent>
+
+      <LazyLoadComponent>
+        <HealthGuide />
+      </LazyLoadComponent>
+
+      {showBillboard && <Billboard />}
+
+      <Chatbot />
+    </div>
   );
 };
 

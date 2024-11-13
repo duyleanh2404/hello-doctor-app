@@ -1,4 +1,4 @@
-const socials = [
+export const socials = [
   {
     id: 1,
     href: "https://www.facebook.com/hellobacsi/",
@@ -24,5 +24,3 @@ const socials = [
     alt: "YouTube"
   }
 ];
-
-export default socials;

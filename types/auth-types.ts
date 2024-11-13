@@ -1,44 +1,55 @@
-export interface RegisterFormInputs {
-  day: string;
-  year: string;
-  ward: string;
+export type LoginForm = {
   email: string;
+  password: string;
+};
+
+export type RegisterForm = {
+  email: string;
+  fullname: string;
+  day: string;
   month: string;
-  gender: string;
+  year: string;
   street: string;
+  ward: string;
   district: string;
   province: string;
-  fullname: string;
+  gender: string;
   password: string;
   phoneNumber: string;
 };
 
-export interface LoginUserData {
+export type ResetPasswordForm = {
+  newPassword: string;
+  confirmNewPassword: string;
+};
+
+export type LoginData = {
   email: string;
   password: string;
 };
 
-export interface RegisterUserData {
+export type RegisterData = {
   email: string;
+  fullname: string;
   gender: string;
   address: string;
-  fullname: string;
   password: string;
   phoneNumber: string;
   dateOfBirth: string;
 };
 
-export interface LoginOrRegisterWithGoogleData {
-  name: string;
+export type VerifyOtpData = {
   email: string;
-};
-
-export interface VerifyOtpData {
   otp: string;
-  email: string;
 };
 
-export interface ResetPasswordData {
+export type ContinueWithGoogleData = {
+  email: string;
+  name: string;
+  image: string;
+};
+
+export type ResetPasswordData = {
   email: string;
   newPassword: string;
 };

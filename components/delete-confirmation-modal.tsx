@@ -1,5 +1,3 @@
-import { cn } from "@/lib/utils";
-
 import {
   Dialog,
   DialogTitle,
@@ -10,43 +8,51 @@ import { Button } from "@/components/ui/button";
 
 interface DeleteConfirmationModalProps {
   isOpen: boolean;
+  isCancel?: boolean;
   isDeleting: boolean;
   onClose: () => void;
   onConfirm: () => void;
 };
 
 const DeleteConfirmationModal = ({
-  isOpen, isDeleting, onClose, onConfirm
+  isOpen, isDeleting, isCancel, onClose, onConfirm
 }: DeleteConfirmationModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
-        <DialogTitle className="text-xl">Xác nhận xóa</DialogTitle>
+        <DialogTitle className="text-xl">Xác nhận {isCancel ? "hủy" : "xóa"}?</DialogTitle>
         <DialogDescription className="text-base">
-          Bạn có chắc chắn muốn xóa? Hành động này không thể hoàn tác.
+          {
+            isCancel
+              ? "Bạn có chắc chắn muốn hủy đơn? Hành động này không thể hoàn tác."
+              : "Bạn có chắc chắn muốn xóa? Hành động này không thể hoàn tác."
+          }
         </DialogDescription>
 
         <div className="flex justify-end gap-4 mt-6">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-            className="min-w-[100px] shadow-md transition duration-500"
-          >
-            Hủy
-          </Button>
+          {!isCancel && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="min-w-[120px] h-[3.2rem] shadow-md transition duration-500"
+            >
+              Hủy
+            </Button>
+          )}
 
           <Button
             type="button"
             variant="default"
-            disabled={isDeleting}
             onClick={onConfirm}
-            className={cn(
-              "min-w-[100px] bg-red-500 hover:bg-red-500/80 shadow-md transition duration-500",
-              isDeleting && "opacity-50 cursor-not-allowed"
-            )}
+            disabled={isDeleting}
+            className="min-w-[120px] h-[3.2rem] bg-red-500 hover:bg-red-500/80 shadow-md transition duration-500"
           >
-            {isDeleting ? "Đang xóa..." : "Xóa"}
+            {
+              isCancel
+                ? isDeleting ? "Đang hủy..." : "Hủy đơn"
+                : isDeleting ? "Đang xóa..." : "Xóa"
+            }
           </Button>
         </div>
       </DialogContent>

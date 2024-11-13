@@ -1,20 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { IoChevronBack } from "react-icons/io5";
-import { useDispatch, useSelector } from "react-redux";
-import toast from "react-hot-toast";
-
 import Link from "next/link";
 import Image from "next/image";
 
-import { cn } from "@/lib/utils";
+import { IoChevronBack } from "react-icons/io5";
+import { useDispatch, useSelector } from "react-redux";
+import NProgress from "nprogress";
+import toast from "react-hot-toast";
+import "nprogress/nprogress.css";
+
 import {
-  setVerificationEmail,
-  setVerifyingAuthStatus
+  resetToLogin,
+  setVerifyingAuthSuccess
 } from "@/store/slices/auth-slice";
 import { RootState } from "@/store/store";
+
 import { resendOtp, verifyOtp } from "@/services/auth-service";
 import useTimer from "@/hooks/use-timer";
 
@@ -25,53 +27,82 @@ import {
 } from "@/components/ui/input-otp";
 import { Button } from "@/components/ui/button";
 import Spinner from "@/components/spinner";
-import ProtectRoute from "@/app/(auth)/verify-otp/protect-route";
 
-const VerifyOtp = () => {
+const VerifyOtpPage = () => {
   const router = useRouter();
 
   const dispatch = useDispatch();
-  const { verificationEmail, isVerifyingAuth } = useSelector((state: RootState) => state.auth);
+  const { isVerifyingAuth, verificationEmail } = useSelector((state: RootState) => state.auth);
 
-  const [otpValue, setOtpValue] = useState<string>("");
+  const { isDisabled, timeLeft, resetTimer } = useTimer(60);
+  const [isLoading, setLoading] = useState<boolean>(false);
+
+  const [otp, setOtp] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { timeLeft, isDisabled, resetTimer } = useTimer(0);
-
-  useEffect(() => {
-    if (isVerifyingAuth) return;
-    router.push("/login");
-  }, [isVerifyingAuth]);
+  if (!isVerifyingAuth) {
+    router.replace("/login");
+    return <Spinner center />;
+  }
 
   const handleResendOtp = async () => {
     resetTimer(60);
-    await resendOtp({ email: verificationEmail });
+    await resendOtp(verificationEmail);
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    setIsLoading(true);
+  const handleVerifyOtp = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setLoading(true);
+    setErrorMessage("");
 
-    if (otpValue.length !== 6) {
-      setIsLoading(false);
+    if (otp.length !== 6) {
+      setLoading(false);
       setErrorMessage("Vui lòng nhập đầy đủ mã xác thực!");
       return;
     }
 
-    const { errorCode } = await verifyOtp({ email: verificationEmail, otp: otpValue });
-    if (errorCode === "INVALID_OTP") {
-      setIsLoading(false);
-      setErrorMessage("Mã xác thực không chính xác!");
-      return;
+    try {
+      await verifyOtp({ email: verificationEmail, otp });
+      handleVerifyOtpSuccess();
+    } catch (status: any) {
+      handleVerifyOtpError(status);
     }
+  };
 
-    setIsLoading(false);
-    setErrorMessage("");
-
-    dispatch(setVerificationEmail(""));
-    dispatch(setVerifyingAuthStatus(false));
+  const handleVerifyOtpSuccess = () => {
+    NProgress.start();
     toast.success("Xác thực tài khoản thành công!");
+    dispatch(setVerifyingAuthSuccess());
+    router.replace("/login");
+  };
+
+  const handleVerifyOtpError = (status: any) => {
+    setLoading(false);
+
+    switch (status) {
+      case 401:
+        handleInvalidOtpError();
+        break;
+      case 400:
+        handleExpiredOtpError();
+        break;
+      default:
+        handleGeneralError();
+        break;
+    }
+  };
+
+  const handleInvalidOtpError = () => {
+    setErrorMessage("Mã xác thực không chính xác!");
+  };
+
+  const handleExpiredOtpError = () => {
+    setErrorMessage("Mã xác thực đã hết hạn. Vui lòng chọn gửi lại mã xác thực!");
+  };
+
+  const handleGeneralError = () => {
+    toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
+    router.replace("/");
   };
 
   if (isLoading) {
@@ -79,126 +110,58 @@ const VerifyOtp = () => {
   }
 
   return (
-    <ProtectRoute>
-      <div className="h-screen bg-[#f7f9fc] overflow-y-auto flex flex-col justify-between">
-        <div className="sm:wrapper flex flex-col items-center gap-12 py-12">
-          <Link href="/">
-            <Image
-              loading="lazy"
-              src="/logo.png"
-              alt="Logo"
-              width={140}
-              height={30}
-            />
-          </Link>
+    <div className="h-screen flex flex-col justify-between bg-[#f7f9fc] overflow-y-auto">
+      <div className="sm:wrapper flex flex-col items-center gap-12 py-12">
+        <Link href="/" onClick={() => NProgress.start()}>
+          <Image loading="lazy" src="/logo.png" alt="Logo" width={140} height={30} />
+        </Link>
 
-          <form
-            onSubmit={handleSubmit}
-            className="w-full sm:w-[550px] flex flex-col gap-12 p-6 sm:py-12 sm:px-8 bg-white rounded-xl sm:rounded-lg shadow-md"
-          >
-            <div className="flex flex-col gap-4">
-              <h1 className="text-[22px] font-bold text-center">Xác thực tài khoản của bạn</h1>
-              <p className="text-base font-medium text-center leading-7">
-                Chúng tôi đã gửi mã xác thực đến email của bạn: <strong>{verificationEmail}</strong>
-              </p>
+        <form
+          onSubmit={handleVerifyOtp}
+          className="w-full sm:w-[550px] flex flex-col gap-12 p-6 sm:py-12 sm:px-8 bg-white rounded-xl sm:rounded-lg shadow-md"
+        >
+          <div className="flex flex-col gap-4 text-center">
+            <h1 className="text-[22px] font-bold">Xác thực tài khoản của bạn</h1>
+            <p className="text-base font-medium">
+              Chúng tôi đã gửi mã xác thực đến email của bạn: <strong>{verificationEmail}</strong>
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-6">
+            <InputOTP autoFocus maxLength={6} value={otp} onChange={setOtp}>
+              <InputOTPGroup>
+                {Array.from({ length: 6 }).map((_, index) => <InputOTPSlot key={index} index={index} />)}
+              </InputOTPGroup>
+            </InputOTP>
+
+            {errorMessage && <span className="text-[15px] text-red-500 text-center">{errorMessage}</span>}
+
+            <div className="flex flex-col gap-10">
+              <Button type="submit" size="xl" variant="main" disabled={isLoading}>Xác thực</Button>
+              <Button type="button" size="xl" variant="back" onClick={() => dispatch(resetToLogin())}>
+                <IoChevronBack />
+                Quay về trang đăng nhập
+              </Button>
             </div>
 
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-center">
-                  <InputOTP
-                    autoFocus
-                    maxLength={6}
-                    value={otpValue}
-                    onChange={(value) => setOtpValue(value)}
-                  >
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
-                    </InputOTPGroup>
-                  </InputOTP>
-                </div>
-
-                {errorMessage && (
-                  <span className="text-[15px] text-red-500 text-center">{errorMessage}</span>
-                )}
-              </div>
-
-              <div className="flex flex-col items-center gap-10">
-                <div className="w-full flex flex-col gap-4">
-                  <Button
-                    type="submit"
-                    variant="default"
-                    disabled={isLoading}
-                    className={cn(
-                      "w-full h-16 text-lg font-medium text-white py-4 bg-primary hover:bg-[#2c74df] rounded-md shadow-md transition duration-500 select-none",
-                      isLoading && "opacity-50 cursor-not-allowed"
-                    )}
-                  >
-                    Xác thực
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => {
-                      dispatch(setVerificationEmail(""));
-                      dispatch(setVerifyingAuthStatus(false));
-                    }}
-                    className="w-full h-16 flex items-center gap-3 text-lg font-medium py-4 border border-gray-300 rounded-md shadow-md transition duration-500 select-none"
-                  >
-                    <IoChevronBack />
-                    <p>Quay về trang đăng nhập</p>
-                  </Button>
-                </div>
-
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={handleResendOtp}
-                  disabled={isDisabled}
-                  className="w-full h-0 text-[17px] font-medium text-black hover:text-primary hover:bg-transparent shadow-none transition duration-500"
-                >
-                  {isDisabled ? (
-                    <p>
-                      Gửi lại mã xác thực sau {""}
-                      <span className="text-red-500">{timeLeft}</span> giây
-                    </p>
-                  ) : (
-                    <p>Gửi lại mã xác thực</p>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <aside className="hidden xl:block fixed bottom-0 left-0" >
-          <Image
-            loading="lazy"
-            src="/auth/aside-left.svg"
-            alt="Aside Left"
-            width={320}
-            height={258}
-          />
-        </aside>
-
-        <aside className="hidden xl:block fixed bottom-0 right-5">
-          <Image
-            loading="lazy"
-            src="/auth/aside-right.svg"
-            alt="Aside Right"
-            width={320}
-            height={258}
-          />
-        </aside>
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={isDisabled}
+              onClick={handleResendOtp}
+              className="w-full text-[17px] font-medium text-black hover:text-primary hover:bg-transparent transition duration-500"
+            >
+              {isDisabled ? (
+                <p>Gửi lại mã xác thực sau <span className="text-red-500">{timeLeft}</span> giây</p>
+              ) : (
+                <p>Gửi lại mã xác thực?</p>
+              )}
+            </Button>
+          </div>
+        </form>
       </div>
-    </ProtectRoute>
+    </div>
   );
 };
 
-export default VerifyOtp;
+export default VerifyOtpPage;

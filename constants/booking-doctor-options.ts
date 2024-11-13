@@ -1,4 +1,4 @@
-const bookingDoctorOptions = [
+export const bookingDoctorOptions = [
   {
     id: 1,
     type: "clinic",
@@ -15,5 +15,3 @@ const bookingDoctorOptions = [
     title: "Chuyên khoa"
   },
 ];
-
-export default bookingDoctorOptions;

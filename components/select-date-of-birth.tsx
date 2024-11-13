@@ -1,11 +1,11 @@
+import { cn } from "@/lib/utils";
+
 import {
   UseFormWatch,
   UseFormRegister,
   UseFormSetValue,
   UseFormClearErrors
 } from "react-hook-form";
-
-import { cn } from "@/lib/utils";
 
 import {
   Select,
@@ -15,17 +15,15 @@ import {
   SelectTrigger
 } from "@/components/ui/select";
 
-interface SelectDateOfBirthProps {
-  watch?: UseFormWatch<any>;
+interface IProps {
   errors: Record<string, any>;
+  watch?: UseFormWatch<any>;
   register: UseFormRegister<any>;
   setValue: UseFormSetValue<any>;
   clearErrors: UseFormClearErrors<any>;
 };
 
-const SelectDateOfBirth = ({
-  watch, errors, register, setValue, clearErrors
-}: SelectDateOfBirthProps) => {
+const SelectDateOfBirth = ({ errors, watch, register, setValue, clearErrors }: IProps) => {
   return (
     <div className="flex gap-4">
       <div className="flex-1 flex flex-col gap-2">
@@ -38,8 +36,8 @@ const SelectDateOfBirth = ({
           }}
         >
           <SelectTrigger className={cn(
-            "border border-gray-300 rounded-md transition duration-500",
-            errors.day ? "border-[#ff4d4f]" : "focus:border-primary focus:shadow-input-primary"
+            "border rounded-md transition duration-500",
+            errors.day ? "border-[#ff4d4f]" : "border-gray-300"
           )}>
             {watch ? (
               <SelectValue placeholder={watch("day") || "Chọn ngày"} />
@@ -49,14 +47,11 @@ const SelectDateOfBirth = ({
           </SelectTrigger>
           <SelectContent>
             {Array.from({ length: 31 }, (_, i) => (
-              <SelectItem key={i} value={(i + 1).toString()}> {i + 1}</SelectItem>
+              <SelectItem key={i} value={(i + 1).toString()}>{i + 1}</SelectItem>
             ))}
           </SelectContent>
         </Select>
-
-        {errors.day && (
-          <p className="text-sm text-red-500">{errors.day.message}</p>
-        )}
+        {errors.day && <p className="text-sm text-red-500">{errors.day.message}</p>}
       </div>
 
       <div className="flex-1 flex flex-col gap-2">
@@ -69,8 +64,8 @@ const SelectDateOfBirth = ({
           }}
         >
           <SelectTrigger className={cn(
-            "border border-gray-300 rounded-md transition duration-500",
-            errors.month ? "border-[#ff4d4f]" : "focus:border-primary focus:shadow-input-primary"
+            "border rounded-md transition duration-500",
+            errors.month ? "border-[#ff4d4f]" : "border-gray-300"
           )}>
             {watch ? (
               <SelectValue placeholder={watch("month") || "Chọn tháng"} />
@@ -84,10 +79,7 @@ const SelectDateOfBirth = ({
             ))}
           </SelectContent>
         </Select>
-
-        {errors.month && (
-          <p className="text-sm text-red-500">{errors.month.message}</p>
-        )}
+        {errors.month && <p className="text-sm text-red-500">{errors.month.message}</p>}
       </div>
 
       <div className="flex-1 flex flex-col gap-2">
@@ -100,8 +92,8 @@ const SelectDateOfBirth = ({
           }}
         >
           <SelectTrigger className={cn(
-            "border border-gray-300 rounded-md transition duration-500",
-            errors.year ? "border-[#ff4d4f]" : "focus:border-primary focus:shadow-input-primary"
+            "border rounded-md transition duration-500",
+            errors.year ? "border-[#ff4d4f]" : "border-gray-300"
           )}>
             {watch ? (
               <SelectValue placeholder={watch("year") || "Chọn năm"} />
@@ -117,10 +109,7 @@ const SelectDateOfBirth = ({
             ))}
           </SelectContent>
         </Select>
-
-        {errors.year && (
-          <p className="text-sm text-red-500">{errors.year.message}</p>
-        )}
+        {errors.year && <p className="text-sm text-red-500">{errors.year.message}</p>}
       </div>
     </div>
   );

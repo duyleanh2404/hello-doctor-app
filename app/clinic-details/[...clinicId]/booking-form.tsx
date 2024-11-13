@@ -1,32 +1,138 @@
-import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
-import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import Swal from "sweetalert2";
+import Cookies from "js-cookie";
+import NProgress from "nprogress";
+import toast from "react-hot-toast";
+import "nprogress/nprogress.css";
+
+import { RootState } from "@/store/store";
+import { useSelector } from "react-redux";
+
+import { ActiveTime, timeRanges } from "@/constants/time-ranges";
+
+import { getCurrentUser } from "@/services/user-serivce";
+import { getSchedule } from "@/services/schedule-service";
+
+import { UserData } from "@/types/user-types";
+import { ClinicData } from "@/types/clinic-types";
+import { DoctorData } from "@/types/doctor-types";
+import { ScheduleData } from "@/types/schedule-types";
+import { SpecialtyData } from "@/types/specialty-types";
 
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
+import Spinner from "@/components/spinner";
 import SelectDoctor from "./select-doctor";
 import SelectSpecialty from "./select-specialty";
+import TimeButtons from "@/components/time-buttons";
 
-const BookingForm = () => {
-  const [selectedActiveTime, setSelectedActiveTime] = useState<string>("morning");
+const BookingForm = ({ clinic }: { clinic: ClinicData }) => {
+  const router = useRouter();
 
-  const TimeButtons = () => {
-    return ["morning", "afternoon", "evening"].map((time) => (
-      <Button
-        key={time}
-        type="button"
-        variant="ghost"
-        onClick={() => setSelectedActiveTime(time)}
-        className={cn(
-          "flex-1 text-base sm:text-[17px] font-semibold pb-2 rounded-none",
-          selectedActiveTime === time ? "text-primary border-b-[3px] border-primary" : "hover:text-primary"
-        )}
-      >
-        {time === "morning" ? "Sáng" : time === "afternoon" ? "Chiều" : "Tối"}
-      </Button>
-    ));
-  }
+  const { isLoggedIn } = useSelector((state: RootState) => state.auth);
+  const [isLoading, setLoading] = useState({ schedule: false, booking: false });
+
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+
+  const [user, setUser] = useState<UserData | null>(null);
+  const [schedule, setSchedule] = useState<ScheduleData | null>(null);
+
+  const [activeTime, setActiveTime] = useState<ActiveTime>("morning");
+  const [filteredTimeSlots, setFilteredTimeSlots] = useState<any[]>([]);
+
+  const [selectedDoctor, setSelectedDoctor] = useState<DoctorData | null>(null);
+  const [selectedSpecialty, setSelectedSpecialty] = useState<SpecialtyData | null>(null);
+
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      if (!selectedDate || !selectedDoctor) return;
+
+      resetState();
+      setLoading({ ...isLoading, schedule: true });
+
+      try {
+        const { schedule } = await getSchedule({
+          doctor_id: selectedDoctor?._id,
+          date: selectedDate
+        });
+        setSchedule(schedule);
+      } catch (error: any) {
+        resetState();
+      } finally {
+        setLoading({ ...isLoading, schedule: false });
+      }
+    };
+
+    fetchSchedule();
+  }, [selectedDate, selectedDoctor]);
+
+  useEffect(() => {
+    if (!schedule?.timeSlots) return;
+
+    const filteredSlots = schedule.timeSlots.filter((slot) => {
+      const { start, end } = timeRanges[activeTime];
+      return slot.timeline >= start && slot.timeline < end;
+    });
+
+    setFilteredTimeSlots(filteredSlots);
+  }, [activeTime, schedule]);
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      if (!isLoggedIn) return;
+
+      const accessToken = Cookies.get("access_token");
+      if (!accessToken) return;
+
+      try {
+        const userData = await getCurrentUser(accessToken);
+        setUser(userData.user);
+      } catch (error: any) {
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
+
+  const resetState = () => {
+    setSchedule(null);
+    setSelectedSlot(null);
+    setActiveTime("morning");
+    setFilteredTimeSlots([]);
+  };
+
+  const handleBooking = async () => {
+    if (user?.role !== "user") {
+      Swal.fire({
+        icon: "error",
+        title: "Đây là chức năng dành cho bệnh nhân!",
+        confirmButtonText: "Đã hiểu",
+        text: "Nhấn vào nút bên dưới để tiếp tục!"
+      });
+      return;
+    }
+
+    setLoading({ ...isLoading, booking: true });
+
+    if (!isLoggedIn) {
+      router.replace("/login");
+      return;
+    }
+
+    NProgress.start();
+    const formattedDate = format(selectedDate!, "dd/MM/yyyy");
+    const encodedDate = btoa(formattedDate);
+    const encodedTime = btoa(selectedSlot!);
+    const encodedDoctorId = btoa(selectedDoctor?._id!);
+    router.replace(`/booking-details?time=${encodedTime}&date=${encodedDate}&doctorId=${encodedDoctorId}`);
+  };
 
   return (
     <div className="h-fit flex flex-col gap-8 pt-6 pb-10 px-6 sm:pt-6 sm:pb-10 sm:px-6 bg-[#F8F9FC] shadow-lg sm:shadow-md rounded-t-3xl sm:rounded-2xl">
@@ -40,61 +146,103 @@ const BookingForm = () => {
       <div className="flex flex-col gap-6 pt-6 pb-10 px-6 sm:pt-6 sm:pb-10 sm:px-6 bg-white rounded-2xl shadow-md">
         <div className="flex flex-col gap-6">
           <h1 className="text-lg font-bold">Tư vấn trực tiếp</h1>
-
           <div className="flex flex-col gap-1">
             <label className="text-sm font-semibold text-[#595959]">Bệnh viện</label>
-            <div className="h-12 flex items-center gap-3 p-[10px] border border-[#ccc] rounded-md cursor-default">
+            <div className="h-14 flex items-center gap-3 p-[10px] border border-gray-300 rounded-md cursor-default">
               <Image
                 loading="lazy"
-                src="/logo.jpg"
+                src={clinic?.avatar}
                 alt="Logo"
                 width={40}
                 height={40}
                 className="object-cover"
               />
               <p className="font-medium text-ellipsis whitespace-nowrap overflow-hidden">
-                Clinic name
+                {clinic?.name}
               </p>
             </div>
           </div>
 
-          <SelectSpecialty />
-          <SelectDoctor />
+          <SelectSpecialty
+            selectedSpecialty={selectedSpecialty}
+            setSelectedSpecialty={setSelectedSpecialty}
+          />
+
+          <SelectDoctor
+            selectedDoctor={selectedDoctor}
+            setSelectedDoctor={setSelectedDoctor}
+            selectedSpecialty={selectedSpecialty}
+          />
 
           <div className="flex flex-col gap-1 transition duration-500">
             <label className="text-sm font-semibold text-[#595959]">Ngày khám</label>
-            <DatePicker />
+            <DatePicker
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
+            />
           </div>
         </div>
 
-        <div className="flex">
-          <TimeButtons />
-        </div>
+        <TimeButtons activeTime={activeTime} setActiveTime={setActiveTime} />
 
-        <div className="flex flex-col items-center gap-6 py-12">
-          <Image
-            loading="lazy"
-            src="/calendar.svg"
-            alt="Calendar"
-            width="100"
-            height="100"
-          />
-          <p className="font-medium text-[#595959]">Chưa có lịch nào vào thời gian này!</p>
-        </div>
+        {isLoading.schedule ? (
+          <Spinner table className="py-16" />
+        ) : (
+          filteredTimeSlots?.length > 0 ? (
+            <div className="grid grid-cols-2 gap-4">
+              {filteredTimeSlots?.map((slot) => (
+                <Button
+                  type="button"
+                  variant="default"
+                  key={slot?.timeline}
+                  disabled={slot?.isBooked}
+                  onClick={() => setSelectedSlot(slot?.timeline)}
+                  className={cn(
+                    "h-14 p-3 font-medium text-black hover:text-white border border-transparent rounded-md shadow-md hover:shadow-lg text-center transition duration-500",
+                    selectedSlot === slot?.timeline
+                      ? "text-white"
+                      : "bg-[#f8f9fc] hover:bg-[#8f9fc] hover:text-black hover:border-primary"
+                  )}
+                >
+                  {slot?.timeline}
+                </Button>
+              ))}
+            </div>
+          ) : (
+            !selectedSpecialty && !selectedDoctor && !selectedDate ? (
+              <div className="flex flex-col items-center gap-12 py-16 text-center">
+                <Image loading="lazy" src="/calendar.svg" alt="Calendar Icon" width={110} height={110} />
+                <p className="font-medium text-[#595959]">
+                  Vui lòng chọn chuyên khoa, bác sĩ và ngày khám!
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-12 py-16">
+                <Image loading="lazy" src="/calendar.svg" alt="Calendar Icon" width={110} height={110} />
+                <p className="font-medium text-[#595959]">
+                  Không tìm thấy lịch nào vào thời gian này!
+                </p>
+              </div>
+            )
+          )
+        )}
 
         <p className="text-base sm:text-[17px] font-medium select-none">
-          Giá từ: <span className="text-[17px] sm:text-lg font-semibold text-[#009e5c]">500.000₫ - 2.500.500₫</span>
+          Giá từ: {""}
+          <span className="text-[17px] sm:text-lg font-semibold text-[#009e5c]">100.000₫ - 1.000.000₫</span>
         </p>
 
         <Button
-          type="submit"
-          variant="default"
-          className="relative text-[17px] font-semibold text-white py-[14px] bg-primary hover:bg-[#2c74df] rounded-lg transition duration-500 select-none"
+          type="button"
+          size="xl"
+          variant="submit"
+          onClick={handleBooking}
+          disabled={isLoading.booking || !selectedDate || !selectedSlot}
         >
-          Xác nhận
+          {isLoading.booking ? "Đang xử lý..." : "Tiếp tục đặt lịch"}
         </Button>
       </div>
-    </div>
+    </div >
   );
 };
 

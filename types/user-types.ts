@@ -1,15 +1,45 @@
 export interface UserData {
   _id: string;
-  role: string;
-  otp?: string;
   email: string;
-  image?: string;
+  fullname: string;
+  role: string;
   gender?: string;
   address?: string;
-  fullname: string;
   password?: string;
   phoneNumber?: string;
   dateOfBirth?: string;
+  image?: string;
+  otp?: string;
+};
+
+export interface EditUserData {
+  id: string;
+  fullname?: string;
+  gender?: string;
+  address?: string;
+  province?: string;
+  phoneNumber?: string;
+  dateOfBirth?: string;
+  imageName?: string;
+  image?: File;
+};
+
+export interface EditUserForm {
+  _id: string;
+  fullname: string;
+  desc: string;
+  gender: string;
+  address: string;
+  dateOfBirth: string;
+  phoneNumber: string;
+  day: string;
+  month: string;
+  year: string;
+  street: string;
+  ward: string;
+  district: string;
+  province: string;
+  image?: FileList;
 };
 
 export interface GetAllUsersData {
@@ -17,27 +47,4 @@ export interface GetAllUsersData {
   limit?: number;
   query?: string;
   province?: string;
-  accessToken: string;
-};
-
-export interface GetUserByIdData {
-  id: string;
-  accessToken: string;
-};
-
-export interface UpdateUserData {
-  id: string;
-  gender?: string;
-  address?: string;
-  fullname?: string;
-  imageName?: string;
-  dateOfBirth?: string;
-  accessToken: string;
-  image?: File | null;
-  phoneNumber?: string;
-};
-
-export interface DeleteUserData {
-  id: string;
-  accessToken: string;
 };

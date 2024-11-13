@@ -1,4 +1,4 @@
-const categories = [
+export const categories = [
   {
     id: 1,
     href: "/specialties",
@@ -13,7 +13,7 @@ const categories = [
   },
   {
     id: 3,
-    href: "/health-tools",
+    href: "#health-check",
     title: "Kiểm tra sức khỏe",
     image: "/categories/health-check.svg"
   },
@@ -24,5 +24,3 @@ const categories = [
     image: "/categories/community.svg"
   }
 ];
-
-export default categories;
