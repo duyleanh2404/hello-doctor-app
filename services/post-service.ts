@@ -1,8 +1,4 @@
-import {
-  EditPostData,
-  CreatePostData,
-  GetAllPostsData
-} from "@/types/post-types";
+import { EditPostData, CreatePostData, GetAllPostsData } from "@/types/post-types";
 
 import { handleResponse } from "@/utils/handle-response";
 import { appendFormData } from "@/utils/append-form-data";
@@ -12,20 +8,15 @@ export const createPost = async (
   { doctor_id, specialty_id, title, releaseDate, desc, imageName, image }: CreatePostData
 ) => {
   const formData = new FormData();
-  appendFormData(formData, {
-    doctor_id, specialty_id, title, releaseDate, desc, imageName
-  });
+  appendFormData(formData, { doctor_id, specialty_id, title, releaseDate, desc, imageName });
 
   if (image) formData.append("image", image);
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/post`,
-    {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${accessToken}` },
-      body: formData
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/post`, {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${accessToken}` },
+    body: formData
+  });
 
   return handleResponse(response);
 };
@@ -35,38 +26,30 @@ export const updatePost = async (
   { id, doctor_id, specialty_id, title, releaseDate, desc, imageName, image }: EditPostData
 ) => {
   const formData = new FormData();
-  appendFormData(formData, {
-    doctor_id, specialty_id, title, releaseDate, desc, imageName
-  });
+  appendFormData(formData, { doctor_id, specialty_id, title, releaseDate, desc, imageName });
 
   if (image) formData.append("image", image);
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/post/${id}`,
-    {
-      method: "PUT",
-      headers: { "Authorization": `Bearer ${accessToken}` },
-      body: formData
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${id}`, {
+    method: "PUT",
+    headers: { "Authorization": `Bearer ${accessToken}` },
+    body: formData
+  });
 
   return handleResponse(response);
 };
 
 export const deletePost = async (accessToken: string, id: string) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/post/${id}`,
-    {
-      method: "DELETE",
-      headers: { "Authorization": `Bearer ${accessToken}` }
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${id}`, {
+    method: "DELETE",
+    headers: { "Authorization": `Bearer ${accessToken}` }
+  });
 
   return handleResponse(response);
 };
 
 export const getAllPosts = async ({
-  doctor_id, specialty_id, page = 1, limit = 10, query, exclude, releaseDate
+  page = 1, limit = 10, doctor_id, specialty_id, query, exclude, releaseDate
 }: GetAllPostsData) => {
   const queryParams = new URLSearchParams({
     page: page.toString(),
@@ -89,12 +72,9 @@ export const getAllPosts = async ({
 };
 
 export const getPostById = async (id: string) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/post/${id}`,
-    {
-      method: "GET"
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/${id}`, {
+    method: "GET"
+  });
 
   return handleResponse(response);
 };

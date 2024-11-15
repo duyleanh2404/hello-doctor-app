@@ -4,13 +4,13 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 
 import { format, parse } from "date-fns";
 import { FiUpload } from "react-icons/fi";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
-import JoditEditor from "jodit-react";
 
 import { EditPostForm } from "@/types/post-types";
 import { getPostById, updatePost } from "@/services/post-service";
@@ -28,10 +28,12 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import Spinner from "@/components/spinner";
 
+const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
+
 const EditPost = () => {
   const router = useRouter();
-  const { postId } = useParams<{ postId: string }>();
 
+  const { postId } = useParams<{ postId: string }>();
   const { specialties, isLoading: isLoadingSpecialties } = useSpecialties("desc");
 
   const [content, setContent] = useState<string>("");
@@ -41,16 +43,10 @@ const EditPost = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
 
   const [imageName, setImageName] = useState<string>("");
-  const [imageURL, setImageURL] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const {
-    watch,
-    register,
-    setValue,
-    setError,
-    clearErrors,
-    handleSubmit,
-    formState: { errors }
+    watch, register, setValue, setError, clearErrors, handleSubmit, formState: { errors }
   } = useForm<EditPostForm>();
 
   useEffect(() => {
@@ -61,10 +57,11 @@ const EditPost = () => {
         setValue("doctor_id", post.doctor_id._id);
         setValue("specialty_id", post.specialty_id._id);
         setContent(post.desc);
-        setImageURL(post.image);
+        setImageUrl(post.image);
         setImageName(post.imageName);
         setSelectedDate(parse(post.releaseDate, "dd/MM/yyyy", new Date()));
       } catch (error: any) {
+        console.error(error);
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       }
     };
@@ -76,9 +73,14 @@ const EditPost = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    if (!file.type.startsWith("image/")) {
+      toast.error("Vui lòng chỉ tải lên hình ảnh!");
+      return;
+    }
+
     clearErrors("image");
     setImageName(file.name);
-    setImageURL(URL.createObjectURL(file));
+    setImageUrl(URL.createObjectURL(file));
   };
 
   const handleEditorChange = (newContent: string) => {
@@ -90,19 +92,17 @@ const EditPost = () => {
   const handleValidate = () => {
     if (!selectedDate) {
       setDateError("Vui lòng chọn ngày đăng!");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    if (content.trim() !== "") return;
-    setError("desc", {
-      type: "manual",
-      message: "Vui lòng nhập mô tả của bài viết!"
-    });
+    if (content.trim() === "") {
+      setError("desc", { type: "manual", message: "Vui lòng nhập mô tả của bài viết!" });
+    };
   };
 
-  const handleEditPost: SubmitHandler<EditPostForm> = async (data) => {
+  const handleEditPost: SubmitHandler<EditPostForm> = async (postData) => {
     const accessToken = Cookies.get("access_token");
     if (!accessToken) return;
-
     setLoading(true);
 
     try {
@@ -110,17 +110,18 @@ const EditPost = () => {
         accessToken,
         {
           id: postId[0],
-          doctor_id: data.doctor_id,
-          specialty_id: data.specialty_id,
-          title: data.title,
+          doctor_id: postData.doctor_id,
+          specialty_id: postData.specialty_id,
+          title: postData.title,
           releaseDate: selectedDate && format(selectedDate, "dd/MM/yyyy"),
           desc: content,
           imageName,
-          image: data.image?.[0],
+          image: postData.image?.[0],
         });
 
       toast.success("Cập nhật bài viết thành công!");
     } catch (error: any) {
+      console.error(error);
       toast.error("Cập nhật bài viết thất bại. Vui lòng thử lại sau ít phút nữa!");
     } finally {
       router.replace("/system/manage-posts");
@@ -134,7 +135,6 @@ const EditPost = () => {
   return (
     <>
       <h1 className="text-xl font-bold mb-4">Thêm bài viết mới</h1>
-
       <form onSubmit={handleSubmit(handleEditPost)}>
         <div className="flex flex-col gap-8 pb-6">
           <div className="flex flex-col gap-8 -mx-4 px-4">
@@ -147,9 +147,7 @@ const EditPost = () => {
                 {...register("title", { required: "Vui lòng nhập tiêu đề bài viết!" })}
                 className={cn(errors.title ? "border-red-500" : "border-gray-300")}
               />
-              {errors.title && (
-                <p className="text-red-500 text-sm">{errors.title.message}</p>
-              )}
+              {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
             </div>
 
             <div className="flex flex-col gap-2">
@@ -167,9 +165,7 @@ const EditPost = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {isLoadingSpecialties ? (
-                    <div className="py-6">
-                      <Spinner table />
-                    </div>
+                    <div className="py-6"><Spinner table /></div>
                   ) : (
                     specialties?.length > 0 ? (
                       specialties?.map((specialty) => (
@@ -183,9 +179,7 @@ const EditPost = () => {
                               height="30"
                               className="object-cover rounded-full"
                             />
-                            <p className="w-fit font-medium text-ellipsis overflow-hidden">
-                              {specialty?.name}
-                            </p>
+                            <p className="w-fit font-medium text-ellipsis overflow-hidden">{specialty?.name}</p>
                           </div>
                         </SelectItem>
                       ))
@@ -197,9 +191,7 @@ const EditPost = () => {
                   )}
                 </SelectContent>
               </Select>
-              {errors.specialty_id && (
-                <p className="text-red-500 text-sm">{errors.specialty_id.message}</p>
-              )}
+              {errors.specialty_id && <p className="text-red-500 text-sm">{errors.specialty_id.message}</p>}
             </div>
 
             <div className="flex flex-col gap-2">
@@ -235,19 +227,11 @@ const EditPost = () => {
                 </Button>
               </div>
 
-              {errors.image && (
-                <p className="text-red-500 text-sm">{errors.image.message}</p>
-              )}
+              {errors.image && <p className="text-red-500 text-sm">{errors.image.message}</p>}
 
-              {imageURL && (
+              {imageUrl && (
                 <div className="mx-auto mt-6">
-                  <Image
-                    src={imageURL}
-                    alt="Preview"
-                    width={700}
-                    height={700}
-                    className="object-cover rounded-md"
-                  />
+                  <Image src={imageUrl} alt="Preview" width={700} height={700} className="object-cover rounded-md" />
                 </div>
               )}
             </div>
@@ -259,29 +243,15 @@ const EditPost = () => {
                 onChange={handleEditorChange}
                 className={cn("!rounded-md", errors.desc && "!border-red-500")}
               />
-              {errors.desc && (
-                <p className="text-red-500 text-sm">{errors.desc.message}</p>
-              )}
+              {errors.desc && <p className="text-red-500 text-sm">{errors.desc.message}</p>}
             </div>
           </div>
 
           <div className="flex items-center justify-end gap-4">
-            <Button
-              type="button"
-              size="lg"
-              variant="cancel"
-              onClick={() => router.replace("/system/manage-posts")}
-            >
+            <Button type="button" size="lg" variant="cancel" onClick={() => router.replace("/system/manage-posts")}>
               Hủy
             </Button>
-
-            <Button
-              type="submit"
-              size="lg"
-              variant="submit"
-              disabled={isLoading}
-              onClick={handleValidate}
-            >
+            <Button type="submit" size="lg" variant="submit" disabled={isLoading} onClick={handleValidate}>
               {isLoading ? "Đang cập nhật..." : "Cập nhật"}
             </Button>
           </div>

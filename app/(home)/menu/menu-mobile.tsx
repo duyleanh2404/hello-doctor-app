@@ -6,6 +6,8 @@ import Link from "next/link";
 import Image from "next/image";
 
 import { FiSearch } from "react-icons/fi";
+import NProgress from "nprogress";
+import "nprogress/nprogress.css";
 
 import { RootState } from "@/store/store";
 import { menuMobile } from "@/constants/menu-mobile";
@@ -13,13 +15,13 @@ import { menuMobile } from "@/constants/menu-mobile";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-interface MenuMobileProps {
+interface IProps {
   isOpenMenu: boolean;
   tabActive: string | null;
   handleToggleMenu: (menuName: string) => void;
 };
 
-const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: MenuMobileProps) => {
+const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: IProps) => {
   const router = useRouter();
 
   const [isFocused, setIsFocused] = useState<boolean>(false);
@@ -54,10 +56,7 @@ const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: MenuMobile
             />
           </div>
 
-          <Link
-            href="/booking-doctor"
-            className="w-full flex items-center gap-3"
-          >
+          <Link href="/booking-doctor" onClick={() => NProgress.start()} className="w-full flex items-center gap-3">
             <Image
               loading="lazy"
               src="/doctor.svg"
@@ -92,7 +91,10 @@ const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: MenuMobile
             <Button
               type="button"
               variant="default"
-              onClick={() => router.replace("/register")}
+              onClick={() => {
+                NProgress.start();
+                router.push("/register");
+              }}
               className="flex-1 h-14 text-[#2D87F3] font-medium border border-[#2D87F3] bg-white hover:bg-[#2D87F3]/10 rounded-md transition duration-500"
             >
               Đăng ký
@@ -101,7 +103,10 @@ const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: MenuMobile
             <Button
               type="button"
               variant="default"
-              onClick={() => router.replace("/login")}
+              onClick={() => {
+                NProgress.start();
+                router.push("/login");
+              }}
               className="flex-1 h-14 text-white font-medium bg-[#2D87F3] hover:bg-[#2D87F3]/80 rounded-md transition duration-500"
             >
               Đăng nhập
@@ -112,5 +117,7 @@ const MenuMobile = memo(({ isOpenMenu, tabActive, handleToggleMenu }: MenuMobile
     </div>
   );
 });
+
+MenuMobile.displayName = "MenuMobile";
 
 export default MenuMobile; 

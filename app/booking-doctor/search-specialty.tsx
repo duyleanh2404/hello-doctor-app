@@ -29,62 +29,51 @@ const SearchSpecialty = () => {
   const [selectedSpecialty, setSelectedSpecialty] = useState<SpecialtyData | null>(null);
 
   const [query, setQuery] = useState<string>("");
-  const [inputValue, setInputValue] = useState<string>("");
   const debouncedQuery = useDebounce(query, 500);
 
   useClickOutside(dropdownRef, () => setIsDropdownVisible(false));
 
-  const fetchSpecialties = async (query?: string) => {
-    setLoading({ ...isLoading, specialties: true });
-
-    try {
-      const { specialties } = await getAllSpecialties({
-        query, exclude: "desc"
-      });
-      setSpecialties(specialties);
-    } catch (error: any) {
-      toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
-    } finally {
-      setLoading({ ...isLoading, specialties: false });
-    }
-  };
-
   useEffect(() => {
-    fetchSpecialties(debouncedQuery);
+    const fetchSpecialties = async () => {
+      setLoading({ ...isLoading, specialties: true });
+
+      try {
+        const { specialties } = await getAllSpecialties({
+          query: debouncedQuery, exclude: "desc"
+        });
+        setSpecialties(specialties);
+      } catch (error: any) {
+        console.error(error);
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
+      } finally {
+        setLoading({ ...isLoading, specialties: false });
+      }
+    };
+
+    fetchSpecialties();
   }, [debouncedQuery]);
-
-  useEffect(() => {
-    if (selectedSpecialty) setInputValue(selectedSpecialty?.name);
-  }, [selectedSpecialty]);
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setQuery(value);
-    setInputValue(value);
-    setIsDropdownVisible(true);
-  };
 
   const handleRoute = () => {
     NProgress.start();
     setLoading({ ...isLoading, routing: true });
-    router.replace(`/specialties/${btoa(selectedSpecialty?._id!)}`);
+    if (selectedSpecialty?._id) router.push(`/specialties/${btoa(selectedSpecialty._id)}`);
   };
 
   return (
     <div className="wrapper p-6 sm:p-8 bg-white shadow-md rounded-b-2xl">
       <div className="flex flex-col sm:flex-row items-center gap-4">
         <div ref={dropdownRef} className="relative w-full sm:w-auto flex-1">
-          <FiSearch
-            size="22"
-            className="absolute top-1/2 left-5 -translate-y-1/2 text-[#595959]"
-          />
+          <FiSearch size="22" className="absolute top-1/2 left-5 -translate-y-1/2 text-[#595959]" />
           <Input
+            value={selectedSpecialty ? selectedSpecialty?.name : query}
             type="text"
-            value={inputValue}
             spellCheck={false}
-            onChange={handleInputChange}
             placeholder="Tìm kiếm theo tên chuyên khoa"
             onFocus={() => setIsDropdownVisible(true)}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              if (selectedSpecialty) setSelectedSpecialty(null);
+            }}
             className="pl-14"
           />
 
@@ -106,7 +95,6 @@ const SearchSpecialty = () => {
                     key={specialty?._id}
                     onClick={() => {
                       setIsDropdownVisible(false);
-                      setInputValue(specialty?.name);
                       setSelectedSpecialty(specialty);
                     }}
                     className="w-full h-14 flex items-center justify-start gap-4 hover:text-primary transition duration-500"
@@ -119,9 +107,7 @@ const SearchSpecialty = () => {
                       height="30"
                       className="object-cover rounded-full"
                     />
-                    <p className="w-fit font-medium text-ellipsis overflow-hidden">
-                      {specialty?.name}
-                    </p>
+                    <p className="w-fit font-medium text-ellipsis overflow-hidden">{specialty?.name}</p>
                   </Button>
                 ))
               ) : (
@@ -133,13 +119,7 @@ const SearchSpecialty = () => {
           </div>
         </div>
 
-        <Button
-          type="button"
-          size="lg"
-          variant="search"
-          disabled={isLoading.routing}
-          onClick={handleRoute}
-        >
+        <Button type="button" size="lg" variant="search" disabled={isLoading.routing} onClick={handleRoute}>
           {isLoading.routing ? "Đang tìm kiếm..." : "Tìm kiếm"}
         </Button>
       </div>

@@ -18,6 +18,11 @@ import Breadcrumb from "@/components/breadcrumb";
 
 const Advertise = lazy(() => import("@/components/advertises/advertise"));
 
+type ShareIcon = {
+  id: number;
+  src: string;
+};
+
 const PostDetailsPage = () => {
   const { postId } = useParams<{ postId: string }>();
   const post = usePost(atob(postId));
@@ -43,7 +48,7 @@ const PostDetailsPage = () => {
         <div className="w-full lg:w-[70%] flex flex-col xl:flex-row gap-10">
           <div className="w-[5%] hidden xl:block relative py-2">
             <div className="sticky top-36 flex flex-row xl:flex-col gap-8">
-              {shareIcons.map(({ id, src }) => (
+              {shareIcons.map(({ id, src }: ShareIcon) => (
                 <Image loading="lazy" key={id} src={src} alt="Icon" width="30" height="30" />
               ))}
             </div>
@@ -57,7 +62,7 @@ const PostDetailsPage = () => {
               </div>
 
               <div className="flex items-center gap-8">
-                {shareIcons.map(({ id, src }) => (
+                {shareIcons.map(({ id, src }: ShareIcon) => (
                   <Image loading="lazy" key={id} src={src} alt="Icon" width="25" height="25" />
                 ))}
               </div>
@@ -70,10 +75,7 @@ const PostDetailsPage = () => {
         <div className="flex-1 relative flex flex-col gap-8">
           <div className="flex flex-col items-center gap-4 p-6 border rounded-md shadow-sm">
             <div className="w-full flex flex-col items-center gap-4 pb-3 border-b">
-              <Link
-                href={`/doctor-details/${btoa(post?.doctor_id?._id)}`}
-                onClick={() => NProgress.start()}
-              >
+              <Link href={`/doctor-details/${btoa(post?.doctor_id?._id)}`} onClick={() => NProgress.start()}>
                 <Hint label="Xem chi tiết">
                   <Image
                     loading="lazy"
@@ -99,9 +101,7 @@ const PostDetailsPage = () => {
           </div>
 
           <div className="sticky top-32">
-            <Suspense>
-              <Advertise />
-            </Suspense>
+            <Suspense fallback={<Spinner table />}><Advertise /></Suspense>
           </div>
         </div>
       </div>

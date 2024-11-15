@@ -12,18 +12,6 @@ export interface UserData {
   otp?: string;
 };
 
-export interface EditUserData {
-  id: string;
-  fullname?: string;
-  gender?: string;
-  address?: string;
-  province?: string;
-  phoneNumber?: string;
-  dateOfBirth?: string;
-  imageName?: string;
-  image?: File;
-};
-
 export interface EditUserForm {
   _id: string;
   fullname: string;
@@ -40,6 +28,18 @@ export interface EditUserForm {
   district: string;
   province: string;
   image?: FileList;
+};
+
+export interface EditUserData {
+  id: string;
+  fullname?: string;
+  gender?: string;
+  address?: string;
+  province?: string;
+  phoneNumber?: string;
+  dateOfBirth?: string;
+  imageName?: string;
+  image?: File;
 };
 
 export interface GetAllUsersData {

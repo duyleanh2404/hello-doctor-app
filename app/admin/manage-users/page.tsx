@@ -12,6 +12,7 @@ import { LuClipboardEdit } from "react-icons/lu";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 
+import { Province } from "@/types/auth-types";
 import { UserData } from "@/types/user-types";
 import { deleteUser, getAllUsers } from "@/services/user-serivce";
 
@@ -38,7 +39,7 @@ import { Button } from "@/components/ui/button";
 import Hint from "@/components/hint";
 import Spinner from "@/components/spinner";
 import PaginationSection from "@/components/pagination";
-import DeleteConfirmationModal from "@/components/delete-confirmation-modal";
+import DeleteConfirmationModal from "@/components/modal/delete-confirmation-modal";
 
 const ManageUsers = () => {
   const router = useRouter();
@@ -47,7 +48,7 @@ const ManageUsers = () => {
   const [inputFocused, setInputFocused] = useState<boolean>(false);
   const [isLoading, setLoading] = useState({ users: false, deleting: false });
 
-  const provinces: any[] = useProvinces();
+  const provinces: Province[] = useProvinces();
   const [selectedProvince, setSelectedProvince] = useState<string>("");
 
   const [users, setUsers] = useState<UserData[]>([]);
@@ -68,6 +69,7 @@ const ManageUsers = () => {
       const { users, total } = await getAllUsers(accessToken, { page, limit: 10, query, province });
       handleUsersFetchSuccess(users, total);
     } catch (error: any) {
+      console.error(error);
       toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
     } finally {
       setLoading({ ...isLoading, users: false });
@@ -96,8 +98,10 @@ const ManageUsers = () => {
       setModalOpen(false);
       toast.success("Xóa người dùng thành công!");
     } catch (error: any) {
+      console.error(error);
       toast.error("Xóa người dùng thất bại. Vui lòng thử lại sau ít phút nữa!");
     } finally {
+      setModalOpen(false);
       setLoading({ ...isLoading, deleting: false });
     }
   };
@@ -130,7 +134,7 @@ const ManageUsers = () => {
             {provinces?.length > 0 ? (
               <>
                 <SelectItem value="all">Tất cả</SelectItem>
-                {provinces?.map((province) => (
+                {provinces?.map((province: any) => (
                   <SelectItem key={province?.id} value={province?.name}>{province?.name}</SelectItem>
                 ))}
               </>
@@ -164,8 +168,7 @@ const ManageUsers = () => {
       </div >
 
       <div className={cn(
-        "relative rounded-md shadow-md overflow-y-auto",
-        users?.length > 0 ? "h-auto" : "h-full"
+        "relative rounded-md shadow-md overflow-y-auto", users?.length > 0 ? "h-auto" : "h-full"
       )}>
         <Table className="relative h-full text-[17px]">
           <TableHeader className="sticky top-0 left-0 right-0 h-12 bg-gray-100">
@@ -182,7 +185,7 @@ const ManageUsers = () => {
 
           <TableBody>
             {users?.length > 0 ? (
-              users?.map((user, index) => {
+              users?.map((user: UserData, index) => {
                 const startIndex = (currentPage - 1) * 10;
 
                 return (

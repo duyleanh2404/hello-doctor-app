@@ -4,13 +4,22 @@ import Image from "next/image";
 import { socials } from "@/constants/socials";
 import { certificates } from "@/constants/certificates";
 
-const healthTopics = [
-  "Chuyên đề sức khỏe",
-  "Kiểm tra sức khỏe",
-  "Tìm bệnh viện",
-  "Cộng đồng",
-  "Cửa hàng"
-];
+type Certificate = {
+  id: number,
+  src: string,
+  width: number,
+  height: number;
+};
+
+type Social = {
+  id: number,
+  alt: string,
+  src: string,
+  href: string
+};
+
+const aboutUs = ["Tự giới thiệu", "Ban điều hành", "Tuyển dụng", "Quảng cáo", "Liên hệ"];
+const healthTopics = ["Chuyên đề sức khỏe", "Kiểm tra sức khỏe", "Tìm bệnh viện", "Cộng đồng", "Cửa hàng"];
 
 const policies = [
   "Điều khoản sử dụng",
@@ -22,26 +31,12 @@ const policies = [
   "Quy định đặt lịch bác sĩ và mua hàng"
 ];
 
-const aboutUs = [
-  "Tự giới thiệu",
-  "Ban điều hành",
-  "Tuyển dụng",
-  "Quảng cáo",
-  "Liên hệ"
-];
-
 const Footer = () => {
   return (
     <footer className="text-white bg-[#1b3250] pt-14 pb-8">
       <div className="wrapper grid grid-cols-2 lg:grid-cols-5 gap-12 pb-12 border-b border-[#e4e8ec1a]">
         <div className="col-span-2 flex flex-col gap-6">
-          <Image
-            loading="lazy"
-            src="/logo-white.png"
-            alt="Hello Bacsi Logo"
-            width={130}
-            height={29}
-          />
+          <Image loading="lazy" src="/logo-white.png" alt="Hello Bacsi Logo" width={130} height={29} />
           <p className="text-sm leading-7">
             Hello Bacsi mong muốn trở thành nền tảng thông tin y khoa hàng đầu tại Việt Nam, giúp bạn đưa ra những quyết định đúng đắn liên quan về chăm sóc sức khỏe và hỗ trợ bạn cải thiện chất lượng cuộc sống.
           </p>
@@ -49,15 +44,9 @@ const Footer = () => {
           <div className="flex items-center gap-6">
             <p className="text-sm text-[#87909c]">Kết nối với chúng tôi</p>
             <div className="flex items-center gap-6">
-              {socials.map(({ id, href, src, alt }) => (
+              {socials.map(({ id, href, src, alt }: Social) => (
                 <Link key={id} href={href} target="_blank">
-                  <Image
-                    loading="lazy"
-                    src={src}
-                    alt={alt}
-                    width={24}
-                    height={24}
-                  />
+                  <Image loading="lazy" src={src} alt={alt} width={24} height={24} />
                 </Link>
               ))}
             </div>
@@ -65,21 +54,15 @@ const Footer = () => {
         </div>
 
         <div className="flex flex-col gap-4 text-sm leading-6">
-          {healthTopics.map((link, idx) => (
-            <Link key={idx} href="/">{link}</Link>
-          ))}
+          {healthTopics.map((link: string, idx) => <Link key={idx} href="/">{link}</Link>)}
         </div>
 
         <div className="flex flex-col gap-4 text-sm leading-6">
-          {policies.map((link, idx) => (
-            <Link key={idx} href="/">{link}</Link>
-          ))}
+          {policies.map((link: string, idx) => <Link key={idx} href="/">{link}</Link>)}
         </div>
 
         <div className="flex flex-col gap-4 text-sm leading-6">
-          {aboutUs.map((link, idx) => (
-            <Link key={idx} href="/">{link}</Link>
-          ))}
+          {aboutUs.map((link: string, idx) => <Link key={idx} href="/">{link}</Link>)}
         </div>
       </div>
 
@@ -88,13 +71,11 @@ const Footer = () => {
           <p>
             © 2024 Bản quyền các bài viết thuộc tập đoàn Hello Health Group. Các bài viết của Hello Bacsi chỉ có tính chất tham khảo, không thay thế cho việc chẩn đoán hoặc điều trị y khoa.
           </p>
-          <p>
-            Giấy xác nhận cung cấp dịch vụ mạng xã hội trực tuyến số 529/GP-BTTTT, HN ngày 03/12/2019.
-          </p>
+          <p>Giấy xác nhận cung cấp dịch vụ mạng xã hội trực tuyến số 529/GP-BTTTT, HN ngày 03/12/2019.</p>
         </div>
 
         <div className="flex-1 flex items-center justify-end gap-8">
-          {certificates.map(({ id, src, width, height }) => (
+          {certificates.map(({ id, src, width, height }: Certificate) => (
             <Image
               loading="lazy"
               key={id}

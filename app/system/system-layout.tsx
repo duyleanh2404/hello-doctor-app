@@ -11,15 +11,12 @@ import { resetUserData, setLoginStatus } from "@/store/slices/auth-slice";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 
-import {
-  FaRegNewspaper,
-  FaRegCalendarAlt
-} from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
 import { FaRegBell } from "react-icons/fa6";
 import { BsClipboard2PlusFill } from "react-icons/bs";
 import { IoMdHelpCircleOutline } from "react-icons/io";
 import { IoTime, IoSettingsOutline } from "react-icons/io5";
+import { FaRegNewspaper, FaRegCalendarAlt } from "react-icons/fa";
 
 import { UserData } from "@/types/user-types";
 import { getCurrentUser, editUser } from "@/services/user-serivce";
@@ -54,11 +51,10 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       if (!accessToken) return;
 
       try {
-        const userData = await getCurrentUser(accessToken);
-        if (!userData) return;
-
-        setUser(userData.user);
+        const { user } = await getCurrentUser(accessToken);
+        setUser(user);
       } catch (error: any) {
+        console.error(error);
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       } finally {
         setIsChanged(false);
@@ -69,10 +65,8 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   }, [isChanged]);
 
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!user) return;
-
     const accessToken = Cookies.get("access_token");
-    if (!accessToken) return;
+    if (!accessToken || !user) return;
 
     const file = event.target.files?.[0];
     if (!file) return;
@@ -82,6 +76,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       toast.success("Cập nhật ảnh đại diện thành công!");
       setIsChanged(true);
     } catch (error: any) {
+      console.error(error);
       toast.error("Cập nhật ảnh đại diện thất bại. Vui lòng thử lại sau ít phút nữa!");
     } finally {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -101,14 +96,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="fixed top-0 left-0 w-[18%] h-screen flex flex-col justify-between bg-[#1c3f66]">
         <div className="flex flex-col gap-6">
           <Link href="/admin/manage-users">
-            <Image
-              loading="lazy"
-              src="/logo-admin.jpg"
-              alt="Logo"
-              width="320"
-              height="170"
-              className="py-4"
-            />
+            <Image loading="lazy" src="/logo-admin.jpg" alt="Logo" width="320" height="170" className="py-4" />
           </Link>
 
           <div className="flex flex-col">
@@ -150,8 +138,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
           onClick={handleLogout}
           className="flex items-center justify-start gap-3 text-[17px] font-medium text-white py-4 px-6 bg-transparent hover:bg-black hover:bg-opacity-20 transition duration-500 select-none"
         >
-          <FiLogOut size="20" />
-          Đăng xuất
+          <FiLogOut size="20" /> Đăng xuất
         </Button>
       </div>
 
@@ -214,13 +201,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                       />
                     </label>
 
-                    <Input
-                      id="avatarInput"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageChange}
-                    />
+                    <Input id="avatarInput" type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
                   </div>
 
                   <div className="flex flex-col">

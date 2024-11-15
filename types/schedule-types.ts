@@ -7,7 +7,7 @@ export interface ScheduleData {
   doctor_id: DoctorData;
   clinic_id: ClinicData;
   specialty_id: SpecialtyData;
-  date?: Date;
+  date: Date;
   timeSlots: TimeSlot[];
 };
 
@@ -26,10 +26,7 @@ export interface EditScheduleData {
   id: string;
   doctor_id?: string;
   date?: Date;
-  timeSlots?: Array<{
-    timeline: string;
-    isBooked?: boolean;
-  }>;
+  timeSlots?: Array<TimeSlot>;
 };
 
 export interface GetAllSchedulesData {
@@ -40,7 +37,7 @@ export interface GetAllSchedulesData {
   date?: Date;
 };
 
-export interface GetSchedulesByRange {
+export interface GetSchedulesByRangeData {
   doctor_id?: string;
   startDate?: Date;
   endDate?: Date;

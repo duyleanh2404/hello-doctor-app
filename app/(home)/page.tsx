@@ -27,9 +27,6 @@ export default function Home() {
 
   useEffect(() => {
     NProgress.done();
-  }, []);
-
-  useEffect(() => {
     const shouldShowModal = Math.random() > 0.2;
     setShowModal(shouldShowModal);
   }, []);

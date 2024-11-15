@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import Swal from "sweetalert2";
 import Cookies from "js-cookie";
+import NProgress from "nprogress";
+import "nprogress/nprogress.css";
 
 import { RootState } from "@/store/store";
 import { useDispatch, useSelector } from "react-redux";
@@ -35,11 +37,7 @@ const VerifyPaymentPage = () => {
       if (vnp_TransactionStatus === "00") {
         try {
           const appointmentDate = new Date(bookingData.date);
-
-          await createAppointment(accessToken, {
-            ...bookingData,
-            date: appointmentDate
-          });
+          await createAppointment(accessToken, { ...bookingData, date: appointmentDate });
 
           Swal.fire({
             icon: "success",
@@ -49,11 +47,13 @@ const VerifyPaymentPage = () => {
           })
             .then((result) => {
               if (result.isConfirmed) {
-                router.replace("/")
+                NProgress.start();
+                router.replace("/");
                 dispatch(setVerifyingPayment(false));
               };
             });
         } catch (error: any) {
+          console.error(error);
           Swal.fire({
             icon: "error",
             title: "Có lỗi xảy ra!",
@@ -62,7 +62,8 @@ const VerifyPaymentPage = () => {
           })
             .then((result) => {
               if (result.isConfirmed) {
-                router.replace("/")
+                NProgress.start();
+                router.replace("/");
                 dispatch(setVerifyingPayment(false));
               };
             });
@@ -76,7 +77,8 @@ const VerifyPaymentPage = () => {
         })
           .then((result) => {
             if (result.isConfirmed) {
-              router.replace("/")
+              NProgress.start();
+              router.replace("/");
               dispatch(setVerifyingPayment(false));
             };
           });

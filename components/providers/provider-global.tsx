@@ -8,9 +8,7 @@ import store, { persistor } from "@/store/store";
 const ProviderGlobal = ({ children }: { children: React.ReactNode }) => {
   return (
     <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        {children}
-      </PersistGate>
+      <PersistGate loading={null} persistor={persistor}>{children}</PersistGate>
     </Provider>
   );
 };

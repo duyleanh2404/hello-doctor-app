@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -30,43 +30,36 @@ const MenuMobile = dynamic(() => import("@/app/(home)/menu/menu-mobile"), { ssr:
 const CategoriesMenu = dynamic(() => import("@/app/(home)/menu/categories-menu"), { ssr: false });
 const HealthCheckMenu = dynamic(() => import("@/app/(home)/menu/health-check-menu"), { ssr: false });
 
-interface MenuState {
+type MenuState = {
   tabActive: string | null;
   isOpenMenuMobile: boolean;
 };
 
+type MenuMobile = {
+  value: string;
+  label: string;
+};
+
 const Header = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const [isFocused, setIsFocused] = useState<boolean>(false);
 
   const dispatch = useDispatch();
   const { isBannerVisible } = useSelector((state: RootState) => state.common);
 
-  const [menuState, setMenuState] = useState<MenuState>({
-    tabActive: null, isOpenMenuMobile: false
-  });
+  const [menuState, setMenuState] = useState<MenuState>({ tabActive: null, isOpenMenuMobile: false });
 
   const handleToggleMenuMobile = () => {
-    setMenuState((prev) => ({
-      ...prev,
-      isOpenMenuMobile: !prev.isOpenMenuMobile
-    }));
+    setMenuState((prev) => ({ ...prev, isOpenMenuMobile: !prev.isOpenMenuMobile }));
   };
 
   const handleToggleMenu = (menuName: string) => {
-    setMenuState((prev) => ({
-      ...prev,
-      tabActive: prev.tabActive === menuName ? null : menuName
-    }));
+    setMenuState((prev) => ({ ...prev, tabActive: prev.tabActive === menuName ? null : menuName }));
   };
 
   return (
-    <div
-      className={cn(
-        "sticky top-0 left-0 right-0 flex flex-col z-50",
-        isBannerVisible ? "h-[120px]" : "h-[65px]"
-      )}
-    >
+    <div className={cn("sticky top-0 left-0 right-0 flex flex-col z-50", isBannerVisible ? "h-[120px]" : "h-[65px]")}>
       {isBannerVisible && (
         <div className="flex-1 relative flex items-center justify-between sm:justify-center text-sm sm:text-lg text-white bg-[#284a75] px-6">
           <p className="animate-bounce">⏬ Tải App Hello Bacsi - Nhận ngay 100K</p>
@@ -84,19 +77,8 @@ const Header = () => {
       <div className="h-[65px] border-b bg-white px-6 shadow-sm z-50">
         <div className="h-full flex items-center justify-between gap-3">
           <div className="flex items-center gap-8">
-            <Link
-              href="/"
-              onClick={() => NProgress.start()}
-            >
-              <div>
-                <Image
-                  loading="lazy"
-                  src="/logo.png"
-                  alt="Company Logo"
-                  width={120}
-                  height={120}
-                />
-              </div>
+            <Link href="/" onClick={() => pathname !== "/" && NProgress.start()}>
+              <Image loading="lazy" src="/logo.png" alt="Company Logo" width={120} height={120} />
             </Link>
 
             <div className="hidden xl:flex items-center gap-6">
@@ -119,7 +101,7 @@ const Header = () => {
               </div>
 
               <div className="flex items-center gap-8">
-                {menuMobile.map(({ value, label }) => (
+                {menuMobile.map(({ value, label }: MenuMobile) => (
                   <Button
                     key={value}
                     variant="ghost"
@@ -152,16 +134,8 @@ const Header = () => {
               }}
               className="hidden md:flex items-center gap-3 hover:bg-[#e3f2ff] transition duration-500"
             >
-              <Image
-                loading="lazy"
-                src="/doctor.svg"
-                alt="Doctor"
-                width={24}
-                height={24}
-              />
-              <p className="text-[15px] font-semibold">
-                Đặt lịch với bác sĩ
-              </p>
+              <Image loading="lazy" src="/doctor.svg" alt="Doctor" width={24} height={24} />
+              <p className="text-[15px] font-semibold">Đặt lịch với bác sĩ</p>
             </Button>
 
             <UserSettings />
@@ -170,11 +144,7 @@ const Header = () => {
               onClick={handleToggleMenuMobile}
               className="relative flex md:hidden items-center justify-center w-[30px] h-[30px] hover:bg-[#f2f2f2] transition duration-500 rounded-md cursor-pointer select-none"
             >
-              {menuState.isOpenMenuMobile ? (
-                <IoClose size="26" />
-              ) : (
-                <FaBarsStaggered size="19" />
-              )}
+              {menuState.isOpenMenuMobile ? <IoClose size="26" /> : <FaBarsStaggered size="19" />}
             </div>
           </div>
         </div>
@@ -185,15 +155,8 @@ const Header = () => {
           handleToggleMenu={handleToggleMenu}
         />
 
-        <CategoriesMenu
-          tabActive={menuState.tabActive}
-          setMenuState={setMenuState}
-        />
-
-        <HealthCheckMenu
-          tabActive={menuState.tabActive}
-          setMenuState={setMenuState}
-        />
+        <CategoriesMenu tabActive={menuState.tabActive} setMenuState={setMenuState} />
+        <HealthCheckMenu tabActive={menuState.tabActive} setMenuState={setMenuState} />
       </div>
     </div>
   );

@@ -5,8 +5,8 @@ export interface CreateHistoryForm {
 };
 
 export interface CreateHistoryData {
-  email: string;
   appointment_id: string;
+  email: string;
   doctorComment: string;
   healthStatus: "bad" | "normal" | "good";
   prescriptionImage: File;

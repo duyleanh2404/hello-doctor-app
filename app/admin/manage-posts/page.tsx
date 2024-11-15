@@ -16,6 +16,9 @@ import { LuClipboardEdit } from "react-icons/lu";
 import { BsClipboard2PlusFill } from "react-icons/bs";
 
 import { PostData } from "@/types/post-types";
+import { DoctorData } from "@/types/doctor-types";
+import { SpecialtyData } from "@/types/specialty-types";
+
 import { deletePost, getAllPosts } from "@/services/post-service";
 
 import useDebounce from "@/hooks/use-debounce";
@@ -43,7 +46,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import Hint from "@/components/hint";
 import Spinner from "@/components/spinner";
 import PaginationSection from "@/components/pagination";
-import DeleteConfirmationModal from "@/components/delete-confirmation-modal";
+import DeleteConfirmationModal from "@/components/modal/delete-confirmation-modal";
 
 const ManagePosts = () => {
   const router = useRouter();
@@ -52,10 +55,8 @@ const ManagePosts = () => {
   const [inputFocused, setInputFocused] = useState<boolean>(false);
   const [isLoading, setLoading] = useState({ posts: false, deleting: false });
 
-  const { doctors, isLoading: isLoadingDoctors } = useDoctors(
-    "specialty_id, clinic_id, desc, medicalFee, image"
-  );
   const { specialties, isLoading: isLoadingSpecialties } = useSpecialties("desc, image");
+  const { doctors, isLoading: isLoadingDoctors } = useDoctors("specialty_id, clinic_id, desc, medicalFee, image");
 
   const [posts, setPosts] = useState<PostData[]>([]);
   const [postToDelete, setPostToDelete] = useState<string | null>(null);
@@ -75,7 +76,6 @@ const ManagePosts = () => {
   ) => {
     const accessToken = Cookies.get("access_token");
     if (!accessToken) return;
-
     setLoading({ ...isLoading, posts: true });
 
     try {
@@ -88,17 +88,20 @@ const ManagePosts = () => {
         exclude: "desc, image",
         releaseDate: date && format(date, "dd/MM/yyyy")
       });
-
-      const itemsPerPage = 10;
-      const totalPages = Math.ceil(total / itemsPerPage);
-
-      setPosts(posts);
-      setTotalPages(totalPages);
+      handlePostsFetchSuccess(posts, total);
     } catch (error: any) {
+      console.error(error);
       toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
     } finally {
       setLoading({ ...isLoading, posts: false });
     }
+  };
+
+  const handlePostsFetchSuccess = (posts: PostData[], total: number) => {
+    const itemsPerPage = 10;
+    const totalPages = Math.ceil(total / itemsPerPage);
+    setPosts(posts);
+    setTotalPages(totalPages);
   };
 
   useEffect(() => {
@@ -106,29 +109,30 @@ const ManagePosts = () => {
   }, [currentPage, debouncedSearchQuery, selectedDoctor, selectedSpecialty, selectedDate]);
 
   const handleDeletePost = async () => {
-    if (!postToDelete) return;
-
     const accessToken = Cookies.get("access_token");
-    if (!accessToken) return;
-
+    if (!accessToken || !postToDelete) return;
     setLoading({ ...isLoading, deleting: true });
 
     try {
       await deletePost(accessToken, postToDelete);
-
-      if (currentPage > 1 && posts?.length === 1) {
-        setCurrentPage(currentPage - 1);
-        await fetchPosts(currentPage - 1);
-      } else {
-        await fetchPosts(currentPage);
-      }
-
+      await handlePrefetchingPosts();
       setModalOpen(false);
       toast.success("Xóa bài viết thành công!");
     } catch (error: any) {
+      console.error(error);
       toast.error("Xóa bài viết thất bại. Vui lòng thử lại sau ít phút nữa!");
     } finally {
+      setModalOpen(false);
       setLoading({ ...isLoading, deleting: false });
+    }
+  };
+
+  const handlePrefetchingPosts = async () => {
+    if (currentPage > 1 && posts?.length === 1) {
+      setCurrentPage(currentPage - 1);
+      await fetchPosts(currentPage - 1);
+    } else {
+      await fetchPosts(currentPage);
     }
   };
 
@@ -139,7 +143,6 @@ const ManagePosts = () => {
   return (
     <>
       <h1 className="text-xl font-bold mb-4">Danh sách bài viết</h1>
-
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Select onValueChange={(value) => setSelectedSpecialty(value)}>
@@ -152,24 +155,19 @@ const ManagePosts = () => {
                       ? "Tất cả"
                       : selectedSpecialty
                         ? specialties.find(specialty => specialty._id === selectedSpecialty)?.name
-                        : "Chọn chuyên khoa"
-                  }
+                        : "Chọn chuyên khoa"}
                 />
               </div>
             </SelectTrigger>
             <SelectContent>
               {isLoadingSpecialties ? (
-                <div className="py-6">
-                  <Spinner table />
-                </div>
+                <div className="py-6"><Spinner table /></div>
               ) : (
                 specialties?.length > 0 ? (
                   <>
                     <SelectItem value="all">Tất cả</SelectItem>
-                    {specialties?.map((specialty) => (
-                      <SelectItem key={specialty?._id} value={specialty?._id}>
-                        {specialty?.name}
-                      </SelectItem>
+                    {specialties?.map((specialty: SpecialtyData) => (
+                      <SelectItem key={specialty?._id} value={specialty?._id}>{specialty?.name}</SelectItem>
                     ))}
                   </>
                 ) : (
@@ -191,24 +189,19 @@ const ManagePosts = () => {
                       ? "Tất cả"
                       : selectedDoctor
                         ? doctors.find(doctor => doctor._id === selectedDoctor)?.fullname
-                        : "Chọn bác sĩ"
-                  }
+                        : "Chọn bác sĩ"}
                 />
               </div>
             </SelectTrigger>
             <SelectContent>
               {isLoadingDoctors ? (
-                <div className="py-6">
-                  <Spinner table />
-                </div>
+                <div className="py-6"><Spinner table /></div>
               ) : (
                 doctors?.length > 0 ? (
                   <>
                     <SelectItem value="all">Tất cả</SelectItem>
-                    {doctors?.map((doctor) => (
-                      <SelectItem key={doctor?._id} value={doctor?._id}>
-                        {doctor?.fullname}
-                      </SelectItem>
+                    {doctors?.map((doctor: DoctorData) => (
+                      <SelectItem key={doctor?._id} value={doctor?._id}>{doctor?.fullname}</SelectItem>
                     ))}
                   </>
                 ) : (
@@ -252,8 +245,7 @@ const ManagePosts = () => {
       </div>
 
       <div className={cn(
-        "relative rounded-md shadow-md overflow-x-auto",
-        posts?.length > 0 ? "h-auto" : "h-full"
+        "relative rounded-md shadow-md overflow-x-auto", posts?.length > 0 ? "h-auto" : "h-full"
       )}>
         <Table className="relative h-full text-[17px]">
           <TableHeader className="sticky top-0 left-0 right-0 h-12 bg-gray-100">
@@ -269,7 +261,7 @@ const ManagePosts = () => {
 
           <TableBody>
             {posts?.length > 0 ? (
-              posts?.map((post, index) => {
+              posts?.map((post: PostData, index) => {
                 const startIndex = (currentPage - 1) * 10;
 
                 return (
@@ -305,10 +297,7 @@ const ManagePosts = () => {
                           onClick={() => router.replace(`/admin/manage-posts/edit-post/${btoa(post?._id)}`)}
                           className="group"
                         >
-                          <LuClipboardEdit
-                            size="22"
-                            className="group-hover:text-green-500 transition duration-500"
-                          />
+                          <LuClipboardEdit size="22" className="group-hover:text-green-500 transition duration-500" />
                         </Button>
 
                         <Button
@@ -320,10 +309,7 @@ const ManagePosts = () => {
                           }}
                           className="group"
                         >
-                          <AiOutlineDelete
-                            size="22"
-                            className="group-hover:text-red-500 transition duration-500"
-                          />
+                          <AiOutlineDelete size="22" className="group-hover:text-red-500 transition duration-500" />
                         </Button>
                       </div>
                     </TableCell>

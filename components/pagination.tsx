@@ -9,21 +9,17 @@ import {
   PaginationPrevious
 } from "@/components/ui/pagination";
 
-interface PaginationSectionProps {
+interface IProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
 };
 
-const PaginationSection = ({
-  currentPage, totalPages, onPageChange,
-}: PaginationSectionProps) => {
+const PaginationSection = ({ currentPage, totalPages, onPageChange }: IProps) => {
   const maxVisiblePages = 5;
 
   const handlePageChange = (page: number) => {
-    if (page !== currentPage && page > 0 && page <= totalPages) {
-      onPageChange(page);
-    }
+    if (page !== currentPage && page > 0 && page <= totalPages) onPageChange(page);
   };
 
   if (totalPages <= maxVisiblePages) {
@@ -33,9 +29,7 @@ const PaginationSection = ({
           <PaginationItem>
             <PaginationPrevious
               onClick={() => handlePageChange(currentPage - 1)}
-              className={cn(
-                "cursor-pointer", currentPage === 1 ? "disabled" : ""
-              )}
+              className={cn("cursor-pointer", currentPage === 1 ? "disabled" : "")}
             />
           </PaginationItem>
 
@@ -57,9 +51,7 @@ const PaginationSection = ({
           <PaginationItem>
             <PaginationNext
               onClick={() => handlePageChange(currentPage + 1)}
-              className={cn(
-                "cursor-pointer", currentPage === totalPages ? "disabled" : ""
-              )}
+              className={cn("cursor-pointer", currentPage === totalPages ? "disabled" : "")}
             />
           </PaginationItem>
         </PaginationContent>
@@ -85,9 +77,7 @@ const PaginationSection = ({
         <PaginationItem>
           <PaginationPrevious
             onClick={() => handlePageChange(currentPage - 1)}
-            className={cn(
-              "cursor-pointer", currentPage === 1 ? "disabled" : ""
-            )}
+            className={cn("cursor-pointer", currentPage === 1 ? "disabled" : "")}
           />
         </PaginationItem>
 
@@ -109,9 +99,7 @@ const PaginationSection = ({
         <PaginationItem>
           <PaginationNext
             onClick={() => handlePageChange(currentPage + 1)}
-            className={cn(
-              "cursor-pointer", currentPage === totalPages ? "disabled" : ""
-            )}
+            className={cn("cursor-pointer", currentPage === totalPages ? "disabled" : "")}
           />
         </PaginationItem>
       </PaginationContent>

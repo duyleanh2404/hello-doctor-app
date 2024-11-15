@@ -14,6 +14,7 @@ const useClinic = (id: string) => {
         const { clinic } = await getClinicById(id);
         setClinic(clinic);
       } catch (error: any) {
+        console.error(error);
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       }
     };

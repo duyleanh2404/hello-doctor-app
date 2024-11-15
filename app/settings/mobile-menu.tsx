@@ -17,8 +17,8 @@ const MobileMenu = () => {
   const pathname = usePathname();
   const dispatch = useDispatch();
 
-  const { openMenuMobile } = useSelector((state: RootState) => state.settings);
   const { isBannerVisible } = useSelector((state: RootState) => state.common);
+  const { openMenuMobile } = useSelector((state: RootState) => state.settings);
 
   return (
     <div

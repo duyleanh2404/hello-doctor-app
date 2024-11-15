@@ -1,8 +1,4 @@
-import {
-  EditDoctorData,
-  CreateDoctorData,
-  GetAllDoctorsData
-} from "@/types/doctor-types";
+import { EditDoctorData, CreateDoctorData, GetAllDoctorsData } from "@/types/doctor-types";
 
 import { handleResponse } from "@/utils/handle-response";
 import { appendFormData } from "@/utils/append-form-data";
@@ -18,14 +14,11 @@ export const createDoctor = async (
 
   if (image) formData.append("image", image);
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/doctor/create`,
-    {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${accessToken}` },
-      body: formData
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/doctor/create`, {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${accessToken}` },
+    body: formData
+  });
 
   return handleResponse(response);
 };
@@ -41,26 +34,20 @@ export const editDoctor = async (
 
   if (image) formData.append("image", image);
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/doctor/${id}`,
-    {
-      method: "PUT",
-      headers: { "Authorization": `Bearer ${accessToken}` },
-      body: formData
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/doctor/${id}`, {
+    method: "PUT",
+    headers: { "Authorization": `Bearer ${accessToken}` },
+    body: formData
+  });
 
   return handleResponse(response);
 };
 
 export const deleteDoctor = async (accessToken: string, id: string) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/doctor/${id}`,
-    {
-      method: "DELETE",
-      headers: { "Authorization": `Bearer ${accessToken}` }
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/doctor/${id}`, {
+    method: "DELETE",
+    headers: { "Authorization": `Bearer ${accessToken}` }
+  });
 
   return handleResponse(response);
 };
@@ -89,12 +76,9 @@ export const getAllDoctors = async ({
 };
 
 export const getDoctorById = async (id: string) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/doctor/${id}`,
-    {
-      method: "GET"
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/doctor/${id}`, {
+    method: "GET"
+  });
 
   return handleResponse(response);
 };

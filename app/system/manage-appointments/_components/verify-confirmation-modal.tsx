@@ -23,45 +23,38 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import Spinner from "@/components/spinner";
 
-interface VerifyConfirmationModalProps {
+interface IProps {
   isOpen: boolean;
   appointmentToVerify: AppointmentData;
   onClose: () => void;
   onChanged: () => void;
 };
 
-const VerifyConfirmationModal = ({
-  isOpen, appointmentToVerify, onClose, onChanged
-}: VerifyConfirmationModalProps) => {
+const VerifyConfirmationModal = ({ isOpen, appointmentToVerify, onClose, onChanged }: IProps) => {
   const [fileName, setFileName] = useState<string>("");
   const [isLoading, setLoading] = useState<boolean>(false);
 
-  const {
-    reset,
-    register,
-    handleSubmit,
-    formState: { errors }
-  } = useForm<CreateHistoryForm>();
+  const { reset, register, handleSubmit, formState: { errors } } = useForm<CreateHistoryForm>();
 
-  const handleVerifyAppointment: SubmitHandler<CreateHistoryForm> = async (data) => {
+  const handleVerifyAppointment: SubmitHandler<CreateHistoryForm> = async (historyData) => {
     const accessToken = Cookies.get("access_token");
     if (!accessToken) return;
-
     setLoading(true);
 
     try {
       await createHistory(
         accessToken,
         {
-          ...data,
+          ...historyData,
           appointment_id: appointmentToVerify._id,
           email: appointmentToVerify.user_id.email,
-          prescriptionImage: data.prescriptionImage?.[0]
+          prescriptionImage: historyData.prescriptionImage?.[0]
         }
       );
       toast.success("Xác nhận đơn đặt lịch khám thành công!");
       onChanged();
     } catch (error: any) {
+      console.error(error);
       toast.error("Xác nhận đơn đặt lịch thất bại. Vui lòng thử lại sau ít phút nữa!");
     } finally {
       handleClose();
@@ -70,10 +63,15 @@ const VerifyConfirmationModal = ({
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const file = event.target.files?.[0];
-      setFileName(file.name);
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Vui lòng chỉ tải lên hình ảnh!");
+      return;
     }
+
+    setFileName(file.name);
   };
 
   const handleClose = () => {
@@ -111,9 +109,7 @@ const VerifyConfirmationModal = ({
                   errors.doctorComment ? "border-red-500" : "border-gray-300"
                 )}
               />
-              {errors.doctorComment && (
-                <p className="text-red-500 text-sm">{errors.doctorComment.message}</p>
-              )}
+              {errors.doctorComment && <p className="text-red-500 text-sm">{errors.doctorComment.message}</p>}
             </div>
 
             <div className="flex flex-col gap-2 mt-4">
@@ -152,9 +148,7 @@ const VerifyConfirmationModal = ({
                   <Label htmlFor="good" className="pl-2 cursor-pointer">Tốt</Label>
                 </div>
               </div>
-              {errors.healthStatus && (
-                <p className="text-red-500 text-sm">{errors.healthStatus.message}</p>
-              )}
+              {errors.healthStatus && <p className="text-red-500 text-sm">{errors.healthStatus.message}</p>}
             </div>
 
             <div className="flex flex-col gap-3 mt-4">
@@ -177,37 +171,20 @@ const VerifyConfirmationModal = ({
                   <p>{fileName ? fileName : "Tải ảnh lên"}</p>
                 </Button>
               </div>
-              {errors.prescriptionImage && (
-                <p className="text-red-500 text-sm">{errors.prescriptionImage.message}</p>
-              )}
+              {errors.prescriptionImage && <p className="text-red-500 text-sm">{errors.prescriptionImage.message}</p>}
             </div>
           </div>
 
           <div className="flex justify-end gap-4 mt-6">
-            <Button
-              type="button"
-              size="lg"
-              variant="cancel"
-              onClick={handleClose}
-            >
-              Hủy
-            </Button>
-
-            <Button
-              type="submit"
-              size="lg"
-              variant="submit"
-              disabled={isLoading}
-            >
+            <Button type="button" size="lg" variant="cancel" onClick={handleClose}>Hủy</Button>
+            <Button type="submit" size="lg" variant="submit" disabled={isLoading}>
               {isLoading ? "Đang xác nhận..." : "Xác nhận"}
             </Button>
           </div>
         </form>
 
         {isLoading && (
-          <div className="fixed inset-0">
-            <Spinner center />
-          </div>
+          <div className="fixed inset-0"><Spinner center /></div>
         )}
       </DialogContent>
     </Dialog>

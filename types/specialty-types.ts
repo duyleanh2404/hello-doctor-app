@@ -1,32 +1,32 @@
-export interface SpecialtyData {
+export type SpecialtyData = {
   _id: string;
   name: string;
   desc: string;
   image: string;
 };
 
-export interface CreateSpecialtyForm {
-  _id?: string;
+export type CreateSpecialtyForm = {
+  _id: string;
   name: string;
   desc: string;
   image: FileList;
 };
 
-export interface EditSpecialtyForm {
-  _id?: string;
-  name: string;
-  desc: string;
+export type EditSpecialtyForm = {
+  _id: string;
+  name?: string;
+  desc?: string;
   image?: FileList;
 };
 
-export interface CreateSpecialtyData {
+export type CreateSpecialtyData = {
   name: string;
   desc: string;
-  image?: File;
+  image: File;
   imageName: string;
 };
 
-export interface EditSpecialtyData {
+export type EditSpecialtyData = {
   id: string;
   name?: string;
   desc?: string;
@@ -34,7 +34,7 @@ export interface EditSpecialtyData {
   imageName?: string;
 };
 
-export interface GetAllSpecialtiesData {
+export type GetAllSpecialtiesData = {
   page?: number;
   limit?: number;
   query?: string;

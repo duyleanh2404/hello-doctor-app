@@ -16,9 +16,7 @@ export default function SettingsLayout({
   return (
     <div>
       <Header />
-      <MainSettingsLayout>
-        {children}
-      </MainSettingsLayout>
+      <MainSettingsLayout>{children}</MainSettingsLayout>
       <Footer />
     </div>
   );

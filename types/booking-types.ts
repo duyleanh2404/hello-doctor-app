@@ -14,20 +14,20 @@ export interface BookingData {
   _id: string;
   user_id: string;
   doctor_id: DoctorData;
+  doctor: string;
   date: string;
   time: string;
   address: string;
   reasons: string;
   zaloPhone: string;
   newPatients: boolean;
-  doctor: string;
 };
 
 export interface ScheduleInfoProps {
   time?: string;
+  paymentMethod: string;
   isBooking: boolean;
   isLoading: boolean;
-  paymentMethod: string;
   schedule?: ScheduleData;
   setPaymentMethod: (paymentMethod: string) => void;
 };

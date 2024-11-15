@@ -4,12 +4,12 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 
 import { FiUpload } from "react-icons/fi";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
-import JoditEditor from "jodit-react";
 
 import { CreateClinicForm } from "@/types/clinic-types";
 import { createClinic } from "@/services/clinic-service";
@@ -18,6 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import SelectAddress from "@/components/select-address";
 
+const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
+
 const CreateClinic = () => {
   const router = useRouter();
 
@@ -25,36 +27,34 @@ const CreateClinic = () => {
   const [isLoading, setLoading] = useState<boolean>(false);
 
   const [avatarName, setAvatarName] = useState<string>("");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarUrl, setavatarUrl] = useState<string | null>(null);
 
   const [bannerName, setBannerName] = useState<string>("");
-  const [bannerUrl, setBannerUrl] = useState<string | null>(null);
+  const [bannerUrl, setbannerUrl] = useState<string | null>(null);
 
   const [selectedProvince, setSelectedProvince] = useState<any | null>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<any | null>(null);
 
   const {
-    watch,
-    register,
-    setValue,
-    setError,
-    clearErrors,
-    handleSubmit,
-    formState: { errors }
+    watch, register, setValue, setError, clearErrors, handleSubmit, formState: { errors }
   } = useForm<CreateClinicForm>();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, type: string) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    clearErrors(type === "avatar" ? "avatar" : "banner");
+    if (!file.type.startsWith("image/")) {
+      toast.error("Vui lòng chỉ tải lên hình ảnh!");
+      return;
+    }
 
+    clearErrors(type === "avatar" ? "avatar" : "banner");
     if (type === "avatar") {
       setAvatarName(file.name);
-      setAvatarUrl(URL.createObjectURL(file));
+      setavatarUrl(URL.createObjectURL(file));
     } else {
       setBannerName(file.name);
-      setBannerUrl(URL.createObjectURL(file));
+      setbannerUrl(URL.createObjectURL(file));
     }
   };
 
@@ -65,62 +65,54 @@ const CreateClinic = () => {
   };
 
   const handleValidateEditor = () => {
-    if (content.trim() !== "") return;
-    setError("desc", {
-      type: "manual",
-      message: "Vui lòng nhập mô tả của bệnh viện!"
-    });
+    if (content.trim() === "") {
+      setError("desc", { type: "manual", message: "Vui lòng nhập mô tả của bệnh viện!" });
+    }
   };
 
-  const handleCreateClinic: SubmitHandler<CreateClinicForm> = async (data) => {
+  const handleCreateClinic: SubmitHandler<CreateClinicForm> = async (clinicData) => {
     const accessToken = Cookies.get("access_token");
     if (!accessToken) return;
-
     setLoading(true);
 
     try {
-      const avatarFile = data.avatar?.[0];
-      const bannerFile = data.banner?.[0];
-
       await createClinic(
         accessToken,
         {
+          name: clinicData.name,
+          desc: content,
           avatarName,
           bannerName,
-          avatar: avatarFile,
-          banner: bannerFile,
-          desc: content,
-          name: data.name,
-          address: `${data.street}, ${data.ward}, ${data.district}, ${data.province}`,
+          avatar: clinicData.avatar?.[0],
+          banner: clinicData.banner?.[0],
+          address: `${clinicData.street}, ${clinicData.ward}, ${clinicData.district}, ${clinicData.province}`
         }
       );
 
       router.replace("/admin/manage-clinics");
       toast.success("Thêm bệnh viện thành công!");
-    } catch (error: any) {
-      setLoading(false);
+    } catch (status: any) {
+      handleError(status);
+    }
+  };
 
-      switch (error) {
-        case 409:
-          setError("name", {
-            type: "manual",
-            message: "Bệnh viện này đã tồn tại!"
-          });
-          window.scrollTo({ top: 0, behavior: "smooth" });
-          break;
+  const handleError = (status: number) => {
+    setLoading(false);
 
-        default:
-          toast.success("Thêm bệnh viện thất bại. Vui lòng thử lại sau ít phút nữa!");
-          router.replace("/admin/manage-clinics");
-          break;
-      }
+    if (status === 409) {
+      setError("name", {
+        type: "manual", message: "Bệnh viện này đã tồn tại!"
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      toast.success("Thêm bệnh viện thất bại. Vui lòng thử lại sau ít phút nữa!");
+      router.replace("/admin/manage-clinics");
     }
   };
 
   return (
     <>
       <h1 className="text-xl font-bold mb-4">Thêm bệnh viện mới</h1>
-
       <form onSubmit={handleSubmit(handleCreateClinic)}>
         <div className="flex flex-col gap-8 pb-6">
           <div className="flex flex-col gap-8 -mx-4 px-4">
@@ -133,9 +125,7 @@ const CreateClinic = () => {
                 {...register("name", { required: "Vui lòng nhập tên bệnh viện!" })}
                 className={cn(errors.name ? "border-red-500" : "border-gray-300")}
               />
-              {errors.name && (
-                <p className="text-red-500 text-sm">{errors.name.message}</p>
-              )}
+              {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
             </div>
 
             <SelectAddress
@@ -172,9 +162,7 @@ const CreateClinic = () => {
                 </Button>
               </div>
 
-              {errors.avatar && (
-                <p className="text-red-500 text-sm">{errors.avatar.message}</p>
-              )}
+              {errors.avatar && <p className="text-red-500 text-sm">{errors.avatar.message}</p>}
 
               {avatarUrl && (
                 <div className="mx-auto mt-6">
@@ -211,9 +199,7 @@ const CreateClinic = () => {
                 </Button>
               </div>
 
-              {errors.banner && (
-                <p className="text-red-500 text-sm">{errors.banner.message}</p>
-              )}
+              {errors.banner && <p className="text-red-500 text-sm">{errors.banner.message}</p>}
 
               {bannerUrl && (
                 <div className="mx-auto mt-6">
@@ -235,28 +221,14 @@ const CreateClinic = () => {
                 onChange={handleEditorChange}
                 className={cn("!rounded-md", errors.desc && "!border-red-500")}
               />
-              {errors.desc && (
-                <p className="text-red-500 text-sm">{errors.desc.message}</p>
-              )}
+              {errors.desc && <p className="text-red-500 text-sm">{errors.desc.message}</p>}
             </div>
 
             <div className="flex items-center justify-end gap-4">
-              <Button
-                type="button"
-                size="lg"
-                variant="cancel"
-                onClick={() => router.replace("/admin/manage-clinics")}
-              >
+              <Button type="button" size="lg" variant="cancel" onClick={() => router.replace("/admin/manage-clinics")}>
                 Hủy
               </Button>
-
-              <Button
-                type="submit"
-                size="lg"
-                variant="submit"
-                disabled={isLoading}
-                onClick={handleValidateEditor}
-              >
+              <Button type="submit" size="lg" variant="submit" disabled={isLoading} onClick={handleValidateEditor}>
                 {isLoading ? "Đang tạo..." : "Tạo mới"}
               </Button>
             </div>

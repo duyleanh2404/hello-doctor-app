@@ -28,7 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Spinner from "@/components/spinner";
 import PaginationSection from "@/components/pagination";
-import DeleteConfirmationModal from "@/components/delete-confirmation-modal";
+import DeleteConfirmationModal from "@/components/modal/delete-confirmation-modal";
 
 const ManageSpecialties = () => {
   const router = useRouter();
@@ -49,24 +49,24 @@ const ManageSpecialties = () => {
   const fetchSpecialties = async (page: number, query?: string) => {
     const accessToken = Cookies.get("access_token");
     if (!accessToken) return;
-
     setLoading({ ...isLoading, specialties: true });
 
     try {
-      const { specialties, total } = await getAllSpecialties({
-        page, limit: 10, query, exclude: "unnecessary"
-      });
-
-      const itemsPerPage = 10;
-      const totalPages = Math.ceil(total / itemsPerPage);
-
-      setTotalPages(totalPages);
-      setSpecialties(specialties);
+      const { specialties, total } = await getAllSpecialties({ page, limit: 10, query });
+      handleSpecialtiesFetchSuccess(specialties, total);
     } catch (error: any) {
+      console.error(error);
       toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
     } finally {
       setLoading({ ...isLoading, specialties: false });
     }
+  };
+
+  const handleSpecialtiesFetchSuccess = (specialties: SpecialtyData[], total: number) => {
+    const itemsPerPage = 10;
+    const totalPages = Math.ceil(total / itemsPerPage);
+    setSpecialties(specialties);
+    setTotalPages(totalPages);
   };
 
   useEffect(() => {
@@ -74,29 +74,30 @@ const ManageSpecialties = () => {
   }, [currentPage, debouncedSearchQuery]);
 
   const handleDeleteSpecialty = async () => {
-    if (!specialtyToDelete) return;
-
     const accessToken = Cookies.get("access_token");
-    if (!accessToken) return;
-
+    if (!accessToken || !specialtyToDelete) return;
     setLoading({ ...isLoading, deleting: true });
 
     try {
       await deleteSpecialty(accessToken, specialtyToDelete);
-
-      if (currentPage > 1 && specialties?.length === 1) {
-        setCurrentPage(currentPage - 1);
-        await fetchSpecialties(currentPage - 1);
-      } else {
-        await fetchSpecialties(currentPage);
-      }
-
+      await handlePrefetchingSpecialties();
       setModalOpen(false);
       toast.success("Xóa chuyên khoa thành công!");
     } catch (error: any) {
+      console.error(error);
       toast.error("Xóa chuyên khoa thất bại. Vui lòng thử lại sau ít phút nữa!");
     } finally {
+      setModalOpen(false);
       setLoading({ ...isLoading, deleting: false });
+    }
+  };
+
+  const handlePrefetchingSpecialties = async () => {
+    if (currentPage > 1 && specialties?.length === 1) {
+      setCurrentPage(currentPage - 1);
+      await fetchSpecialties(currentPage - 1);
+    } else {
+      await fetchSpecialties(currentPage);
     }
   };
 
@@ -107,7 +108,6 @@ const ManageSpecialties = () => {
   return (
     <>
       <h1 className="text-xl font-bold mb-4">Danh sách chuyên khoa</h1>
-
       <div className="relative ml-auto">
         <FiSearch
           size="22"
@@ -130,8 +130,7 @@ const ManageSpecialties = () => {
       </div>
 
       <div className={cn(
-        "relative rounded-md shadow-md overflow-x-auto",
-        specialties?.length > 0 ? "h-auto" : "h-full"
+        "relative rounded-md shadow-md overflow-x-auto", specialties?.length > 0 ? "h-auto" : "h-full"
       )}>
         <Table className="relative h-full text-[17px]">
           <TableHeader className="sticky top-0 left-0 right-0 h-12 bg-gray-100">
@@ -146,7 +145,7 @@ const ManageSpecialties = () => {
 
           <TableBody>
             {specialties?.length > 0 ? (
-              specialties?.map((specialty, index) => {
+              specialties?.map((specialty: SpecialtyData, index) => {
                 const startIndex = (currentPage - 1) * 10;
 
                 return (
@@ -178,10 +177,7 @@ const ManageSpecialties = () => {
                           }
                           className="group"
                         >
-                          <LuClipboardEdit
-                            size="22"
-                            className="group-hover:text-green-500 transition duration-500"
-                          />
+                          <LuClipboardEdit size="22" className="group-hover:text-green-500 transition duration-500" />
                         </Button>
 
                         <Button
@@ -193,10 +189,7 @@ const ManageSpecialties = () => {
                           }}
                           className="group"
                         >
-                          <AiOutlineDelete
-                            size="22"
-                            className="group-hover:text-red-500 transition duration-500"
-                          />
+                          <AiOutlineDelete size="22" className="group-hover:text-red-500 transition duration-500" />
                         </Button>
                       </div>
                     </TableCell>

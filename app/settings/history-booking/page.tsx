@@ -25,29 +25,23 @@ import { FaLocationDot, FaCheck, FaBars } from "react-icons/fa6";
 import { RootState } from "@/store/store";
 import { setOpenMenuMobile } from "@/store/slices/settings-slice";
 
-import {
-  deleteAppointment,
-  getAllAppointments
-} from "@/services/appointment-service";
 import { AppointmentData } from "@/types/appointment-types";
 import { formatVietnameseCurrency } from "@/utils/format-vietnamese-currency";
+import { deleteAppointment, getAllAppointments } from "@/services/appointment-service";
 
 import { Button } from "@/components/ui/button";
 import Spinner from "@/components/spinner";
 import PaginationSection from "@/components/pagination";
-import DeleteConfirmationModal from "@/components/delete-confirmation-modal";
+import DeleteConfirmationModal from "@/components/modal/delete-confirmation-modal";
 
 const HistoryBooking = () => {
   const router = useRouter();
+
   const dispatch = useDispatch();
+  const { user, openMenuMobile } = useSelector((state: RootState) => state.settings);
 
-  const { user } = useSelector((state: RootState) => state.settings);
-  const { openMenuMobile } = useSelector((state: RootState) => state.settings);
-
-  const [isLoading, setLoading] = useState({
-    appointments: false, deleting: false, verifying: false
-  });
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
+  const [isLoading, setLoading] = useState({ appointments: false, deleting: false, verifying: false });
 
   const [appointments, setAppointments] = useState<AppointmentData[]>([]);
   const [appointmentToDelete, setAppointmentToDelete] = useState<string | null>(null);
@@ -62,52 +56,57 @@ const HistoryBooking = () => {
   const fetchAppointments = async (page: number) => {
     const accessToken = Cookies.get("access_token");
     if (!accessToken) return;
-
     setLoading({ ...isLoading, appointments: true });
 
     try {
       const { appointments, total } = await getAllAppointments(
         accessToken, { page, user_id: user?._id }
       );
-
-      const itemsPerPage = 10;
-      const totalPages = Math.ceil(total / itemsPerPage);
-
-      setTotalPages(totalPages);
-      setAppointments(appointments);
+      handleAppointmentsFetchSuccess(appointments, total);
     } catch (error: any) {
+      console.error(error);
       toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
     } finally {
       setLoading({ ...isLoading, appointments: false });
     }
   };
 
+  const handleAppointmentsFetchSuccess = (appointments: AppointmentData[], total: number) => {
+    const itemsPerPage = 10;
+    const totalPages = Math.ceil(total / itemsPerPage);
+    setTotalPages(totalPages);
+    setAppointments(appointments);
+  };
+
   useEffect(() => {
     fetchAppointments(currentPage);
   }, [currentPage]);
 
-  const handleCancelAppointment = async () => {
-    if (!appointmentToDelete) return;
-
+  const handleDeleteAppointment = async () => {
     const accessToken = Cookies.get("access_token");
-    if (!accessToken) return;
-
+    if (!accessToken || !appointmentToDelete) return;
     setLoading({ ...isLoading, deleting: true });
 
     try {
       await deleteAppointment(accessToken, appointmentToDelete);
-      await fetchAppointments(currentPage);
-
-      if (currentPage > 1 && appointments?.length === 1) {
-        setCurrentPage(1);
-      }
-
+      await handlePrefetchingAppointments();
       setModalOpen(false);
       toast.success("Hủy đơn đặt lịch khám thành công!");
     } catch (error: any) {
+      console.error(error);
       toast.success("Hủy đơn thất bại. Vui lòng thử lại sau ít phút nữa!");
     } finally {
+      setModalOpen(false);
       setLoading({ ...isLoading, deleting: false });
+    }
+  };
+
+  const handlePrefetchingAppointments = async () => {
+    if (currentPage > 1 && appointments?.length === 1) {
+      setCurrentPage(currentPage - 1);
+      await fetchAppointments(currentPage - 1);
+    } else {
+      await fetchAppointments(currentPage);
     }
   };
 
@@ -131,18 +130,14 @@ const HistoryBooking = () => {
         </div>
 
         <div className={cn(
-          "flex flex-col gap-12",
-          appointments?.length > 0 ? "w-[700px]" : "w-full"
+          "flex flex-col gap-12", appointments?.length > 0 ? "w-[700px]" : "w-full"
         )}>
           {isLoading.appointments ? (
             <Spinner center />
           ) : (
             appointments?.length > 0 ? (
               appointments?.map((appointment: AppointmentData) => (
-                <div
-                  key={appointment?._id}
-                  className="w-full bg-white shadow-md rounded-lg"
-                >
+                <div key={appointment?._id} className="w-full bg-white shadow-md rounded-lg">
                   <div className="flex flex-col p-6">
                     <div className="flex items-start justify-between pb-6 border-b border-dashed">
                       <div className="flex items-center gap-6">
@@ -154,24 +149,18 @@ const HistoryBooking = () => {
                           className="object-cover rounded-full"
                         />
                         <div className="flex flex-col gap-2">
-                          <h1 className="text-[17px] font-semibold">
-                            {appointment?.doctor_id?.fullname}
-                          </h1>
-                          <p className="text-sm text-[#595959]">
-                            {appointment?.doctor_id?.specialty_id?.name}
-                          </p>
+                          <h1 className="text-[17px] font-semibold">{appointment?.doctor_id?.fullname}</h1>
+                          <p className="text-sm text-[#595959]">{appointment?.doctor_id?.specialty_id?.name}</p>
                         </div>
                       </div>
 
                       {appointment?.isVerified ? (
                         <div className="flex items-center gap-3 text-[15px] font-semibold text-green-500">
-                          <FaCheck />
-                          <p>Đã xác nhận</p>
+                          <FaCheck /> <p>Đã xác nhận</p>
                         </div>
                       ) : (
                         <div className="flex items-center gap-3 text-[15px] font-semibold text-red-500">
-                          <IoClose className="size-5" />
-                          <p>Chưa xác nhận</p>
+                          <IoClose className="size-5" /> <p>Chưa xác nhận</p>
                         </div>
                       )}
                     </div>
@@ -273,7 +262,7 @@ const HistoryBooking = () => {
           isCancel
           isOpen={isModalOpen}
           isDeleting={isLoading.deleting}
-          onConfirm={handleCancelAppointment}
+          onConfirm={handleDeleteAppointment}
           onClose={() => setModalOpen(false)}
         />
       </div>

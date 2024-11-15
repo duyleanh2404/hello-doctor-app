@@ -62,10 +62,6 @@
     @apply border-border;
   }
 
-  /* html {
-    @apply overflow-x-hidden;
-  } */
-
   body {
     @apply bg-background text-foreground;
   }
@@ -74,6 +70,7 @@
     @apply outline-none;
   }
 }
+
 
 @layer components {
   .wrapper {
@@ -97,6 +94,10 @@ body {
 
 html body[data-scroll-locked] {
   margin-right: 0 !important;
+}
+
+svg {
+  flex-shrink: 0;
 }
 
 .loader {
@@ -135,6 +136,11 @@ html body[data-scroll-locked] {
   height: auto;
 }
 
+.logo {
+  display: flex;
+  justify-content: center;
+}
+
 .insurance,
 .body-content,
 .map_map__dKKTO,
@@ -151,8 +157,16 @@ html body[data-scroll-locked] {
   grid-template-columns: repeat(3, 1fr);
 }
 
+.swal2-popup {
+  width: 600px;
+  padding: 20px;
+  border-radius: 20px;
+}
+
 .swal2-confirm {
-  width: 150px !important;
+  width: 180px !important;
+  padding: 16px !important;
+  border-radius: 5px !important;
   border-color: transparent !important;
   background-color: #2D87F3 !important;
 }

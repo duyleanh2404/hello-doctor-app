@@ -26,7 +26,6 @@ import SearchDoctor from "./search-doctor";
 import MedicalExperts from "./medical-experts";
 import SearchSpecialty from "./search-specialty";
 import Billboard from "@/components/advertises/billboard";
-import LazyLoadComponent from "@/components/lazyload-component";
 
 const OutstandingDoctor = lazy(() => import("./outstanding-doctor"));
 const OutstandingClinic = lazy(() => import("./outstanding-clinic"));
@@ -41,9 +40,6 @@ const BookingDoctorPage = () => {
 
   useEffect(() => {
     NProgress.done();
-  }, []);
-
-  useEffect(() => {
     const shouldShowBillboard = Math.random() > 0.5;
     setShowBillboard(shouldShowBillboard);
   }, []);
@@ -52,9 +48,8 @@ const BookingDoctorPage = () => {
     () => ({
       specialty: <SearchSpecialty />,
       clinic: <SearchClinic provinces={provinces} />,
-      doctor: <SearchDoctor provinces={provinces} />,
-    }),
-    [provinces]
+      doctor: <SearchDoctor provinces={provinces} />
+    }), [provinces]
   );
 
   return (
@@ -65,13 +60,7 @@ const BookingDoctorPage = () => {
             {bookingDoctorBanners.map(({ id, image }) => (
               <CarouselItem key={id}>
                 <div className="relative w-full pt-[32%] sm:pt-[22%]">
-                  <Image
-                    loading="lazy"
-                    src={image}
-                    alt="Banner"
-                    fill
-                    className="w-full h-full object-cover"
-                  />
+                  <Image loading="lazy" src={image} alt="Banner" fill className="w-full h-full object-cover" />
                 </div>
               </CarouselItem>
             ))}
@@ -88,9 +77,7 @@ const BookingDoctorPage = () => {
                 onClick={() => setTabActive(type as Tab)}
                 className={cn(
                   "relative min-w-fit py-3 xl:py-4 px-10 xl:px-12 rounded-none",
-                  tabActive === type
-                    ? "bg-white border-t-[3px] border-primary"
-                    : "",
+                  tabActive === type && "bg-white border-t-[3px] border-primary",
                   type !== "clinic" &&
                   "before:absolute before:top-1/2 before:left-0 before:-translate-y-1/2 before:w-[1px] before:h-[25px] before:bg-[#ccc]"
                 )}
@@ -103,25 +90,11 @@ const BookingDoctorPage = () => {
       </div>
 
       {tabComponents[tabActive]}
-
-      <LazyLoadComponent>
-        <OutstandingDoctor provinces={provinces} />
-      </LazyLoadComponent>
-
-      <LazyLoadComponent>
-        <OutstandingClinic provinces={provinces} />
-      </LazyLoadComponent>
-
-      <LazyLoadComponent>
-        <MedicalExperts />
-      </LazyLoadComponent>
-
-      <LazyLoadComponent>
-        <HealthGuide />
-      </LazyLoadComponent>
-
+      <OutstandingDoctor provinces={provinces} />
+      <OutstandingClinic provinces={provinces} />
+      <MedicalExperts />
+      <HealthGuide />
       {showBillboard && <Billboard />}
-
       <Chatbot />
     </div>
   );

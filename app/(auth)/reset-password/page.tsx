@@ -59,6 +59,7 @@ const ResetPassword = () => {
       await resetPassword({ email: verificationEmail, newPassword });
       handleResetPasswordSuccess();
     } catch (error: any) {
+      console.error(error);
       handleResetPasswordError();
     }
   };

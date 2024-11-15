@@ -5,14 +5,14 @@ import {
   TooltipProvider
 } from "@/components/ui/tooltip";
 
-interface HintProps {
+interface IProps {
   label?: string;
   customBg?: string;
   content?: React.ReactNode;
   children: React.ReactNode;
 };
 
-const Hint = ({ children, label, customBg, content }: HintProps) => {
+const Hint = ({ children, label, customBg, content }: IProps) => {
   return (
     <TooltipProvider>
       <Tooltip>

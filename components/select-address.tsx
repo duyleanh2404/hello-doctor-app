@@ -7,6 +7,8 @@ import {
   UseFormClearErrors
 } from "react-hook-form";
 
+import { Ward, District, Province } from "@/types/auth-types";
+
 import useWards from "@/hooks/fetch/use-wards";
 import useProvinces from "@/hooks/fetch/use-provinces";
 import useDistricts from "@/hooks/fetch/use-districts";
@@ -22,14 +24,14 @@ import { Input } from "@/components/ui/input";
 
 interface IProps {
   errors: Record<string, any>;
-  selectedProvince: any | null;
-  selectedDistrict: any | null;
+  selectedProvince: Province | null;
+  selectedDistrict: District | null;
   watch: UseFormWatch<any>;
   register: UseFormRegister<any>;
   setValue: UseFormSetValue<any>;
   clearErrors: UseFormClearErrors<any>;
-  setSelectedProvince: (province: any | null) => void;
-  setSelectedDistrict: (district: any | null) => void;
+  setSelectedProvince: (province: Province | null) => void;
+  setSelectedDistrict: (district: District | null) => void;
 };
 
 const SelectAddress = ({
@@ -43,12 +45,12 @@ const SelectAddress = ({
   setSelectedProvince,
   setSelectedDistrict
 }: IProps) => {
-  const provinces: any[] = useProvinces();
-  const wards: any[] = useWards(selectedDistrict);
-  const districts: any[] = useDistricts(selectedProvince);
+  const provinces: Province[] = useProvinces();
+  const wards: Ward[] = useWards(selectedDistrict);
+  const districts: District[] = useDistricts(selectedProvince);
 
   const handleProvinceChange = (provinceName: string) => {
-    const province = provinces.find((province: any) => province.name === provinceName);
+    const province = provinces.find((province: Province) => province.name === provinceName);
     if (!province) return;
 
     clearErrors("province");
@@ -62,7 +64,7 @@ const SelectAddress = ({
   };
 
   const handleDistrictChange = (districtName: string) => {
-    const district = districts.find((district: any) => district.name === districtName);
+    const district = districts.find((district: District) => district.name === districtName);
     if (!district) return;
 
     setValue("ward", "");
@@ -89,7 +91,7 @@ const SelectAddress = ({
           </SelectTrigger>
           <SelectContent className="h-[300px]">
             {provinces?.length > 0 ? (
-              provinces?.map((province) => (
+              provinces?.map((province: Province) => (
                 <SelectItem key={province?.name} value={province?.name}>{province?.name}</SelectItem>
               ))
             ) : (
@@ -118,7 +120,7 @@ const SelectAddress = ({
           </SelectTrigger>
           <SelectContent>
             {districts?.length > 0 ? (
-              districts?.map((district: any) => (
+              districts?.map((district: District) => (
                 <SelectItem key={district?.name} value={district?.name}>{district?.name}</SelectItem>
               ))
             ) : (
@@ -150,7 +152,7 @@ const SelectAddress = ({
           </SelectTrigger>
           <SelectContent>
             {wards?.length > 0 ? (
-              wards?.map((ward: any) => (
+              wards?.map((ward: Ward) => (
                 <SelectItem key={ward?._id} value={ward?.name}>{ward?.name}</SelectItem>
               ))
             ) : (

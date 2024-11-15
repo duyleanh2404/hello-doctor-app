@@ -14,6 +14,7 @@ const useDoctor = (id: string) => {
         const { doctor } = await getDoctorById(id);
         setDoctor(doctor);
       } catch (error: any) {
+        console.error(error);
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       }
     };

@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import Image from "next/image";
 
 import { FiSearch } from "react-icons/fi";
@@ -10,6 +10,7 @@ import NProgress from "nprogress";
 import toast from "react-hot-toast";
 import "nprogress/nprogress.css";
 
+import { Province } from "@/types/auth-types";
 import { ClinicData } from "@/types/clinic-types";
 import { getAllClinics } from "@/services/clinic-service";
 
@@ -27,72 +28,58 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Spinner from "@/components/spinner";
 
-const SearchClinic = ({ provinces }: { provinces: { id: string; name: string }[] }) => {
+const SearchClinic = memo(({ provinces }: { provinces: Province[] }) => {
   const router = useRouter();
+
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const [clinics, setClinics] = useState<ClinicData[]>([]);
 
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
   const [isLoading, setLoading] = useState({ clinics: false, routing: false });
 
-  const [clinics, setClinics] = useState<ClinicData[]>([]);
-  const [selectedClinic, setSelectedClinic] = useState<ClinicData | null>(null);
-
-  const [inputValue, setInputValue] = useState<string>("");
   const [selectedProvince, setSelectedProvince] = useState<string>("");
+  const [selectedClinic, setSelectedClinic] = useState<ClinicData | null>(null);
 
   const [query, setQuery] = useState<string>("");
   const debouncedQuery = useDebounce(query, 500);
 
   useClickOutside(dropdownRef, () => setIsDropdownVisible(false));
 
-  const fetchClinics = async (query?: string, province?: string) => {
-    setLoading({ ...isLoading, clinics: true });
-
-    try {
-      const { clinics } = await getAllClinics({
-        query,
-        exclude: "address, desc, banner",
-        province
-      });
-      setClinics(clinics);
-    } catch (error: any) {
-      toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
-    } finally {
-      setLoading({ ...isLoading, clinics: false });
-
-    }
-  };
-
   useEffect(() => {
     if (selectedProvince) setIsDropdownVisible(true);
-    fetchClinics(debouncedQuery, selectedProvince);
+
+    const fetchClinics = async () => {
+      setLoading({ ...isLoading, clinics: true });
+
+      try {
+        const { clinics } = await getAllClinics({
+          query: debouncedQuery,
+          exclude: "address, desc, banner",
+          province: selectedProvince
+        });
+        setClinics(clinics);
+      } catch (error: any) {
+        console.error(error);
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
+      } finally {
+        setLoading({ ...isLoading, clinics: false });
+      }
+    };
+
+    fetchClinics();
   }, [debouncedQuery, selectedProvince]);
-
-  useEffect(() => {
-    if (selectedClinic) setInputValue(selectedClinic?.name);
-  }, [selectedClinic]);
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setQuery(value);
-    setInputValue(value);
-    setIsDropdownVisible(!!value);
-  };
 
   const handleRoute = () => {
     NProgress.start();
     setLoading({ ...isLoading, routing: true });
-    router.replace(`/clinic-details/${btoa(selectedClinic?._id!)}`);
+    if (selectedClinic?._id) router.push(`/clinic-details/${btoa(selectedClinic._id)}`);
   };
 
   return (
     <div className="wrapper p-6 sm:p-8 bg-white shadow-md rounded-b-2xl">
       <div className="flex flex-col lg:flex-row items-center gap-4">
         <div className="w-full lg:w-[20%]">
-          <Select
-            value={selectedProvince}
-            onValueChange={(value) => setSelectedProvince(value)}
-          >
+          <Select value={selectedProvince} onValueChange={(value) => setSelectedProvince(value)}>
             <SelectTrigger
               className={cn(
                 "w-full py-[14px] px-4 text-[17px] placeholder:text-[17px] placeholder:text-[#595959] placeholder:font-medium border border-gray-300 focus:border-primary focus:shadow-input-primary rounded-lg transition duration-500",
@@ -105,10 +92,8 @@ const SearchClinic = ({ provinces }: { provinces: { id: string; name: string }[]
               {provinces?.length > 0 ? (
                 <>
                   <SelectItem value="all">Tất cả</SelectItem>
-                  {provinces?.map((province) => (
-                    <SelectItem key={province?.id} value={province?.name}>
-                      {province?.name}
-                    </SelectItem>
+                  {provinces?.map((province: any) => (
+                    <SelectItem key={province?.id} value={province?.name}>{province?.name}</SelectItem>
                   ))}
                 </>
               ) : (
@@ -121,16 +106,17 @@ const SearchClinic = ({ provinces }: { provinces: { id: string; name: string }[]
         </div>
 
         <div ref={dropdownRef} className="relative w-full lg:w-auto flex-1">
-          <FiSearch
-            size="22"
-            className="absolute top-1/2 left-5 -translate-y-1/2 text-[#595959]"
-          />
+          <FiSearch size="22" className="absolute top-1/2 left-5 -translate-y-1/2 text-[#595959]" />
           <Input
-            value={inputValue}
+            value={selectedClinic ? selectedClinic?.name : query}
+            type="text"
             spellCheck={false}
-            onChange={handleInputChange}
             placeholder="Tìm kiếm theo tên bệnh viện/ phòng khám"
             onFocus={() => setIsDropdownVisible(true)}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              if (selectedClinic) setSelectedClinic(null);
+            }}
             className="pl-14"
           />
 
@@ -151,9 +137,8 @@ const SearchClinic = ({ provinces }: { provinces: { id: string; name: string }[]
                     variant="ghost"
                     key={clinic?._id}
                     onClick={() => {
-                      setIsDropdownVisible(false);
-                      setInputValue(clinic?.name);
                       setSelectedClinic(clinic);
+                      setIsDropdownVisible(false);
                     }}
                     className="w-full h-14 flex items-center justify-start gap-4 hover:text-primary transition duration-500"
                   >
@@ -165,9 +150,7 @@ const SearchClinic = ({ provinces }: { provinces: { id: string; name: string }[]
                       height="30"
                       className="object-cover rounded-full"
                     />
-                    <p className="w-fit font-medium text-ellipsis overflow-hidden">
-                      {clinic?.name}
-                    </p>
+                    <p className="w-fit font-medium text-ellipsis overflow-hidden">{clinic?.name}</p>
                   </Button>
                 ))
               ) : (
@@ -179,18 +162,14 @@ const SearchClinic = ({ provinces }: { provinces: { id: string; name: string }[]
           </div>
         </div>
 
-        <Button
-          type="button"
-          size="lg"
-          variant="search"
-          disabled={isLoading.routing}
-          onClick={handleRoute}
-        >
+        <Button type="button" size="lg" variant="search" disabled={isLoading.routing} onClick={handleRoute}>
           {isLoading.routing ? "Đang tìm kiếm..." : "Tìm kiếm"}
         </Button>
       </div>
     </div>
   );
-};
+});
+
+SearchClinic.displayName = "SearchClinic";
 
 export default SearchClinic;

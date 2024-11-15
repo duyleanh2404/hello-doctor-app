@@ -7,26 +7,22 @@ import { jwtDecode, JwtPayload } from "jwt-decode";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 
-import {
-  getSchedule,
-  editSchedule,
-  createSchedule
-} from "@/services/schedule-service";
-import { ScheduleData } from "@/types/schedule-types";
 import { generateTimeSlots } from "@/utils/generate-timeslots";
+import { ScheduleData, TimeSlot } from "@/types/schedule-types";
+import { getSchedule, editSchedule, createSchedule } from "@/services/schedule-service";
 
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import Spinner from "@/components/spinner";
 
 const ManageSchedules = () => {
-  const [schedule, setSchedule] = useState<ScheduleData | null>(null);
-
   const [isLoading, setLoading] = useState<boolean>(false);
   const [isAddingOrEditing, setIsAddingOrEditing] = useState<boolean>(false);
 
   const timeSlots = generateTimeSlots();
   const [timesError, setTimesError] = useState<string>("");
+
+  const [schedule, setSchedule] = useState<ScheduleData | null>(null);
   const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
 
   const today = new Date();
@@ -42,24 +38,20 @@ const ManageSchedules = () => {
 
   useEffect(() => {
     const fetchScheduleData = async () => {
-      if (!selectedDate) return;
-
       const accessToken = Cookies.get("access_token");
-      if (!accessToken) return;
+      if (!accessToken || !selectedDate) return;
 
+      const decodedToken: any = jwtDecode<JwtPayload>(accessToken);
+      if (!decodedToken) return;
       setLoading(true);
 
       try {
-        const decodedToken: any = jwtDecode<JwtPayload>(accessToken);
-        if (!decodedToken) return;
-
         const { schedule } = await getSchedule({
-          date: selectedDate,
-          doctor_id: decodedToken.doctor_id
+          date: selectedDate, doctor_id: decodedToken.doctor_id
         });
-
         setSchedule(schedule);
-        const activeSlots = schedule.timeSlots?.map((slot: any) => slot.timeline);
+
+        const activeSlots = schedule.timeSlots?.map((slot: TimeSlot) => slot.timeline);
         setSelectedTimes(activeSlots);
       } catch (error: any) {
         console.error(error);
@@ -91,72 +83,48 @@ const ManageSchedules = () => {
     return true;
   };
 
-  const isValidDate = () => {
-    if (!(selectedDate instanceof Date && !isNaN(selectedDate.getTime()))) {
-      toast.error("Ngày không hợp lệ!");
-      return false;
-    }
-    return true;
-  };
-
   const handleAddOrEditSchedule = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setTimesError("");
 
-    if (!isValidTimes() || !isValidDate()) return;
+    if (!isValidTimes()) return;
 
     const accessToken = Cookies.get("access_token");
     if (!accessToken) return;
 
     const decodedToken: any = jwtDecode<JwtPayload>(accessToken);
     if (!decodedToken || !decodedToken.doctor_id) return;
-
     setIsAddingOrEditing(true);
 
-    const timeSlots = selectedTimes.map(time => ({
-      timeline: time, isBooked: false
-    }));
+    const timeSlots = selectedTimes.map((time: string) => ({ timeline: time, isBooked: false }));
 
     try {
-      switch (true) {
-        case !!schedule:
-          await editSchedule(
-            accessToken,
-            {
-              id: schedule._id,
-              doctor_id: decodedToken.doctor_id,
-              date: selectedDate,
-              timeSlots
-            }
-          );
-          toast.success("Cập nhật lịch trình thành công!");
-          break;
-
-        default:
-          await createSchedule(
-            accessToken,
-            {
-              doctor_id: decodedToken.doctor_id,
-              date: selectedDate!,
-              timeSlots
-            }
-          );
-          toast.success("Thêm lịch trình thành công!");
-          break;
+      if (schedule) {
+        await editSchedule(
+          accessToken,
+          { id: schedule._id, doctor_id: decodedToken.doctor_id, date: selectedDate, timeSlots }
+        );
+        toast.success("Cập nhật lịch trình thành công!");
+      } else {
+        await createSchedule(
+          accessToken,
+          { doctor_id: decodedToken.doctor_id, date: selectedDate!, timeSlots }
+        );
+        toast.success("Thêm lịch trình thành công!");
       }
-    } catch (error: any) {
-      switch (error) {
-        case 409:
-          toast.error("Lịch trình này đã tồn tại!");
-          resetForm();
-          break;
-
-        default:
-          toast.error("Thêm lịch trình thất bại!");
-          break;
-      }
+    } catch (status: any) {
+      handleError(status);
     } finally {
       setIsAddingOrEditing(false);
+    }
+  };
+
+  const handleError = (status: number) => {
+    if (status === 409) {
+      toast.error("Lịch trình này đã tồn tại!");
+      resetForm();
+    } else {
+      toast.error("Thêm lịch trình thất bại!");
     }
   };
 
@@ -167,26 +135,19 @@ const ManageSchedules = () => {
   return (
     <>
       <h1 className="text-xl font-bold mb-4">Thêm hoặc chỉnh sửa lịch trình</h1>
-
       <form onSubmit={handleAddOrEditSchedule}>
         <div className="flex flex-col gap-8 pb-6">
           <div className="flex flex-col gap-8 -mx-4 px-4">
             <div className="flex flex-col gap-2">
               <label className="text-[17px] font-semibold">Chọn ngày</label>
-              <DatePicker
-                placeholder="Chọn ngày"
-                selectedDate={selectedDate}
-                setSelectedDate={setSelectedDate}
-              />
+              <DatePicker placeholder="Chọn ngày" selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
             </div>
 
             <div className="flex flex-col gap-2">
               <label className="text-[17px] font-semibold">Chọn thời gian</label>
               <div className="grid grid-cols-5 gap-4">
                 {timeSlots?.map((timeSlot) => {
-                  const isBooked = schedule?.timeSlots?.find(
-                    (slot: any) => slot.timeline === timeSlot && slot.isBooked
-                  );
+                  const isBooked = schedule?.timeSlots?.find((slot: any) => slot.timeline === timeSlot && slot.isBooked);
 
                   return (
                     <Button
@@ -197,8 +158,7 @@ const ManageSchedules = () => {
                       className={cn(
                         "w-full h-14 text-base shadow-none transition duration-500",
                         selectedTimes.includes(timeSlot)
-                          ? "text-white bg-primary"
-                          : "text-black hover:text-white border bg-transparent",
+                          ? "text-white bg-primary" : "text-black hover:text-white border bg-transparent",
                         timesError && "border-red-500 hover:border-transparent"
                       )}
                     >
@@ -207,7 +167,6 @@ const ManageSchedules = () => {
                   );
                 })}
               </div>
-
               {timesError && <p className="text-red-500 text-sm">{timesError}</p>}
             </div>
           </div>

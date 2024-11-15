@@ -66,20 +66,10 @@ const LoginPage = () => {
   const handleLoginSuccess = (user: UserData, accessToken: string) => {
     NProgress.start();
     toast.success("Đăng nhập thành công!");
-
     Cookies.set("access_token", accessToken, {
-      expires: 1,
-      secure: true,
-      sameSite: "strict"
+      expires: 1, secure: true, sameSite: "strict"
     });
-
-    dispatch(setUserData({
-      email: user.email,
-      fullname: user.fullname,
-      role: user.role,
-      image: user.image
-    }));
-
+    dispatch(setUserData(user));
     dispatch(setLoginSuccess());
     router.replace("/");
   };

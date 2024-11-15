@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
-
-import toast from "react-hot-toast";
-
 import { getProvinces } from "@/services/auth-service";
+import toast from "react-hot-toast";
 
 const useProvinces = () => {
   const [provinces, setProvinces] = useState([]);
@@ -13,6 +11,7 @@ const useProvinces = () => {
         const { data } = await getProvinces();
         setProvinces(data);
       } catch (error: any) {
+        console.error(error);
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       }
     };

@@ -1,18 +1,19 @@
 "use client"
 
-import * as React from "react"
-import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { Cross2Icon } from "@radix-ui/react-icons"
+import * as React from "react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 
-import { cn } from "@/lib/utils"
+import { Cross2Icon } from "@radix-ui/react-icons";
 
-const Dialog = DialogPrimitive.Root
+import { cn } from "@/lib/utils";
 
-const DialogTrigger = DialogPrimitive.Trigger
+const Dialog = DialogPrimitive.Root;
 
-const DialogPortal = DialogPrimitive.Portal
+const DialogTrigger = DialogPrimitive.Trigger;
 
-const DialogClose = DialogPrimitive.Close
+const DialogPortal = DialogPrimitive.Portal;
+
+const DialogClose = DialogPrimitive.Close;
 
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
@@ -26,8 +27,9 @@ const DialogOverlay = React.forwardRef<
     )}
     {...props}
   />
-))
-DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
+));
+
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
@@ -50,8 +52,9 @@ const DialogContent = React.forwardRef<
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </DialogPortal>
-))
-DialogContent.displayName = DialogPrimitive.Content.displayName
+));
+
+DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({
   className,
@@ -64,8 +67,9 @@ const DialogHeader = ({
     )}
     {...props}
   />
-)
-DialogHeader.displayName = "DialogHeader"
+);
+
+DialogHeader.displayName = "DialogHeader";
 
 const DialogFooter = ({
   className,
@@ -78,8 +82,9 @@ const DialogFooter = ({
     )}
     {...props}
   />
-)
-DialogFooter.displayName = "DialogFooter"
+);
+
+DialogFooter.displayName = "DialogFooter";
 
 const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
@@ -93,8 +98,9 @@ const DialogTitle = React.forwardRef<
     )}
     {...props}
   />
-))
-DialogTitle.displayName = DialogPrimitive.Title.displayName
+));
+
+DialogTitle.displayName = DialogPrimitive.Title.displayName;
 
 const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
@@ -105,8 +111,9 @@ const DialogDescription = React.forwardRef<
     className={cn("text-sm text-muted-foreground", className)}
     {...props}
   />
-))
-DialogDescription.displayName = DialogPrimitive.Description.displayName
+));
+
+DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
 export {
   Dialog,
@@ -118,5 +125,5 @@ export {
   DialogHeader,
   DialogFooter,
   DialogTitle,
-  DialogDescription,
-}
+  DialogDescription
+};

@@ -13,6 +13,7 @@ import { setLoginStatus, setUserData } from "@/store/slices/auth-slice";
 import { continueWithGoogle, getGoogleInfo } from "@/services/auth-service";
 
 import { Button } from "./ui/button";
+import { UserData } from "@/types/user-types";
 
 const ContinueWithGoogle = () => {
   const router = useRouter();
@@ -20,26 +21,12 @@ const ContinueWithGoogle = () => {
 
   const handleContinueWithGoogle = useGoogleLogin({
     onSuccess: async (response) => {
-      const { email, name, picture: image } = await getGoogleInfo(response.access_token);
-
       try {
+        const { email, name, picture: image } = await getGoogleInfo(response.access_token);
         const { user, accessToken } = await continueWithGoogle({ email, name, image });
-        NProgress.start();
-        toast.success("Đăng nhập thành công!");
-        Cookies.set("access_token", accessToken, {
-          expires: 1,
-          secure: true,
-          sameSite: "strict"
-        });
-
-        dispatch(setUserData({
-          email: user.email,
-          fullname: user.fullname,
-          role: user.role,
-          image: user.image
-        }));
-        dispatch(setLoginStatus(true));
+        handleLoginSuccess(user, accessToken);
       } catch (error: any) {
+        console.error(error);
         toast.error("Đăng nhập thất bại!");
       } finally {
         router.replace("/");
@@ -50,15 +37,17 @@ const ContinueWithGoogle = () => {
     }
   });
 
+  const handleLoginSuccess = (user: UserData, accessToken: string) => {
+    NProgress.start();
+    toast.success("Đăng nhập thành công!");
+    Cookies.set("access_token", accessToken, { expires: 1, secure: true, sameSite: "strict" });
+    dispatch(setUserData(user));
+    dispatch(setLoginStatus(true));
+  }
+
   return (
     <>
-      <Button
-        type="button"
-        size="xl"
-        variant="outline"
-        onClick={() => handleContinueWithGoogle()}
-        className="relative"
-      >
+      <Button type="button" size="xl" variant="outline" onClick={() => handleContinueWithGoogle()} className="relative">
         <Image
           loading="lazy"
           src="/auth/google.svg"

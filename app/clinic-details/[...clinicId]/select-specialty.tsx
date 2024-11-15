@@ -15,12 +15,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Spinner from "@/components/spinner";
 
-interface SelectSpecialtyProps {
+interface IProps {
   selectedSpecialty: SpecialtyData | null;
-  setSelectedSpecialty: (selectedSpecialty: SpecialtyData) => void;
+  setSelectedSpecialty: (selectedSpecialty: SpecialtyData | null) => void;
 };
 
-const SelectSpecialty = ({ selectedSpecialty, setSelectedSpecialty }: SelectSpecialtyProps) => {
+const SelectSpecialty = ({ selectedSpecialty, setSelectedSpecialty }: IProps) => {
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const [specialties, setSpecialties] = useState<SpecialtyData[]>([]);
 
@@ -28,38 +28,27 @@ const SelectSpecialty = ({ selectedSpecialty, setSelectedSpecialty }: SelectSpec
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
 
   const [query, setQuery] = useState<string>("");
-  const [inputValue, setInputValue] = useState<string>("");
   const debouncedQuery = useDebounce(query, 500);
 
   useClickOutside(dropdownRef, () => setIsDropdownVisible(false));
 
-  const fetchSpecialties = async (query?: string) => {
-    setLoading(true);
-
-    try {
-      const { specialties } = await getAllSpecialties({ query });
-      setSpecialties(specialties);
-    } catch (error: any) {
-      toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchSpecialties(debouncedQuery);
+    const fetchSpecialties = async () => {
+      setLoading(true);
+
+      try {
+        const { specialties } = await getAllSpecialties({ query: debouncedQuery });
+        setSpecialties(specialties);
+      } catch (error: any) {
+        console.error(error);
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSpecialties();
   }, [debouncedQuery]);
-
-  useEffect(() => {
-    if (selectedSpecialty) setInputValue(selectedSpecialty?.name);
-  }, [selectedSpecialty]);
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setQuery(value);
-    setInputValue(value);
-    setIsDropdownVisible(true);
-  };
 
   return (
     <div ref={dropdownRef} className="flex flex-col gap-1">
@@ -69,13 +58,17 @@ const SelectSpecialty = ({ selectedSpecialty, setSelectedSpecialty }: SelectSpec
           size="22"
           className="absolute top-1/2 left-4 -translate-y-1/2 text-[#595959]"
         />
+
         <Input
           type="text"
-          value={inputValue}
           spellCheck={false}
-          onChange={handleInputChange}
           placeholder="Chọn chuyên khoa"
           onFocus={() => setIsDropdownVisible(true)}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            if (selectedSpecialty) setSelectedSpecialty(null);
+          }}
+          value={selectedSpecialty ? selectedSpecialty?.name : query}
           className="pl-12"
         />
 
@@ -97,7 +90,6 @@ const SelectSpecialty = ({ selectedSpecialty, setSelectedSpecialty }: SelectSpec
                   key={specialty?._id}
                   onClick={() => {
                     setIsDropdownVisible(false);
-                    setInputValue(specialty?.name);
                     setSelectedSpecialty(specialty);
                   }}
                   className="w-full h-14 flex items-center justify-start gap-4 hover:text-primary transition duration-500"

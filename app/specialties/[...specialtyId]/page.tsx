@@ -9,8 +9,10 @@ import NProgress from "nprogress";
 import toast from "react-hot-toast";
 import "nprogress/nprogress.css";
 
-import { PostData } from "@/types/post-types";
 import { getAllPosts } from "@/services/post-service";
+
+import { Province } from "@/types/auth-types";
+import { PostData } from "@/types/post-types";
 
 import useProvinces from "@/hooks/fetch/use-provinces";
 import useSpecialty from "@/hooks/fetch/use-specialty";
@@ -18,8 +20,8 @@ import useSpecialty from "@/hooks/fetch/use-specialty";
 import Chatbot from "@/components/chatbot";
 import Spinner from "@/components/spinner";
 import Breadcrumb from "@/components/breadcrumb";
-import Advertise from "@/components/advertises/advertise";
 
+const Advertise = lazy(() => import("@/components/advertises/advertise"));
 const OutstandingDoctor = lazy(() => import("@/app/booking-doctor/outstanding-doctor"));
 
 const SpecialtyDetailsPage = () => {
@@ -28,7 +30,7 @@ const SpecialtyDetailsPage = () => {
   const { specialtyId } = useParams<{ specialtyId: string }>();
   const specialty = useSpecialty(atob(specialtyId));
 
-  const provinces: any[] = useProvinces();
+  const provinces: Province[] = useProvinces();
   const [posts, setPosts] = useState<PostData[]>([]);
 
   useEffect(() => {
@@ -43,11 +45,13 @@ const SpecialtyDetailsPage = () => {
         const { posts } = await getAllPosts({ specialty_id: atob(specialtyId[0]) });
         setPosts(posts);
       } catch (error: any) {
+        console.error(error);
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       } finally {
         setLoading(false);
       }
     };
+
     fetchPosts();
   }, []);
 
@@ -94,7 +98,6 @@ const SpecialtyDetailsPage = () => {
       <div className="wrapper">
         <div className="flex flex-col gap-8">
           <h1 className="text-[22px] font-bold">Kiến thức chung</h1>
-
           {posts?.length > 0 ? (
             <div className="flex flex-col lg:flex-row gap-12">
               <div className="flex-1">
@@ -114,9 +117,7 @@ const SpecialtyDetailsPage = () => {
                   </div>
 
                   <div className="flex flex-col gap-3">
-                    <p className="text-sm sm:text-[15px] font-bold text-primary">
-                      {posts[0]?.specialty_id?.name}
-                    </p>
+                    <p className="text-sm sm:text-[15px] font-bold text-primary">{posts[0]?.specialty_id?.name}</p>
                     <h1 className="text-lg sm:text-2xl font-bold">{posts[0]?.title}</h1>
                   </div>
 
@@ -207,8 +208,7 @@ const SpecialtyDetailsPage = () => {
                           className="rounded-full"
                         />
                         <p className="text-sm sm:text-[15px]">
-                          Tham vấn y khoa: {""}
-                          <span className="font-semibold">{post?.doctor_id?.fullname}</span>
+                          Tham vấn y khoa: <span className="font-semibold">{post?.doctor_id?.fullname}</span>
                         </p>
                       </div>
                     </div>
@@ -218,13 +218,7 @@ const SpecialtyDetailsPage = () => {
             </div>
           ) : (
             <div className="w-full hidden lg:flex flex-col items-center justify-center gap-12 pt-8">
-              <Image
-                loading="lazy"
-                src="/not-found.png"
-                alt="Not found"
-                width="240"
-                height="240"
-              />
+              <Image loading="lazy" src="/not-found.png" alt="Not found" width="240" height="240" />
               <h1 className="text-xl font-semibold text-[#262626] text-center">
                 Rất tiếc, hiện tại không tìm thấy bài viết nào!
               </h1>
@@ -235,7 +229,6 @@ const SpecialtyDetailsPage = () => {
         <div className="relative flex flex-col-reverse xl:flex-row gap-12 pt-20 pb-16">
           <div className="w-full xl:w-[65%] flex flex-col gap-8">
             <h1 className="text-[22px] font-bold">Những điều bạn cần biết</h1>
-
             {posts?.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-y-12 gap-x-6">
                 {posts?.slice(5)?.map((post: PostData) => (
@@ -256,9 +249,7 @@ const SpecialtyDetailsPage = () => {
                     </div>
 
                     <div className="flex flex-col gap-3">
-                      <p className="text-sm sm:text-[15px] font-bold text-primary">
-                        {post?.specialty_id?.name}
-                      </p>
+                      <p className="text-sm sm:text-[15px] font-bold text-primary">{post?.specialty_id?.name}</p>
                       <h1 className="text-lg sm:text-xl font-bold">{post?.title}</h1>
                     </div>
 
@@ -272,8 +263,7 @@ const SpecialtyDetailsPage = () => {
                         className="rounded-full"
                       />
                       <p className="text-sm sm:text-[15px]">
-                        Tham vấn y khoa:
-                        <span className="font-semibold"> {post?.doctor_id?.fullname}</span>
+                        Tham vấn y khoa: <span className="font-semibold"> {post?.doctor_id?.fullname}</span>
                       </p>
                     </div>
                   </Link>
@@ -281,13 +271,7 @@ const SpecialtyDetailsPage = () => {
               </div>
             ) : (
               <div className="w-full hidden lg:flex flex-col items-center justify-center gap-12 pt-8">
-                <Image
-                  loading="lazy"
-                  src="/not-found.png"
-                  alt="Not found"
-                  width="240"
-                  height="240"
-                />
+                <Image loading="lazy" src="/not-found.png" alt="Not found" width="240" height="240" />
                 <h1 className="text-xl font-semibold text-[#262626] text-center">
                   Rất tiếc, hiện tại không tìm thấy bài viết nào!
                 </h1>
@@ -296,9 +280,7 @@ const SpecialtyDetailsPage = () => {
           </div>
 
           <div className="flex-1 xl:block hidden">
-            <div className="sticky top-32 flex flex-col gap-12">
-              <Advertise />
-            </div>
+            <Suspense fallback={<Spinner table />}><Advertise /></Suspense>
           </div>
 
         </div>

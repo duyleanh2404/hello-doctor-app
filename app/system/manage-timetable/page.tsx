@@ -26,25 +26,19 @@ import Spinner from "@/components/spinner";
 
 const ManageTimetable = () => {
   const timePeriods: Array<"Sáng" | "Trưa" | "Chiều"> = ["Sáng", "Trưa", "Chiều"];
-  const periodRanges = {
-    Sáng: ["06:00", "12:00"], Trưa: ["12:00", "18:00"], Chiều: ["18:00", "00:00"]
-  };
+  const periodRanges = { Sáng: ["06:00", "12:00"], Trưa: ["12:00", "18:00"], Chiều: ["18:00", "00:00"] };
 
   const [isLoading, setLoading] = useState<boolean>(false);
-
   const [schedules, setSchedules] = useState<ScheduleData[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
   useEffect(() => {
     const fetchSchedules = async () => {
-      if (!selectedDate) return;
-
       const accessToken = Cookies.get("access_token");
-      if (!accessToken) return;
+      if (!accessToken || !selectedDate) return;
 
       const decodedToken: any = jwtDecode<JwtPayload>(accessToken);
       if (!decodedToken) return;
-
       setLoading(true);
 
       const startDate = new Date(selectedDate);
@@ -58,11 +52,8 @@ const ManageTimetable = () => {
 
       try {
         const { schedules } = await getSchedulesByRange({
-          doctor_id: decodedToken.doctor_id,
-          startDate,
-          endDate
+          doctor_id: decodedToken.doctor_id, startDate, endDate
         });
-
         setSchedules(schedules);
       } catch (error: any) {
         console.error(error);
@@ -102,6 +93,7 @@ const ManageTimetable = () => {
       date.setDate(currentMonday.getDate() + i);
       dates.push(date);
     }
+
     return dates;
   };
 
@@ -109,9 +101,7 @@ const ManageTimetable = () => {
 
   const getTimeSlotsForPeriod = (timeSlots: TimeSlot[], period: "Sáng" | "Trưa" | "Chiều") => {
     const [start, end] = periodRanges[period];
-    return timeSlots.filter(
-      (slot) => slot.timeline >= start && slot.timeline < end
-    );
+    return timeSlots.filter((slot: TimeSlot) => slot.timeline >= start && slot.timeline < end);
   };
 
   const getScheduleForDate = (date: Date): ScheduleData | undefined => {
@@ -130,7 +120,6 @@ const ManageTimetable = () => {
   return (
     <div className="h-full flex flex-col gap-6">
       <h1 className="text-xl font-bold mb-4">Thời khóa biểu của tôi</h1>
-
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-8">
           <div className="flex items-center">
@@ -157,16 +146,14 @@ const ManageTimetable = () => {
               onClick={goToPreviousWeek}
               className="h-12 flex items-center gap-2 bg-blue-500 text-white px-6 rounded-md transition duration-500"
             >
-              <FaChevronLeft size={12} />
-              <p>Trước</p>
+              <FaChevronLeft size={12} /> <p>Trước</p>
             </Button>
 
             <Button
               onClick={goToNextWeek}
               className="h-12 flex items-center gap-2 bg-blue-500 text-white px-6 rounded-md transition duration-500"
             >
-              <p>Tiếp</p>
-              <FaAngleRight size={12} />
+              <p>Tiếp</p> <FaAngleRight size={12} />
             </Button>
           </div>
         </div>
@@ -253,13 +240,7 @@ const ManageTimetable = () => {
         </Table>
       ) : (
         <div className="w-full flex flex-col items-center justify-center gap-12 pt-8">
-          <Image
-            loading="lazy"
-            src="/not-found.png"
-            alt="Not found"
-            width="240"
-            height="240"
-          />
+          <Image loading="lazy" src="/not-found.png" alt="Not found" width="240" height="240" />
           <h1 className="text-xl font-semibold text-[#262626] text-center">
             Rất tiếc, hiện tại không tìm thấy lịch trình nào. Vui lòng chọn ngày!
           </h1>
