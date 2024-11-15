@@ -56,11 +56,13 @@ export type ResetPasswordData = {
 
 export type Province = {
   _id: string;
+  id: string;
   name: string;
 };
 
 export type District = {
   _id: string;
+  id: string;
   name: string;
 };
 
