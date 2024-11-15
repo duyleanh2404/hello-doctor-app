@@ -25,11 +25,11 @@ export interface CreatePostForm {
 };
 
 export interface EditPostForm {
-  doctor_id: string;
-  specialty_id: string;
-  title: string;
-  releaseDate: string;
-  desc: string;
+  doctor_id?: string;
+  specialty_id?: string;
+  title?: string;
+  releaseDate?: string;
+  desc?: string;
   imageName?: string;
   image?: FileList;
 };
@@ -47,8 +47,8 @@ export interface CreatePostData {
 
 export interface EditPostData {
   id: string;
-  doctor_id: string;
-  specialty_id: string;
+  doctor_id?: string;
+  specialty_id?: string;
   title?: string;
   releaseDate?: string;
   desc?: string;

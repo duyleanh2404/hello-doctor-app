@@ -17,6 +17,7 @@ const usePosts = (exclude?: string) => {
         const { posts } = await getAllPosts({ exclude });
         setPosts(posts);
       } catch (error: any) {
+        console.error(error);
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       } finally {
         setLoading(false);

@@ -17,6 +17,7 @@ const useClinics = (exclude?: string) => {
         const { clinics } = await getAllClinics({ exclude });
         setClinics(clinics);
       } catch (error: any) {
+        console.error(error);
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       } finally {
         setLoading(false);

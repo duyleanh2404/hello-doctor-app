@@ -1,11 +1,12 @@
+import { memo } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
 
+import { Controller } from "react-hook-form";
+
 import { MdEmail } from "react-icons/md";
 import { FaPhone } from "react-icons/fa6";
-
-import { Controller } from "react-hook-form";
 
 import { UserInfoProps } from "@/types/booking-types";
 import { validatePhoneNumber } from "@/utils/validate-phone-number";
@@ -19,14 +20,9 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import Spinner from "@/components/spinner";
 
-const UserInfo = ({
+const UserInfo = memo(({
   user, isLoading, errors, control, setValue, register, clearErrors
 }: UserInfoProps) => {
-  const handleCheckboxChange = (checked: boolean) => {
-    clearErrors("zaloPhone");
-    setValue("zaloPhone", checked ? user?.phoneNumber || "" : "");
-  };
-
   return (
     <div className="w-full lg:w-[35%] flex flex-col gap-8 p-6 border shadow-md rounded-2xl">
       <div className="flex flex-col gap-4">
@@ -50,9 +46,7 @@ const UserInfo = ({
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col gap-1">
-                  <h1 className="text-lg font-semibold text-[#404040]">
-                    {user?.fullname}
-                  </h1>
+                  <h1 className="text-lg font-semibold text-[#404040]">{user?.fullname}</h1>
                   <div className="flex items-center gap-3 text-[#595959]">
                     <p>{user?.gender === "male" ? "Nam" : "Nữ"}</p>
                     <p>{user?.dateOfBirth}</p>
@@ -65,7 +59,6 @@ const UserInfo = ({
                   <FaPhone size="14" className="w-[20px] text-[#595959]" />
                   <p className="text-[#595959]">{user?.phoneNumber}</p>
                 </div>
-
                 <div className="flex items-center gap-3">
                   <MdEmail size="16" className="w-[20px] text-[#595959]" />
                   <p className="text-[#595959]">{user?.email}</p>
@@ -116,14 +109,12 @@ const UserInfo = ({
                     <Input
                       id="new"
                       type="radio"
-                      className="w-[16px] h-[16px] cursor-pointer"
                       value="true"
                       checked={field.value === true}
                       onChange={() => field.onChange(true)}
+                      className="w-[16px] h-[16px] cursor-pointer"
                     />
-                    <label htmlFor="new" className="pl-3 cursor-pointer select-none">
-                      Bệnh nhân mới
-                    </label>
+                    <label htmlFor="new" className="pl-3 cursor-pointer select-none">Bệnh nhân mới</label>
                   </div>
                 )}
               />
@@ -136,14 +127,12 @@ const UserInfo = ({
                     <Input
                       id="old"
                       type="radio"
-                      className="w-[16px] h-[16px] cursor-pointer"
                       value="false"
                       checked={field.value === false}
                       onChange={() => field.onChange(false)}
+                      className="w-[16px] h-[16px] cursor-pointer"
                     />
-                    <label htmlFor="old" className="pl-3 cursor-pointer select-none">
-                      Bệnh nhân cũ
-                    </label>
+                    <label htmlFor="old" className="pl-3 cursor-pointer select-none">Bệnh nhân cũ</label>
                   </div>
                 )}
               />
@@ -166,13 +155,16 @@ const UserInfo = ({
                   errors.zaloPhone ? "border-red-500" : "focus:border-primary focus:shadow-input-primary"
                 )}
               />
-
-              {errors.zaloPhone && (
-                <span className="text-[13px] text-red-500">{errors.zaloPhone.message}</span>
-              )}
+              {errors.zaloPhone && <span className="text-[13px] text-red-500">{errors.zaloPhone.message}</span>}
 
               <div className="flex items-center space-x-2 select-none">
-                <Checkbox id="terms" onCheckedChange={handleCheckboxChange} />
+                <Checkbox
+                  id="terms"
+                  onCheckedChange={(checked: boolean) => {
+                    clearErrors("zaloPhone");
+                    setValue("zaloPhone", checked ? user?.phoneNumber || "" : "");
+                  }}
+                />
                 <label htmlFor="terms" className="text-sm font-medium leading-none cursor-pointer">
                   Dùng số điện thoại trong hồ sơ người dùng
                 </label>
@@ -192,17 +184,12 @@ const UserInfo = ({
                 errors.address ? "border-red-500" : "focus:border-primary focus:shadow-input-primary"
               )}
             />
-
-            {errors.address && (
-              <span className="text-[13px] text-red-500">{errors.address.message}</span>
-            )}
+            {errors.address && <span className="text-[13px] text-red-500">{errors.address.message}</span>}
           </div>
         </div>
 
         <div className="flex flex-col gap-2">
-          <h1 className="text-[17px] font-semibold text-[#404040]">
-            2. Lí do tới thăm khám của bạn?
-          </h1>
+          <h1 className="text-[17px] font-semibold text-[#404040]">2. Lí do tới thăm khám của bạn?</h1>
           <textarea
             rows={5}
             spellCheck={false}
@@ -217,13 +204,13 @@ const UserInfo = ({
             )}
           />
 
-          {errors.reasons && (
-            <span className="text-[13px] text-red-500">{errors.reasons.message}</span>
-          )}
+          {errors.reasons && <span className="text-[13px] text-red-500">{errors.reasons.message}</span>}
         </div>
       </div>
     </div>
   );
-};
+});
+
+UserInfo.displayName = "UserInfo";
 
 export default UserInfo;

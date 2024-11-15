@@ -14,6 +14,7 @@ const usePost = (id: string) => {
         const { post } = await getPostById(id);
         setPost(post);
       } catch (error: any) {
+        console.error(error);
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       }
     };

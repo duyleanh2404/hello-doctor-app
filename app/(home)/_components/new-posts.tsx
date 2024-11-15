@@ -52,14 +52,10 @@ const NewPosts = () => {
 
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm sm:text-base font-bold text-primary">
-                      {posts[0]?.specialty_id?.name}
-                    </p>
+                    <p className="text-sm sm:text-base font-bold text-primary">{posts[0]?.specialty_id?.name}</p>
                     <p className="text-sm font-semibold">{posts[0]?.releaseDate}</p>
                   </div>
-                  <h1 className="text-lg sm:text-xl font-bold line-clamp-2">
-                    {posts[0]?.title}
-                  </h1>
+                  <h1 className="text-lg sm:text-xl font-bold line-clamp-2">{posts[0]?.title}</h1>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -72,8 +68,7 @@ const NewPosts = () => {
                     className="rounded-full"
                   />
                   <p className="text-sm sm:text-[15px]">
-                    Tham vấn y khoa: {""}
-                    <span className="font-semibold">{posts[0]?.doctor_id?.fullname}</span>
+                    Tham vấn y khoa: <span className="font-semibold">{posts[0]?.doctor_id?.fullname}</span>
                   </p>
                 </div>
               </Link>
@@ -112,8 +107,7 @@ const NewPosts = () => {
                           className="rounded-full"
                         />
                         <p className="text-sm sm:text-[15px]">
-                          Tham vấn y khoa: {""}
-                          <span className="font-semibold">{post?.doctor_id?.fullname}</span>
+                          Tham vấn y khoa: <span className="font-semibold">{post?.doctor_id?.fullname}</span>
                         </p>
                       </div>
                     </div>
@@ -156,8 +150,7 @@ const NewPosts = () => {
                         className="rounded-full"
                       />
                       <p className="text-sm sm:text-[15px]">
-                        Tham vấn y khoa: {""}
-                        <span className="font-semibold">{post?.doctor_id?.fullname}</span>
+                        Tham vấn y khoa: <span className="font-semibold">{post?.doctor_id?.fullname}</span>
                       </p>
                     </div>
                   </div>
@@ -166,16 +159,10 @@ const NewPosts = () => {
             </div>
 
             <div className="w-full hidden md:block">
-              <Carousel
-                className="w-full"
-                plugins={[Autoplay({ delay: 3000 })]}
-              >
+              <Carousel className="w-full" plugins={[Autoplay({ delay: 3000 })]}>
                 <CarouselContent>
                   {posts?.slice(4, 10)?.map((post: PostData) => (
-                    <CarouselItem
-                      key={post?._id}
-                      className="basis-1/3 xl:basis-1/4"
-                    >
+                    <CarouselItem key={post?._id} className="basis-1/3 xl:basis-1/4">
                       <Link
                         href={`/posts/${btoa(post?._id)}`}
                         onClick={() => NProgress.start()}
@@ -221,13 +208,7 @@ const NewPosts = () => {
           </>
         ) : (
           <div className="w-full hidden lg:flex flex-col items-center justify-center gap-12 pt-8">
-            <Image
-              loading="lazy"
-              src="/not-found.png"
-              alt="Not found"
-              width="240"
-              height="240"
-            />
+            <Image loading="lazy" src="/not-found.png" alt="Not found" width="240" height="240" />
             <h1 className="text-xl font-semibold text-[#262626] text-center">
               Rất tiếc, hiện tại không tìm thấy bài viết nào!
             </h1>

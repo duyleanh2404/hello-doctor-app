@@ -12,11 +12,8 @@ import { format } from "date-fns";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 
-import {
-  deleteSchedule,
-  getAllSchedules
-} from "@/services/schedule-service";
 import { ScheduleData } from "@/types/schedule-types";
+import { deleteSchedule, getAllSchedules } from "@/services/schedule-service";
 import useDebounce from "@/hooks/use-debounce";
 
 import {
@@ -33,7 +30,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import Hint from "@/components/hint";
 import Spinner from "@/components/spinner";
 import PaginationSection from "@/components/pagination";
-import DeleteConfirmationModal from "@/components/delete-confirmation-modal";
+import DeleteConfirmationModal from "@/components/modal/delete-confirmation-modal";
 
 const ManageSchedules = () => {
   const router = useRouter();
@@ -55,25 +52,26 @@ const ManageSchedules = () => {
   const fetchSchedules = async (page: number, query?: string, date?: Date) => {
     const accessToken = Cookies.get("access_token");
     if (!accessToken) return;
-
     setLoading({ ...isLoading, schedules: true });
 
     try {
       const { schedules, total } = await getAllSchedules(
-        accessToken,
-        { page, limit: 10, query, exclude: "timeSlots", date }
+        accessToken, { page, limit: 10, query, exclude: "timeSlots", date }
       );
-
-      const itemsPerPage = 10;
-      const totalPages = Math.ceil(total / itemsPerPage);
-
-      setSchedules(schedules);
-      setTotalPages(totalPages);
+      handleSchedulesFetchSuccess(schedules, total);
     } catch (error: any) {
+      console.error(error);
       toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
     } finally {
       setLoading({ ...isLoading, schedules: false });
     }
+  };
+
+  const handleSchedulesFetchSuccess = (schedules: ScheduleData[], total: number) => {
+    const itemsPerPage = 10;
+    const totalPages = Math.ceil(total / itemsPerPage);
+    setSchedules(schedules);
+    setTotalPages(totalPages);
   };
 
   useEffect(() => {
@@ -81,29 +79,30 @@ const ManageSchedules = () => {
   }, [currentPage, debouncedSearchQuery, selectedDate]);
 
   const handleDeleteSchedule = async () => {
-    if (!scheduleToDelete) return;
-
     const accessToken = Cookies.get("access_token");
-    if (!accessToken) return;
-
+    if (!accessToken || !scheduleToDelete) return;
     setLoading({ ...isLoading, deleting: true });
 
     try {
       await deleteSchedule(accessToken, scheduleToDelete);
-
-      if (currentPage > 1 && schedules?.length === 1) {
-        setCurrentPage(currentPage - 1);
-        await fetchSchedules(currentPage - 1);
-      } else {
-        await fetchSchedules(currentPage);
-      }
-
+      await handlePrefetchingSchedules();
       setModalOpen(false);
       toast.success("Xóa lịch trình thành công!");
     } catch (error: any) {
+      console.error(error);
       toast.error("Xóa lịch trình thất bại. Vui lòng thử lại sau ít phút nữa!");
     } finally {
+      setModalOpen(false);
       setLoading({ ...isLoading, deleting: false });
+    }
+  };
+
+  const handlePrefetchingSchedules = async () => {
+    if (currentPage > 1 && schedules?.length === 1) {
+      setCurrentPage(currentPage - 1);
+      await fetchSchedules(currentPage - 1);
+    } else {
+      await fetchSchedules(currentPage);
     }
   };
 
@@ -114,7 +113,6 @@ const ManageSchedules = () => {
   return (
     <>
       <h1 className="text-xl font-bold mb-4">Danh sách lịch trình của bác sĩ</h1>
-
       <div className="flex items-center justify-between">
         <DatePicker
           selectedDate={selectedDate}
@@ -145,8 +143,7 @@ const ManageSchedules = () => {
       </div>
 
       <div className={cn(
-        "relative rounded-md shadow-md overflow-x-auto",
-        schedules?.length > 0 ? "h-auto" : "h-full"
+        "relative rounded-md shadow-md overflow-x-auto", schedules?.length > 0 ? "h-auto" : "h-full"
       )}>
         <Table className="relative h-full text-[17px]">
           <TableHeader className="sticky top-0 left-0 right-0 h-12 bg-gray-100">
@@ -162,8 +159,14 @@ const ManageSchedules = () => {
 
           <TableBody>
             {schedules?.length > 0 ? (
-              schedules?.map((schedule, index) => {
+              schedules?.map((schedule: ScheduleData, index) => {
                 const startIndex = (currentPage - 1) * 10;
+
+                const queryParams = new URLSearchParams({
+                  doctorId: btoa(schedule?.doctor_id?._id),
+                  scheduleId: btoa(schedule?._id),
+                  date: format(schedule?.date, "dd/MM/yyyy")
+                }).toString();
 
                 return (
                   <TableRow key={schedule?._id}>
@@ -181,15 +184,10 @@ const ManageSchedules = () => {
                         <Button
                           type="button"
                           variant="ghost"
-                          onClick={() =>
-                            router.replace(`/admin/manage-schedules/edit-schedule/${btoa(schedule?._id)}`)
-                          }
+                          onClick={() => router.replace(`/admin/manage-schedules/edit-schedule?${queryParams}`)}
                           className="group"
                         >
-                          <LuClipboardEdit
-                            size="22"
-                            className="group-hover:text-green-500 transition duration-500"
-                          />
+                          <LuClipboardEdit size="22" className="group-hover:text-green-500 transition duration-500" />
                         </Button>
 
                         <Button
@@ -201,10 +199,7 @@ const ManageSchedules = () => {
                           }}
                           className="group"
                         >
-                          <AiOutlineDelete
-                            size="22"
-                            className="group-hover:text-red-500 transition duration-500"
-                          />
+                          <AiOutlineDelete size="22" className="group-hover:text-red-500 transition duration-500" />
                         </Button>
                       </div>
                     </TableCell>

@@ -17,15 +17,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Spinner from "@/components/spinner";
 
-interface SelectDoctorProps {
+interface IProps {
   selectedDoctor: DoctorData | null;
   selectedSpecialty: SpecialtyData | null;
   setSelectedDoctor: (doctor: DoctorData | null) => void;
 };
 
-const SelectDoctor = ({
-  selectedSpecialty, selectedDoctor, setSelectedDoctor
-}: SelectDoctorProps) => {
+const SelectDoctor = ({ selectedSpecialty, selectedDoctor, setSelectedDoctor }: IProps) => {
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const [doctors, setDoctors] = useState<DoctorData[]>([]);
 
@@ -37,25 +35,26 @@ const SelectDoctor = ({
 
   useClickOutside(dropdownRef, () => setIsDropdownVisible(false));
 
-  const fetchDoctors = async (query?: string, specialty_id?: string) => {
-    setLoading(true);
-
-    try {
-      const { doctors } = await getAllDoctors({
-        query,
-        specialty_id,
-        exclude: "desc, medicalFee"
-      });
-      setDoctors(doctors);
-    } catch (error: any) {
-      toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchDoctors(debouncedQuery, selectedSpecialty?._id);
+    const fetchDoctors = async () => {
+      setLoading(true);
+
+      try {
+        const { doctors } = await getAllDoctors({
+          query: debouncedQuery,
+          specialty_id: selectedSpecialty?._id,
+          exclude: "desc, medicalFee"
+        });
+        setDoctors(doctors);
+      } catch (error: any) {
+        console.error(error);
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctors();
   }, [debouncedQuery, selectedSpecialty?._id]);
 
   return (
@@ -71,6 +70,7 @@ const SelectDoctor = ({
         />
 
         <Input
+          value={selectedDoctor ? selectedDoctor?.fullname : query}
           type="text"
           spellCheck={false}
           placeholder="Chọn bác sĩ"
@@ -80,7 +80,6 @@ const SelectDoctor = ({
             setQuery(event.target.value);
             if (selectedDoctor) setSelectedDoctor(null);
           }}
-          value={selectedDoctor ? selectedDoctor?.fullname : query}
           className="pl-12"
         />
 

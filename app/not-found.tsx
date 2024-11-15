@@ -17,13 +17,7 @@ const NotFoundPage = () => {
       <Header />
 
       <div className="flex flex-col items-center justify-center gap-6 space-header bg-[#f5f5fa] pt-20 pb-36">
-        <Image
-          loading="lazy"
-          src="/not-found.png"
-          alt="Not found"
-          width="250"
-          height="250"
-        />
+        <Image loading="lazy" src="/not-found.png" alt="Not found" width="250" height="250" />
         <h1 className="text-[19px] font-semibold">
           Trang bạn đang tìm kiếm không tồn tại!
         </h1>

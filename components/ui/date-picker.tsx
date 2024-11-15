@@ -1,39 +1,33 @@
 "use client";
 
-import * as React from "react";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+
 import { Calendar as CalendarIcon } from "lucide-react";
+
+import { capitalizeFirstLetter } from "@/utils/capitalize-first-letter";
+
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-const capitalizeFirstLetter = (string: string) => {
-  return string.charAt(0).toUpperCase() + string.slice(1);
+interface IProps {
+  disableDate?: Date;
+  className?: string;
+  dateError?: string;
+  placeholder?: string;
+  selectedDate?: Date | undefined;
+  setDateError?: (dateError: string) => void;
+  setSelectedDate: (selectedDate: Date | undefined) => void;
 };
 
-interface DatePickerProps {
-  className?: string;
-  placeholder?: string;
-  dateError?: string;
-  setDateError?: (dateError: string) => void;
-  selectedDate?: Date | undefined;
-  setSelectedDate: (selectedDate: Date | undefined) => void;
-}
-
 export function DatePicker({
-  dateError,
-  className,
-  placeholder,
-  selectedDate,
-  setDateError,
-  setSelectedDate,
-}: DatePickerProps) {
-  const [open, setOpen] = React.useState(false);
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  disableDate, className, dateError, placeholder, selectedDate, setDateError, setSelectedDate
+}: IProps) {
+  const [open, setOpen] = useState(false);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -48,24 +42,26 @@ export function DatePicker({
           )}
         >
           <CalendarIcon className="flex-shrink-0 mr-2 h-4 w-4" />
-          {selectedDate
-            ? capitalizeFirstLetter(format(selectedDate, "PPP", { locale: vi }))
-            : <span>{placeholder ? placeholder : "Chọn ngày khám"}</span>}
+          {
+            selectedDate
+              ? capitalizeFirstLetter(format(selectedDate, "PPP", { locale: vi }))
+              : <span>{placeholder ? placeholder : "Chọn ngày khám"}</span>
+          }
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
         <Calendar
           mode="single"
           selected={selectedDate}
-          disabled={(date) => date < today}
+          disabled={(date) => date < disableDate!}
           onSelect={(value) => {
             setOpen(false);
             setSelectedDate(value);
-            setDateError && setDateError("");
+            if (setDateError) setDateError("");
           }}
           initialFocus
         />
       </PopoverContent>
     </Popover>
   );
-}
+};

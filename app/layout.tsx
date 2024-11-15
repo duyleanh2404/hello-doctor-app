@@ -31,11 +31,7 @@ export default function RootLayout({
         <ProviderStore>
           <ProviderAuth>
             <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID!}>
-              <Toaster
-                position="top-center"
-                reverseOrder={false}
-                toastOptions={{ style: { maxWidth: 800 } }}
-              />
+              <Toaster position="top-center" reverseOrder={false} toastOptions={{ style: { maxWidth: 800 } }} />
               {children}
             </GoogleOAuthProvider>
           </ProviderAuth>

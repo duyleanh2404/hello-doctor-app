@@ -17,6 +17,7 @@ const useSpecialties = (exclude?: string) => {
         const { specialties } = await getAllSpecialties({ exclude });
         setSpecialties(specialties);
       } catch (error: any) {
+        console.error(error);
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       } finally {
         setLoading(false);

@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import Image from "next/image";
 
 import { FiSearch } from "react-icons/fi";
@@ -8,6 +8,7 @@ import NProgress from "nprogress";
 import toast from "react-hot-toast";
 import "nprogress/nprogress.css";
 
+import { Province } from "@/types/auth-types";
 import { DoctorData } from "@/types/doctor-types";
 import { SpecialtyData } from "@/types/specialty-types";
 import { getAllDoctors } from "@/services/doctor-service";
@@ -27,7 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Spinner from "@/components/spinner";
 
-const SearchDoctor = ({ provinces }: { provinces: any[] }) => {
+const SearchDoctor = memo(({ provinces }: { provinces: Province[] }) => {
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -42,59 +43,45 @@ const SearchDoctor = ({ provinces }: { provinces: any[] }) => {
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorData | null>(null);
 
   const [query, setQuery] = useState<string>("");
-  const [inputValue, setInputValue] = useState<string>("");
   const debouncedQuery = useDebounce(query, 500);
 
   useClickOutside(dropdownRef, () => setIsDropdownVisible(false));
 
-  const fetchDoctors = async (query?: string, province?: string, specialty_id?: string) => {
-    setLoading({ ...isLoading, doctors: true });
-
-    try {
-      const { doctors } = await getAllDoctors({
-        specialty_id,
-        query,
-        exclude: "specialty_id, clinic_id, desc",
-        province
-      });
-      setDoctors(doctors);
-    } catch (error: any) {
-      toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
-    } finally {
-      setLoading({ ...isLoading, doctors: false });
-    }
-  };
-
   useEffect(() => {
     if (selectedProvince || selectedSpecialty) setIsDropdownVisible(true);
-    fetchDoctors(debouncedQuery, selectedProvince, selectedSpecialty);
+
+    const fetchDoctors = async () => {
+      setLoading({ ...isLoading, doctors: true });
+
+      try {
+        const { doctors } = await getAllDoctors({
+          query: debouncedQuery,
+          specialty_id: selectedSpecialty,
+          exclude: "specialty_id, clinic_id, desc",
+          province: selectedProvince
+        });
+        setDoctors(doctors);
+      } catch (error: any) {
+        console.error(error);
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
+      } finally {
+        setLoading({ ...isLoading, doctors: false });
+      }
+    };
+    fetchDoctors();
   }, [debouncedQuery, selectedProvince, selectedSpecialty]);
-
-  useEffect(() => {
-    if (selectedDoctor) setInputValue(selectedDoctor?.fullname);
-  }, [selectedDoctor]);
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setQuery(value);
-    setInputValue(value);
-    setIsDropdownVisible(true);
-  };
 
   const handleRoute = () => {
     NProgress.start();
     setLoading({ ...isLoading, routing: true });
-    router.replace(`/doctor-details/${btoa(selectedDoctor?._id!)}`);
+    if (selectedDoctor?._id) router.push(`/doctor-details/${btoa(selectedDoctor._id)}`);
   };
 
   return (
     <div className="wrapper p-6 sm:p-8 bg-white shadow-md rounded-b-2xl">
       <div className="flex flex-col lg:flex-row items-center gap-4">
         <div className="w-full lg:w-[18%]">
-          <Select
-            value={selectedProvince}
-            onValueChange={(value) => setSelectedProvince(value)}
-          >
+          <Select value={selectedProvince} onValueChange={(value) => setSelectedProvince(value)}>
             <SelectTrigger
               className={cn(
                 "w-full py-[14px] px-4 text-[17px] placeholder:text-[17px] placeholder:text-[#595959] placeholder:font-medium border border-gray-300 focus:border-primary focus:shadow-input-primary rounded-lg transition duration-500",
@@ -107,10 +94,8 @@ const SearchDoctor = ({ provinces }: { provinces: any[] }) => {
               {provinces?.length > 0 ? (
                 <>
                   <SelectItem value="all">Tất cả</SelectItem>
-                  {provinces?.map((province) => (
-                    <SelectItem key={province?.id} value={province?.name}>
-                      {province?.name}
-                    </SelectItem>
+                  {provinces?.map((province: any) => (
+                    <SelectItem key={province?.id} value={province?.name}>{province?.name}</SelectItem>
                   ))}
                 </>
               ) : (
@@ -123,10 +108,7 @@ const SearchDoctor = ({ provinces }: { provinces: any[] }) => {
         </div>
 
         <div className="w-full lg:w-[18%]">
-          <Select
-            value={selectedSpecialty}
-            onValueChange={(value) => setSelectedSpecialty(value)}
-          >
+          <Select value={selectedSpecialty} onValueChange={(value) => setSelectedSpecialty(value)}>
             <SelectTrigger
               className={cn(
                 "w-full py-[14px] px-4 text-[17px] placeholder:text-[17px] placeholder:text-[#595959] placeholder:font-medium border border-gray-300 focus:border-primary focus:shadow-input-primary rounded-lg transition duration-500",
@@ -137,9 +119,7 @@ const SearchDoctor = ({ provinces }: { provinces: any[] }) => {
             </SelectTrigger>
             <SelectContent>
               {isLoadingSpecialties ? (
-                <div className="py-6">
-                  <Spinner table />
-                </div>
+                <div className="py-6"><Spinner table /></div>
               ) : (
                 specialties?.length > 0 ? (
                   <>
@@ -155,9 +135,7 @@ const SearchDoctor = ({ provinces }: { provinces: any[] }) => {
                             height="30"
                             className="object-cover rounded-full"
                           />
-                          <p className="w-fit font-medium text-ellipsis overflow-hidden">
-                            {specialty?.name}
-                          </p>
+                          <p className="w-fit font-medium text-ellipsis overflow-hidden">{specialty?.name}</p>
                         </div>
                       </SelectItem>
                     ))}
@@ -178,11 +156,15 @@ const SearchDoctor = ({ provinces }: { provinces: any[] }) => {
             className="absolute top-1/2 left-5 -translate-y-1/2 text-[#595959]"
           />
           <Input
-            value={inputValue}
+            value={selectedDoctor ? selectedDoctor?.fullname : query}
+            type="text"
             spellCheck={false}
-            onChange={handleInputChange}
             placeholder="Tìm kiếm theo tên bác sĩ"
             onFocus={() => setIsDropdownVisible(true)}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              if (selectedDoctor) setSelectedDoctor(null);
+            }}
             className="pl-14"
           />
 
@@ -203,9 +185,8 @@ const SearchDoctor = ({ provinces }: { provinces: any[] }) => {
                     variant="ghost"
                     key={doctor?._id}
                     onClick={() => {
-                      setIsDropdownVisible(false);
-                      setInputValue(doctor?.fullname);
                       setSelectedDoctor(doctor);
+                      setIsDropdownVisible(false);
                     }}
                     className="w-full h-14 flex items-center justify-start gap-4 hover:text-primary transition duration-500"
                   >
@@ -217,9 +198,7 @@ const SearchDoctor = ({ provinces }: { provinces: any[] }) => {
                       height="30"
                       className="object-cover rounded-full"
                     />
-                    <p className="w-fit font-medium text-ellipsis overflow-hidden">
-                      {doctor?.fullname}
-                    </p>
+                    <p className="w-fit font-medium text-ellipsis overflow-hidden">{doctor?.fullname}</p>
                   </Button>
                 ))
               ) : (
@@ -231,18 +210,14 @@ const SearchDoctor = ({ provinces }: { provinces: any[] }) => {
           </div>
         </div>
 
-        <Button
-          type="button"
-          size="lg"
-          variant="search"
-          disabled={isLoading.routing}
-          onClick={handleRoute}
-        >
+        <Button type="button" size="lg" variant="search" disabled={isLoading.routing} onClick={handleRoute}>
           {isLoading.routing ? "Đang tìm kiếm..." : "Tìm kiếm"}
         </Button>
       </div>
     </div>
   );
-};
+});
+
+SearchDoctor.displayName = "SearchDoctor";
 
 export default SearchDoctor;

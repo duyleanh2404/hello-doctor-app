@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 
-interface InputFieldProps {
+interface IProps {
   id: string;
   label: string;
   placeholder: string;
@@ -8,7 +8,7 @@ interface InputFieldProps {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
-const InputField = ({ id, label, placeholder, value, onChange }: InputFieldProps) => (
+const InputField = ({ id, label, placeholder, value, onChange }: IProps) => (
   <div className="flex flex-col gap-2">
     <label htmlFor={id} className="text-[15px] font-semibold">{label}</label>
     <Input

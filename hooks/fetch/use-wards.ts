@@ -3,16 +3,7 @@ import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
 import { getWards } from "@/services/auth-service";
-
-interface District {
-  id: string;
-  name: string;
-};
-
-interface Ward {
-  id: string;
-  name: string;
-};
+import { Ward, District } from "@/types/auth-types";
 
 const useWards = (selectedDistrict: District | null) => {
   const [wards, setWards] = useState<Ward[]>([]);
@@ -22,9 +13,10 @@ const useWards = (selectedDistrict: District | null) => {
       if (!selectedDistrict) return;
 
       try {
-        const { data } = await getWards(selectedDistrict.id);
+        const { data } = await getWards(selectedDistrict._id);
         setWards(data);
       } catch (error: any) {
+        console.error(error);
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       }
     };

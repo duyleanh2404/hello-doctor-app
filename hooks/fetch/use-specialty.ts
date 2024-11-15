@@ -14,6 +14,7 @@ const useSpecialty = (id: string) => {
         const { specialty } = await getSpecialtyById(id);
         setSpecialty(specialty);
       } catch (error: any) {
+        console.error(error);
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       }
     };

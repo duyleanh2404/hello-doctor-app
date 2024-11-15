@@ -1,8 +1,4 @@
-import {
-  EditClinicData,
-  CreateClinicData,
-  GetAllClinicsData
-} from "@/types/clinic-types";
+import { EditClinicData, CreateClinicData, GetAllClinicsData } from "@/types/clinic-types";
 
 import { handleResponse } from "@/utils/handle-response";
 import { appendFormData } from "@/utils/append-form-data";
@@ -17,14 +13,11 @@ export const createClinic = async (
   if (avatar) formData.append("files", avatar);
   if (banner) formData.append("files", banner);
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/clinic/create`,
-    {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${accessToken}` },
-      body: formData
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clinic/create`, {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${accessToken}` },
+    body: formData
+  });
 
   const responseData = await response.json();
   if (!response.ok) {
@@ -44,14 +37,11 @@ export const editClinic = async (
   if (avatar) formData.append("files", avatar);
   if (banner) formData.append("files", banner);
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/clinic/${id}`,
-    {
-      method: "PUT",
-      headers: { "Authorization": `Bearer ${accessToken}` },
-      body: formData
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clinic/${id}`, {
+    method: "PUT",
+    headers: { "Authorization": `Bearer ${accessToken}` },
+    body: formData
+  });
 
   const responseData = await response.json();
   if (!response.ok) {
@@ -62,13 +52,10 @@ export const editClinic = async (
 };
 
 export const deleteClinic = async (accessToken: string, id: string) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/clinic/${id}`,
-    {
-      method: "DELETE",
-      headers: { "Authorization": `Bearer ${accessToken}` }
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clinic/${id}`, {
+    method: "DELETE",
+    headers: { "Authorization": `Bearer ${accessToken}` }
+  });
 
   return handleResponse(response);
 };
@@ -95,12 +82,9 @@ export const getAllClinics = async ({
 };
 
 export const getClinicById = async (id: string) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/clinic/${id}`,
-    {
-      method: "GET"
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clinic/${id}`, {
+    method: "GET"
+  });
 
   return handleResponse(response);
 };

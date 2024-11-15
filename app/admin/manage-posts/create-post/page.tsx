@@ -9,8 +9,8 @@ import { format } from "date-fns";
 import { FiUpload } from "react-icons/fi";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Cookies from "js-cookie";
+import dynamic from "next/dynamic";
 import toast from "react-hot-toast";
-import JoditEditor from "jodit-react";
 
 import { DoctorData } from "@/types/doctor-types";
 import { CreatePostForm } from "@/types/post-types";
@@ -34,6 +34,8 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import Spinner from "@/components/spinner";
 
+const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
+
 const CreatePost = () => {
   const router = useRouter();
 
@@ -47,67 +49,63 @@ const CreatePost = () => {
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorData | null>(null);
 
   const [imageName, setImageName] = useState<string>("");
-  const [imageURL, setImageURL] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  const { specialties, isLoading: isLoadingSpecialties } = useSpecialties("desc");
   const [doctors, setDoctors] = useState<DoctorData[]>([]);
+  const { specialties, isLoading: isLoadingSpecialties } = useSpecialties("desc");
 
   const [query, setQuery] = useState<string>("");
-  const [inputValue, setInputValue] = useState<string>("");
   const [content, setContent] = useState<string>("");
   const debouncedQuery = useDebounce(query, 500);
 
   const {
-    watch,
-    register,
-    setValue,
-    setError,
-    clearErrors,
-    handleSubmit,
-    formState: { errors }
+    watch, register, setValue, setError, clearErrors, handleSubmit, formState: { errors }
   } = useForm<CreatePostForm>();
 
   useClickOutside(dropdownRef, () => setIsDropdownVisible(false));
 
-  const fetchDoctorsBySpecialty = async (query?: string) => {
-    setLoading({ ...isLoading, doctors: true });
-
-    try {
-      const { doctors } = await getAllDoctors({
-        query,
-        specialty_id: watch("specialty_id"),
-        exclude: "specialty_id, clinic_id, desc, medicalFee"
-      });
-      setDoctors(doctors);
-    } catch (error: any) {
-      toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
-    } finally {
-      setLoading({ ...isLoading, doctors: false });
-    }
-  };
-
   useEffect(() => {
-    if (watch("specialty_id")) fetchDoctorsBySpecialty(debouncedQuery);
-  }, [watch("specialty_id"), debouncedQuery]);
+    if (!watch("specialty_id")) return;
 
-  useEffect(() => {
-    if (selectedDoctor) setInputValue(selectedDoctor?.fullname);
-  }, [selectedDoctor]);
+    const fetchDoctorsBySpecialty = async () => {
+      setLoading({ ...isLoading, doctors: true });
+
+      try {
+        const { doctors } = await getAllDoctors({
+          query: debouncedQuery,
+          specialty_id: watch("specialty_id"),
+          exclude: "specialty_id, clinic_id, desc, medicalFee"
+        });
+        setDoctors(doctors);
+      } catch (error: any) {
+        console.error(error);
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
+      } finally {
+        setLoading({ ...isLoading, doctors: false });
+      }
+    };
+
+    fetchDoctorsBySpecialty();
+  }, [debouncedQuery, watch("specialty_id")]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setQuery(value);
-    setInputValue(value);
-    setIsDropdownVisible(true);
+    if (selectedDoctor) setSelectedDoctor(null);
   };
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    if (!file.type.startsWith("image/")) {
+      toast.error("Vui lòng chỉ tải lên hình ảnh!");
+      return;
+    }
+
     clearErrors("image");
     setImageName(file.name);
-    setImageURL(URL.createObjectURL(file));
+    setImageUrl(URL.createObjectURL(file));
   };
 
   const handleEditorChange = (newContent: string) => {
@@ -118,31 +116,27 @@ const CreatePost = () => {
 
   const handleValidate = () => {
     if (watch("specialty_id") && !selectedDoctor) {
-      setError("doctor_id", {
-        type: "manual",
-        message: "Vui lòng chọn bác sĩ!"
-      });
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      clearErrors("doctor_id");
+      setError("doctor_id", { type: "manual", message: "Vui lòng chọn bác sĩ!" });
     }
-
     if (!selectedDate) {
       setDateError("Vui lòng chọn ngày đăng!");
-      window.scrollTo({ top: 0, behavior: "smooth" });
     }
+    window.scrollTo({ top: 0, behavior: "smooth" });
 
-    if (content.trim() !== "") return;
-    setError("desc", {
-      type: "manual",
-      message: "Vui lòng nhập mô tả của bài viết!"
-    });
+    if (content.trim() === "") {
+      setError("desc", { type: "manual", message: "Vui lòng nhập mô tả của bài viết!" });
+    }
   };
 
-  const handleCreatePost: SubmitHandler<CreatePostForm> = async (data) => {
+  const handleSelectDoctor = (doctor: DoctorData) => {
+    clearErrors("doctor_id");
+    setSelectedDoctor(doctor);
+    setIsDropdownVisible(false);
+  };
+
+  const handleCreatePost: SubmitHandler<CreatePostForm> = async (postData) => {
     const accessToken = Cookies.get("access_token");
     if (!accessToken || !selectedDoctor) return;
-
     setLoading({ ...isLoading, creating: true });
 
     try {
@@ -150,17 +144,18 @@ const CreatePost = () => {
         accessToken,
         {
           doctor_id: selectedDoctor._id,
-          specialty_id: data.specialty_id,
-          title: data.title,
-          desc: content,
+          specialty_id: postData.specialty_id,
+          title: postData.title,
           releaseDate: selectedDate! && format(selectedDate, "dd/MM/yyyy"),
+          desc: content,
           imageName,
-          image: data.image?.[0]
+          image: postData.image?.[0]
         }
       );
 
       toast.success("Thêm bài viết thành công!");
     } catch (error: any) {
+      console.error(error);
       toast.error("Thêm bài viết thất bại. Vui lòng thử lại sau ít phút nữa!");
     } finally {
       router.replace("/admin/manage-posts");
@@ -170,7 +165,6 @@ const CreatePost = () => {
   return (
     <>
       <h1 className="text-xl font-bold mb-4">Thêm bài viết mới</h1>
-
       <form onSubmit={handleSubmit(handleCreatePost)}>
         <div className="flex flex-col gap-8 pb-6">
           <div className="flex flex-col gap-8 -mx-4 px-4">
@@ -183,9 +177,7 @@ const CreatePost = () => {
                 {...register("title", { required: "Vui lòng nhập tiêu đề bài viết!" })}
                 className={cn(errors.title ? "border-red-500" : "border-gray-300")}
               />
-              {errors.title && (
-                <p className="text-red-500 text-sm">{errors.title.message}</p>
-              )}
+              {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
             </div>
 
             <div className="flex flex-col gap-2">
@@ -193,6 +185,7 @@ const CreatePost = () => {
               <Select
                 onValueChange={(value) => {
                   clearErrors("specialty_id");
+                  setSelectedDoctor(null);
                   setValue("specialty_id", value);
                 }}
                 {...register("specialty_id", { required: "Vui lòng chọn chuyên khoa!" })}
@@ -202,9 +195,7 @@ const CreatePost = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {isLoadingSpecialties ? (
-                    <div className="py-6">
-                      <Spinner table />
-                    </div>
+                    <div className="py-6"><Spinner table /></div>
                   ) : (
                     specialties?.length > 0 ? (
                       specialties?.map((specialty) => (
@@ -218,9 +209,7 @@ const CreatePost = () => {
                               height="30"
                               className="object-cover rounded-full"
                             />
-                            <p className="w-fit font-medium text-ellipsis overflow-hidden">
-                              {specialty?.name}
-                            </p>
+                            <p className="w-fit font-medium text-ellipsis overflow-hidden">{specialty?.name}</p>
                           </div>
                         </SelectItem>
                       ))
@@ -232,16 +221,14 @@ const CreatePost = () => {
                   )}
                 </SelectContent>
               </Select>
-              {errors.specialty_id && (
-                <p className="text-red-500 text-sm">{errors.specialty_id.message}</p>
-              )}
+              {errors.specialty_id && <p className="text-red-500 text-sm">{errors.specialty_id.message}</p>}
             </div>
 
             <div className="flex flex-col gap-2">
               <label className="text-[17px] font-semibold">Bác sĩ</label>
               <div ref={dropdownRef} className="relative w-full lg:w-auto flex-1">
                 <Input
-                  value={inputValue}
+                  value={selectedDoctor ? selectedDoctor?.fullname : query}
                   spellCheck={false}
                   onChange={handleInputChange}
                   disabled={!watch("specialty_id")}
@@ -258,7 +245,7 @@ const CreatePost = () => {
                   )}
                 >
                   {isLoading.doctors ? (
-                    <Spinner table className="py-12" />
+                    <div className="py-6"><Spinner table /></div>
                   ) : (
                     doctors?.length > 0 ? (
                       doctors?.map((doctor: DoctorData) => (
@@ -266,11 +253,7 @@ const CreatePost = () => {
                           type="button"
                           variant="ghost"
                           key={doctor?._id}
-                          onClick={() => {
-                            setSelectedDoctor(doctor);
-                            setIsDropdownVisible(false);
-                            setInputValue(doctor?.fullname);
-                          }}
+                          onClick={() => handleSelectDoctor(doctor)}
                           className="w-full h-14 flex items-center justify-start gap-4 hover:text-primary transition duration-500"
                         >
                           <Image
@@ -292,9 +275,7 @@ const CreatePost = () => {
                   )}
                 </div>
               </div>
-              {errors.doctor_id && (
-                <p className="text-red-500 text-sm">{errors.doctor_id.message}</p>
-              )}
+              {errors.doctor_id && <p className="text-red-500 text-sm">{errors.doctor_id.message}</p>}
             </div>
 
             <div className="flex flex-col gap-2">
@@ -307,9 +288,7 @@ const CreatePost = () => {
                 selectedDate={selectedDate}
                 setSelectedDate={setSelectedDate}
               />
-              {dateError && (
-                <p className="text-red-500 text-sm">{dateError}</p>
-              )}
+              {dateError && <p className="text-red-500 text-sm">{dateError}</p>}
             </div>
 
             <div className="flex flex-col gap-2">
@@ -336,14 +315,12 @@ const CreatePost = () => {
                 </Button>
               </div>
 
-              {errors.image && (
-                <p className="text-red-500 text-sm">{errors.image.message}</p>
-              )}
+              {errors.image && <p className="text-red-500 text-sm">{errors.image.message}</p>}
 
-              {imageURL && (
+              {imageUrl && (
                 <div className="mx-auto mt-6">
                   <Image
-                    src={imageURL}
+                    src={imageUrl}
                     alt="Preview"
                     width={700}
                     height={700}
@@ -360,29 +337,15 @@ const CreatePost = () => {
                 onChange={handleEditorChange}
                 className={cn("!rounded-md", errors.desc && "!border-red-500")}
               />
-              {errors.desc && (
-                <p className="text-red-500 text-sm">{errors.desc.message}</p>
-              )}
+              {errors.desc && <p className="text-red-500 text-sm">{errors.desc.message}</p>}
             </div>
           </div>
 
           <div className="flex items-center justify-end gap-4">
-            <Button
-              type="button"
-              size="lg"
-              variant="cancel"
-              onClick={() => router.replace("/admin/manage-posts")}
-            >
+            <Button type="button" size="lg" variant="cancel" onClick={() => router.replace("/admin/manage-posts")}>
               Hủy
             </Button>
-
-            <Button
-              type="submit"
-              size="lg"
-              variant="submit"
-              disabled={isLoading.creating}
-              onClick={handleValidate}
-            >
+            <Button type="submit" size="lg" variant="submit" disabled={isLoading.creating} onClick={handleValidate}>
               {isLoading.creating ? "Đang tạo..." : "Tạo mới"}
             </Button>
           </div>

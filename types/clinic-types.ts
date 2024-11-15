@@ -15,18 +15,18 @@ export interface CreateClinicForm {
   district: string;
   province: string;
   desc: string;
-  avatar?: FileList;
-  banner?: FileList;
+  avatar: FileList;
+  banner: FileList;
 };
 
 export interface EditClinicForm {
-  _id?: string;
-  name: string;
-  street: string;
-  ward: string;
-  district: string;
-  province: string;
-  desc: string;
+  _id: string;
+  name?: string;
+  street?: string;
+  ward?: string;
+  district?: string;
+  province?: string;
+  desc?: string;
   avatar?: FileList;
   banner?: FileList;
 };
@@ -37,8 +37,8 @@ export interface CreateClinicData {
   desc: string;
   avatarName: string;
   bannerName: string;
-  avatar?: File;
-  banner?: File;
+  avatar: File;
+  banner: File;
 };
 
 export interface EditClinicData {

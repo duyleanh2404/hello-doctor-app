@@ -4,15 +4,16 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 
 import { FiUpload } from "react-icons/fi";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
-import JoditEditor from "jodit-react";
 
 import { medicalFees } from "@/constants/medical-fees";
 
+import { Province } from "@/types/auth-types";
 import { ClinicData } from "@/types/clinic-types";
 import { CreateDoctorForm } from "@/types/doctor-types";
 
@@ -35,6 +36,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Spinner from "@/components/spinner";
 
+const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
+
 const CreateDoctor = () => {
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -43,12 +46,10 @@ const CreateDoctor = () => {
   const [isLoading, setLoading] = useState({ clinics: false, creating: false });
 
   const [content, setContent] = useState<string>("");
-  const [inputValue, setInputValue] = useState<string>("");
-
   const [imageName, setImageName] = useState<string>("");
-  const [imageURL, setImageURL] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  const provinces: any[] = useProvinces();
+  const provinces: Province[] = useProvinces();
   const { specialties, isLoading: isLoadingSpecialties } = useSpecialties("desc");
 
   const [clinics, setClinics] = useState<ClinicData[]>([]);
@@ -62,31 +63,27 @@ const CreateDoctor = () => {
   useClickOutside(dropdownRef, () => setIsDropdownVisible(false));
 
   useEffect(() => {
-    const fetchClinics = async (query?: string) => {
+    const fetchClinics = async () => {
       setLoading({ ...isLoading, clinics: true });
 
       try {
-        const { clinics } = await getAllClinics({ query });
+        const { clinics } = await getAllClinics({ query: debouncedQuery });
         setClinics(clinics);
       } catch (error: any) {
+        console.error(error);
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       } finally {
         setLoading({ ...isLoading, clinics: false });
       }
     };
 
-    fetchClinics(debouncedQuery);
+    fetchClinics();
   }, [debouncedQuery]);
-
-  useEffect(() => {
-    if (selectedClinic) setInputValue(selectedClinic.name);
-  }, [selectedClinic]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setQuery(value);
-    setInputValue(value);
-    setIsDropdownVisible(!!value);
+    if (selectedClinic) setSelectedClinic(null);
   };
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,7 +97,7 @@ const CreateDoctor = () => {
 
     clearErrors("image");
     setImageName(file.name);
-    setImageURL(URL.createObjectURL(file));
+    setImageUrl(URL.createObjectURL(file));
   };
 
   const handleEditorChange = (newContent: string) => {
@@ -112,21 +109,17 @@ const CreateDoctor = () => {
   const handleValidate = () => {
     if (!selectedClinic) {
       setError("clinic_id", { type: "manual", message: "Vui lòng chọn bệnh viện!" });
-    } else {
-      clearErrors("clinic_id");
     }
+    window.scrollTo({ top: 0, behavior: "smooth" });
 
     if (content.trim() === "") {
       setError("desc", { type: "manual", message: "Vui lòng nhập mô tả của bác sĩ!" });
     }
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleSelectClinic = (clinic: ClinicData) => {
     clearErrors("clinic_id");
     setSelectedClinic(clinic);
-    setInputValue(clinic?.name);
     setIsDropdownVisible(false);
   };
 
@@ -152,6 +145,7 @@ const CreateDoctor = () => {
 
       toast.success("Thêm bác sĩ thành công!");
     } catch (error: any) {
+      console.error(error);
       toast.error("Thêm bác sĩ thất bại. Vui lòng thử lại sau ít phút nữa!");
     } finally {
       router.replace("/admin/manage-doctors");
@@ -190,7 +184,7 @@ const CreateDoctor = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {provinces?.length > 0 ? (
-                    provinces?.map((province) => (
+                    provinces?.map((province: any) => (
                       <SelectItem key={province?._id} value={province?.name}>{province?.name}</SelectItem>
                     ))
                   ) : (
@@ -250,7 +244,7 @@ const CreateDoctor = () => {
               <label className="text-[17px] font-semibold">Bệnh viện</label>
               <div ref={dropdownRef} className="relative w-full lg:w-auto flex-1">
                 <Input
-                  value={inputValue}
+                  value={selectedClinic ? selectedClinic?.name : query}
                   spellCheck={false}
                   onChange={handleInputChange}
                   onFocus={() => setIsDropdownVisible(true)}
@@ -344,10 +338,10 @@ const CreateDoctor = () => {
 
               {errors.image && <p className="text-red-500 text-sm">{errors.image.message}</p>}
 
-              {imageURL && (
+              {imageUrl && (
                 <div className="mx-auto mt-6">
                   <Image
-                    src={imageURL}
+                    src={imageUrl}
                     alt="Preview"
                     width={300}
                     height={300}

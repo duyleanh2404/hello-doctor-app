@@ -19,7 +19,7 @@ import {
 } from "@/store/slices/auth-slice";
 import { RootState } from "@/store/store";
 
-import { RegisterForm } from "@/types/auth-types";
+import { District, Province, RegisterForm } from "@/types/auth-types";
 import { register } from "@/services/auth-service";
 import useToggle from "@/hooks/use-toggle";
 
@@ -44,17 +44,11 @@ const RegisterPage = () => {
   const [isLoading, setLoading] = useState<boolean>(false);
   const [isPasswordVisible, togglePasswordVisibility] = useToggle(false);
 
-  const [selectedProvince, setSelectedProvince] = useState<any | null>(null);
-  const [selectedDistrict, setSelectedDistrict] = useState<any | null>(null);
+  const [selectedProvince, setSelectedProvince] = useState<Province | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<District | null>(null);
 
   const {
-    watch,
-    setValue,
-    setError,
-    clearErrors,
-    handleSubmit,
-    formState: { errors },
-    register: registerForm
+    watch, setValue, setError, clearErrors, handleSubmit, formState: { errors }, register: registerForm
   } = useForm<RegisterForm>();
 
   useEffect(() => {

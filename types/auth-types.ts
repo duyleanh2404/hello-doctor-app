@@ -53,3 +53,18 @@ export type ResetPasswordData = {
   email: string;
   newPassword: string;
 };
+
+export type Province = {
+  _id: string;
+  name: string;
+};
+
+export type District = {
+  _id: string;
+  name: string;
+};
+
+export type Ward = {
+  _id: string;
+  name: string;
+};

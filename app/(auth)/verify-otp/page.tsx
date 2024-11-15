@@ -76,7 +76,7 @@ const VerifyOtpPage = () => {
     router.replace("/login");
   };
 
-  const handleVerifyOtpError = (status: any) => {
+  const handleVerifyOtpError = (status: number) => {
     setLoading(false);
 
     switch (status) {

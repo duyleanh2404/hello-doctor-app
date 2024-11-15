@@ -22,34 +22,28 @@ const Chatbot = () => {
   const [isLoading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    if (showChat && inputRef.current) {
-      inputRef.current.focus();
-    }
+    if (showChat && inputRef.current) inputRef.current.focus();
   }, [showChat]);
 
   const handleSendMessage = async () => {
     if (!userInput.trim()) return;
-
     setLoading(true);
 
     try {
-      const response = await fetch("/api/gemini",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: userInput })
-        }
-      );
+      const response = await fetch("/api/gemini", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: userInput })
+      });
 
       if (response.ok) {
         const data = await response.json();
-        if (data.answer) {
-          setResponse(data.answer);
-        }
+        if (data?.answer) setResponse(data.answer);
       } else {
         setResponse("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error(error);
       setResponse("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
     } finally {
       setLoading(false);
@@ -98,11 +92,7 @@ const Chatbot = () => {
             </div>
           </div>
 
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => setShowChat(false)}
-          >
+          <Button type="button" variant="ghost" onClick={() => setShowChat(false)}>
             <IoClose className="size-6" />
           </Button>
         </div>

@@ -19,12 +19,10 @@ import {
 } from "@/store/slices/booking-slice";
 import { RootState } from "@/store/store";
 
-import { getCurrentUser } from "@/services/user-serivce";
 import { getSchedule } from "@/services/schedule-service";
 import { createPaymentUrl } from "@/services/payment-service";
 import { createAppointment } from "@/services/appointment-service";
 
-import { UserData } from "@/types/user-types";
 import { BookingData } from "@/types/booking-types";
 import { ScheduleData } from "@/types/schedule-types";
 
@@ -38,30 +36,19 @@ const BookingDetails = () => {
   const router = useRouter();
 
   const dispatch = useDispatch();
-  const { isLoggedIn } = useSelector((state: RootState) => state.auth);
+  const { userData } = useSelector((state: RootState) => state.auth);
+  const [schedule, setSchedule] = useState<ScheduleData | null>(null);
 
   const [paymentMethod, setPaymentMethod] = useState<string>("COD");
   const [isLoading, setLoading] = useState({ schedule: false, user: false, booking: false });
-
-  const [user, setUser] = useState<UserData | null>(null);
-  const [schedule, setSchedule] = useState<ScheduleData | null>(null);
 
   const searchParams = useSearchParams();
   const time = searchParams.get("time");
   const date = searchParams.get("date");
   const doctorId = searchParams.get("doctorId");
 
-  const decodedDate = atob(date!);
-  const decodedTime = atob(time!);
-  const decodedDoctorId = atob(doctorId!);
-
   const {
-    control,
-    register,
-    setValue,
-    clearErrors,
-    handleSubmit,
-    formState: { errors }
+    control, register, setValue, clearErrors, handleSubmit, formState: { errors }
   } = useForm<BookingData>({ defaultValues: { newPatients: true } });
 
   useEffect(() => {
@@ -71,16 +58,16 @@ const BookingDetails = () => {
   useEffect(() => {
     const fetchSchedule = async () => {
       if (!date || !doctorId) return;
-
       setLoading({ ...isLoading, schedule: true });
 
       try {
         const { schedule } = await getSchedule({
-          doctor_id: decodedDoctorId,
-          date: parse(decodedDate, "dd/MM/yyyy", new Date())
+          doctor_id: atob(doctorId!),
+          date: parse(atob(date!), "dd/MM/yyyy", new Date())
         });
         setSchedule(schedule);
       } catch (error: any) {
+        console.error(error);
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       } finally {
         setLoading({ ...isLoading, schedule: false });
@@ -90,54 +77,30 @@ const BookingDetails = () => {
     fetchSchedule();
   }, [date, doctorId]);
 
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      if (!isLoggedIn) return;
-
-      const accessToken = Cookies.get("access_token");
-      if (!accessToken) return;
-
-      setLoading({ ...isLoading, user: true });
-
-      try {
-        const userData = await getCurrentUser(accessToken);
-        setUser(userData.user);
-      } catch (error: any) {
-        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
-      } finally {
-        setLoading({ ...isLoading, user: false });
-      }
-    };
-
-    fetchCurrentUser();
-  }, [isLoggedIn]);
-
-  const handleBookAppointment: SubmitHandler<BookingData> = async (data) => {
-    if (!date || !time || !doctorId || !user) return;
+  const handleBookAppointment: SubmitHandler<BookingData> = async (appointmentData) => {
+    if (!date || !time || !doctorId || !userData) return;
 
     const accessToken = Cookies.get("access_token");
     if (!accessToken) return;
-
     setLoading({ ...isLoading, booking: true });
 
     try {
-      const formattedDate = parse(decodedDate, "dd/MM/yyyy", new Date());
-
+      const formattedDate = parse(atob(date!), "dd/MM/yyyy", new Date());
       switch (paymentMethod) {
         case "COD":
           dispatch(setVerifyingAppointment(true));
           await createAppointment(
             accessToken,
             {
-              user_id: user._id,
-              doctor_id: decodedDoctorId,
+              user_id: userData._id,
+              doctor_id: atob(doctorId!),
               date: formattedDate,
-              time: decodedTime,
-              address: data.address,
-              reasons: data.reasons,
-              payment: "COD",
-              zaloPhone: data.zaloPhone,
-              newPatients: data.newPatients
+              time: atob(time!),
+              address: appointmentData.address,
+              reasons: appointmentData.reasons,
+              zaloPhone: appointmentData.zaloPhone,
+              newPatients: appointmentData.newPatients,
+              payment: "COD"
             }
           );
 
@@ -148,38 +111,43 @@ const BookingDetails = () => {
             text: "Vui lòng kiểm tra email để xác thực đơn đặt lịch!"
           })
             .then((result) => {
-              if (result.isConfirmed) router.replace("/");
+              if (result.isConfirmed) {
+                NProgress.start();
+                router.replace("/");
+              }
             });
           break;
 
         case "ATM":
           dispatch(setVerifyingPayment(true));
           dispatch(setBookingData({
-            user_id: user._id,
-            doctor_id: decodedDoctorId,
+            user_id: userData._id,
+            doctor_id: atob(doctorId!),
             date: formattedDate.toISOString(),
-            time: decodedTime,
-            address: data.address,
-            reasons: data.reasons,
+            time: atob(time!),
             payment: "ATM",
-            zaloPhone: data.zaloPhone,
-            newPatients: data.newPatients,
+            address: appointmentData.address,
+            reasons: appointmentData.reasons,
+            zaloPhone: appointmentData.zaloPhone,
+            newPatients: appointmentData.newPatients,
           }))
 
-          const { paymentUrl } = await createPaymentUrl(
-            accessToken,
-            {
-              amount: schedule?.doctor_id?.medicalFee!,
-              txnRef: (Math.floor(100000 + Math.random() * 900000)).toString(),
-              orderInfo:
-                `Thanh toán tiền khám bệnh ${schedule?.doctor_id?.fullname}, ${format(schedule?.date!, "dd/MM/yyyy")}`,
-              returnUrl: "http://localhost:3000/verify-payment"
-            }
-          );
-          router.replace(paymentUrl);
+          if (schedule?.doctor_id?.medicalFee && schedule?.doctor_id?.fullname && schedule?.date) {
+            const { paymentUrl } = await createPaymentUrl(
+              accessToken,
+              {
+                amount: schedule?.doctor_id?.medicalFee,
+                txnRef: (Math.floor(100000 + Math.random() * 900000)).toString(),
+                orderInfo: `Thanh toán tiền khám bệnh ${schedule.doctor_id.fullname}, ${format(schedule.date, "dd/MM/yyyy")}`,
+                returnUrl: "http://localhost:3000/verify-payment"
+              }
+            );
+            router.replace(paymentUrl);
+          }
           break;
       }
     } catch (error: any) {
+      console.error(error);
       toast.error("Đặt lịch thất bại. Vui lòng thử lại sau ít phút nữa!");
       setLoading({ ...isLoading, booking: false });
       router.replace("/");
@@ -205,7 +173,7 @@ const BookingDetails = () => {
           </div>
         }>
           <UserInfo
-            user={user}
+            user={userData}
             errors={errors}
             control={control}
             setValue={setValue}
@@ -215,7 +183,7 @@ const BookingDetails = () => {
           />
 
           <ScheduleInfo
-            time={decodedTime!}
+            time={atob(time!)!}
             schedule={schedule!}
             paymentMethod={paymentMethod}
             isBooking={isLoading.booking}

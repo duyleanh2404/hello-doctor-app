@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-interface DeleteConfirmationModalProps {
+interface IProps {
   isOpen: boolean;
   isCancel?: boolean;
   isDeleting: boolean;
@@ -14,9 +14,7 @@ interface DeleteConfirmationModalProps {
   onConfirm: () => void;
 };
 
-const DeleteConfirmationModal = ({
-  isOpen, isDeleting, isCancel, onClose, onConfirm
-}: DeleteConfirmationModalProps) => {
+const DeleteConfirmationModal = ({ isOpen, isDeleting, isCancel, onClose, onConfirm }: IProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>

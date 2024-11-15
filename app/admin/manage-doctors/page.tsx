@@ -15,8 +15,10 @@ import { BsClipboard2PlusFill } from "react-icons/bs";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 
-import { DoctorData } from "@/types/doctor-types";
 import { deleteDoctor, getAllDoctors } from "@/services/doctor-service";
+
+import { Province } from "@/types/auth-types";
+import { DoctorData } from "@/types/doctor-types";
 
 import useDebounce from "@/hooks/use-debounce";
 import useClinics from "@/hooks/fetch/use clinics";
@@ -43,7 +45,7 @@ import { Button } from "@/components/ui/button";
 import Hint from "@/components/hint";
 import Spinner from "@/components/spinner";
 import PaginationSection from "@/components/pagination";
-import DeleteConfirmationModal from "@/components/delete-confirmation-modal";
+import DeleteConfirmationModal from "@/components/modal/delete-confirmation-modal";
 
 const ManageDoctors = () => {
   const router = useRouter();
@@ -52,7 +54,7 @@ const ManageDoctors = () => {
   const [inputFocused, setInputFocused] = useState<boolean>(false);
   const [isLoading, setLoading] = useState({ doctors: false, deleting: false });
 
-  const provinces: any[] = useProvinces();
+  const provinces: Province[] = useProvinces();
   const { specialties, isLoading: isLoadingSpecialties } = useSpecialties("desc, image");
   const { clinics, isLoading: isLoadingClinics } = useClinics("desc, address, avatar, banner");
 
@@ -80,6 +82,7 @@ const ManageDoctors = () => {
       });
       handleDoctorsFetchSuccess(doctors, total);
     } catch (error: any) {
+      console.error(error);
       toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
     } finally {
       setLoading({ ...isLoading, doctors: false });
@@ -108,8 +111,10 @@ const ManageDoctors = () => {
       setModalOpen(false);
       toast.success("Xóa bác sĩ thành công!");
     } catch (error: any) {
+      console.error(error);
       toast.error("Xóa bác sĩ thất bại. Vui lòng thử lại sau ít phút nữa!");
     } finally {
+      setModalOpen(false);
       setLoading({ ...isLoading, deleting: false });
     }
   };
@@ -143,7 +148,7 @@ const ManageDoctors = () => {
               {provinces?.length > 0 ? (
                 <>
                   <SelectItem value="all">Tất cả</SelectItem>
-                  {provinces?.map((province) => (
+                  {provinces?.map((province: any) => (
                     <SelectItem key={province?.id} value={province?.name}>{province?.name}</SelectItem>
                   ))}
                 </>
@@ -165,8 +170,7 @@ const ManageDoctors = () => {
                       ? "Tất cả"
                       : selectedSpecialty
                         ? specialties.find(specialty => specialty._id === selectedSpecialty)?.name
-                        : "Chọn chuyên khoa"
-                  }
+                        : "Chọn chuyên khoa"}
                 />
               </div>
             </SelectTrigger>
@@ -191,17 +195,16 @@ const ManageDoctors = () => {
           </Select>
 
           <Select onValueChange={(value) => setSelectedClinic(value)}>
-            <SelectTrigger className="w-[220px] p-3 border-none shadow-none">
-              <div className="flex items-center gap-3">
-                <FaClinicMedical className="size-5 text-[#1c3f66]" />
+            <SelectTrigger className="w-[250px] p-3 border-none shadow-none">
+              <div className="flex items-center gap-3 truncate text-start">
+                <FaClinicMedical className="flex-shrink-0 size-5 text-[#1c3f66]" />
                 <SelectValue
                   placeholder={
                     selectedClinic === "all"
                       ? "Tất cả"
                       : selectedClinic
                         ? clinics.find(clinic => clinic._id === selectedClinic)?.name
-                        : "Chọn bệnh viện"
-                  }
+                        : "Chọn bệnh viện"}
                 />
               </div>
             </SelectTrigger>
@@ -248,8 +251,7 @@ const ManageDoctors = () => {
       </div>
 
       <div className={cn(
-        "relative rounded-md shadow-md overflow-y-auto",
-        doctors?.length > 0 ? "h-auto" : "h-full"
+        "relative rounded-md shadow-md overflow-y-auto", doctors?.length > 0 ? "h-auto" : "h-full"
       )}>
         <Table className="relative h-full text-[17px]">
           <TableHeader className="sticky top-0 left-0 right-0 h-12 bg-gray-100">
@@ -265,7 +267,7 @@ const ManageDoctors = () => {
 
           <TableBody>
             {doctors?.length > 0 ? (
-              doctors?.map((doctor, index) => {
+              doctors?.map((doctor: DoctorData, index) => {
                 const startIndex = (currentPage - 1) * 10;
 
                 return (

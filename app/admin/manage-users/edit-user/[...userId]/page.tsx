@@ -11,6 +11,7 @@ import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 
 import { EditUserForm } from "@/types/user-types";
+import { District, Province } from "@/types/auth-types";
 import { getUserById, editUser } from "@/services/user-serivce";
 
 import useProvinces from "@/hooks/fetch/use-provinces";
@@ -30,7 +31,7 @@ const EditUser = () => {
   const [isLoading, setLoading] = useState({ user: false, editing: false });
 
   const [imageName, setImageName] = useState<string>("");
-  const [imageURL, setImageURL] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const [provinceName, setProvinceName] = useState<string>("");
   const [districtName, setDistrictName] = useState<string>("");
@@ -38,20 +39,20 @@ const EditUser = () => {
   const [selectedProvince, setSelectedProvince] = useState<any | null>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<any | null>(null);
 
-  const provinces: any[] = useProvinces();
-  const districts: any[] = useDistricts(selectedProvince);
+  const provinces: Province[] = useProvinces();
+  const districts: District[] = useDistricts(selectedProvince);
 
   const { watch, register, setValue, clearErrors, handleSubmit, formState: { errors } } = useForm<EditUserForm>();
 
   useEffect(() => {
     if (!provinceName) return;
-    const province = provinces.find((province) => province.name === provinceName.trim());
+    const province = provinces.find((province: any) => province.name === provinceName.trim());
     setSelectedProvince(province);
   }, [provinceName]);
 
   useEffect(() => {
     if (!districts || !districtName) return;
-    const district = districts.find((district) => district.name === districtName.trim());
+    const district = districts.find((district: any) => district.name === districtName.trim());
     setSelectedDistrict(district);
   }, [districts, districtName]);
 
@@ -77,11 +78,9 @@ const EditUser = () => {
             phoneNumber: user.phoneNumber
           };
 
-          Object.entries(userData).forEach(([key, value]: any) => {
-            setValue(key, value);
-          });
+          Object.entries(userData).forEach(([key, value]: any) => setValue(key, value));
 
-          setImageURL(user.image);
+          setImageUrl(user.image);
           setImageName(user.imageName);
           setProvinceName(province);
           setDistrictName(district);
@@ -90,6 +89,7 @@ const EditUser = () => {
           setValue("fullname", user.fullname);
         }
       } catch (error: any) {
+        console.error(error);
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       } finally {
         setLoading({ ...isLoading, user: false });
@@ -110,7 +110,7 @@ const EditUser = () => {
 
     clearErrors("image");
     setImageName(file.name);
-    setImageURL(URL.createObjectURL(file));
+    setImageUrl(URL.createObjectURL(file));
   };
 
   const handleEditUser: SubmitHandler<EditUserForm> = async (data) => {
@@ -135,6 +135,7 @@ const EditUser = () => {
 
       toast.success("Cập nhật thông tin thành công!");
     } catch (error: any) {
+      console.error(error);
       toast.error("Cập nhật thông tin thất bại. Vui lòng thử lại sau ít phút nữa!");
     } finally {
       router.replace("/admin/manage-users");
@@ -246,10 +247,10 @@ const EditUser = () => {
 
               {errors.image && <p className="text-sm text-red-500">{errors.image.message}</p>}
 
-              {imageURL ? (
+              {imageUrl ? (
                 <div className="mx-auto mt-6">
                   <Image
-                    src={imageURL}
+                    src={imageUrl}
                     alt="Preview"
                     width={300}
                     height={300}

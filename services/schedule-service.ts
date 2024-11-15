@@ -1,30 +1,26 @@
-import { toDate } from "date-fns-tz";
-
 import {
   GetScheduleData,
   EditScheduleData,
   CreateScheduleData,
   GetAllSchedulesData,
-  GetSchedulesByRange
+  GetSchedulesByRangeData
 } from "@/types/schedule-types";
 
 import { handleResponse } from "@/utils/handle-response";
 import { formatDateInTimeZone } from "@/utils/format-date-in-timezone";
 
-export const createSchedule = async (accessToken: string, data: CreateScheduleData) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/schedule`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${accessToken}`
-      },
-      body: JSON.stringify({
-        ...data,
-        date: formatDateInTimeZone(data.date, "Asia/Ho_Chi_Minh")
-      })
-    }
+export const createSchedule = async (accessToken: string, scheduleData: CreateScheduleData) => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/schedule`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${accessToken}`
+    },
+    body: JSON.stringify({
+      ...scheduleData,
+      date: formatDateInTimeZone(scheduleData.date, "Asia/Ho_Chi_Minh")
+    })
+  }
   );
 
   const responseData = await response.json();
@@ -35,60 +31,50 @@ export const createSchedule = async (accessToken: string, data: CreateScheduleDa
   return responseData;
 };
 
-export const editSchedule = async (accessToken: string, data: EditScheduleData) => {
+export const editSchedule = async (accessToken: string, scheduleData: EditScheduleData) => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/schedule/${data.id}`,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${accessToken}`
-      },
-      body: JSON.stringify(data)
-    }
-  );
+    `${process.env.NEXT_PUBLIC_API_URL}/schedule/${scheduleData.id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${accessToken}`
+    },
+    body: JSON.stringify(scheduleData)
+  });
 
   return handleResponse(response);
 };
 
 export const deleteSchedule = async (accessToken: string, id: string) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/schedule/${id}`,
-    {
-      method: "DELETE",
-      headers: { "Authorization": `Bearer ${accessToken}` }
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/schedule/${id}`, {
+    method: "DELETE",
+    headers: { "Authorization": `Bearer ${accessToken}` }
+  });
 
   return handleResponse(response);
 };
 
 export const getAllSchedules = async (
-  accessToken: string,
-  { page = 1, limit = 10, query, exclude, date }: GetAllSchedulesData
+  accessToken: string, { page = 1, limit = 10, query, exclude, date }: GetAllSchedulesData
 ) => {
-  const dateISOString = date?.toISOString();
-
   const queryParams = new URLSearchParams({
     page: page.toString(),
     limit: limit.toString(),
     ...(query && { query }),
     ...(exclude && { exclude }),
-    ...(date && { date: dateISOString })
+    ...(date && { date: formatDateInTimeZone(date, "Asia/Ho_Chi_Minh") })
   });
 
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/schedule/all?${queryParams.toString()}`,
-    {
-      method: "GET",
-      headers: { "Authorization": `Bearer ${accessToken}` }
-    }
-  );
+    `${process.env.NEXT_PUBLIC_API_URL}/schedule/all?${queryParams.toString()}`, {
+    method: "GET",
+    headers: { "Authorization": `Bearer ${accessToken}` }
+  });
 
   return handleResponse(response);
 };
 
-export const getSchedulesByRange = async ({ doctor_id, startDate, endDate }: GetSchedulesByRange) => {
+export const getSchedulesByRange = async ({ doctor_id, startDate, endDate }: GetSchedulesByRangeData) => {
   if (startDate && endDate) {
     startDate.setUTCHours(0, 0, 0, 0);
     endDate.setUTCHours(0, 0, 0, 0);
@@ -111,16 +97,10 @@ export const getSchedulesByRange = async ({ doctor_id, startDate, endDate }: Get
 };
 
 export const getSchedule = async ({ doctor_id, schedule_id, date }: GetScheduleData) => {
-  let utcDate;
-  if (date) {
-    const localDate = toDate(date, { timeZone: "Asia/Ho_Chi_Minh" });
-    utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000).toISOString();
-  }
-
   const queryParams = new URLSearchParams({
     ...(doctor_id && { doctor_id }),
     ...(schedule_id && { schedule_id }),
-    ...(date && { date: utcDate })
+    ...(date && { date: formatDateInTimeZone(date, "Asia/Ho_Chi_Minh") })
   });
 
   const response = await fetch(

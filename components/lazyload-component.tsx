@@ -19,10 +19,7 @@ const LazyLoadComponent = ({ children }: { children: React.ReactNode }) => {
       { threshold: 0.1 }
     );
 
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
+    if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, []);
 

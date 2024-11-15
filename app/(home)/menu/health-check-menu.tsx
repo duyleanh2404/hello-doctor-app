@@ -12,17 +12,17 @@ import { toolsCheck } from "@/constants/tools-check";
 
 import { Button } from "@/components/ui/button";
 
-interface MenuState {
+type MenuState = {
   tabActive: string | null;
   isOpenMenuMobile: boolean;
 };
 
-interface HealthCheckMenuProps {
+interface IProps {
   tabActive: string | null;
   setMenuState: React.Dispatch<React.SetStateAction<MenuState>>;
 };
 
-const HealthCheckMenu = memo(({ tabActive, setMenuState }: HealthCheckMenuProps) => {
+const HealthCheckMenu = memo(({ tabActive, setMenuState }: IProps) => {
   const { isBannerVisible } = useSelector((state: RootState) => state.common);
 
   return (
@@ -52,18 +52,8 @@ const HealthCheckMenu = memo(({ tabActive, setMenuState }: HealthCheckMenuProps)
                   href="/"
                   className="w-full flex items-center p-2 hover:text-primary hover:bg-[#e3f2ff] rounded-md cursor-pointer transition duration-500"
                 >
-                  <Image
-                    loading="lazy"
-                    src={image}
-                    alt="Tools Check"
-                    width={50}
-                    height={50}
-                    className="object-cover"
-                  />
-
-                  <p className="w-full h-full flex items-center text-[15px] font-medium px-4 text-start">
-                    {title}
-                  </p>
+                  <Image loading="lazy" src={image} alt="Tools Check" width={50} height={50} className="object-cover" />
+                  <p className="w-full h-full flex items-center text-[15px] font-medium px-4 text-start">{title}</p>
                 </Link>
               ))}
             </div>
@@ -111,10 +101,7 @@ const HealthCheckMenu = memo(({ tabActive, setMenuState }: HealthCheckMenuProps)
                   </div>
                 </div>
 
-                <Link
-                  href="/"
-                  className="group flex items-center gap-3 font-semibold text-primary mr-auto"
-                >
+                <Link href="/" className="group flex items-center gap-3 font-semibold text-primary mr-auto">
                   Xem thêm
                   <FaAngleRight size={15} className="group-hover:translate-x-2 transition-transform duration-500" />
                 </Link>
@@ -126,5 +113,7 @@ const HealthCheckMenu = memo(({ tabActive, setMenuState }: HealthCheckMenuProps)
     </div>
   );
 });
+
+HealthCheckMenu.displayName = "HealthCheckMenu";
 
 export default HealthCheckMenu;

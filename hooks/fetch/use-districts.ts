@@ -1,18 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
 import toast from "react-hot-toast";
 
 import { getDisctricts } from "@/services/auth-service";
-
-interface Province {
-  id: string;
-  name: string;
-};
-
-interface District {
-  id: string;
-  name: string;
-};
+import { District, Province } from "@/types/auth-types";
 
 const useDistricts = (selectedProvince: Province | null) => {
   const [districts, setDistricts] = useState<District[]>([]);
@@ -22,9 +13,10 @@ const useDistricts = (selectedProvince: Province | null) => {
       if (!selectedProvince) return;
 
       try {
-        const { data } = await getDisctricts(selectedProvince.id);
+        const { data } = await getDisctricts(selectedProvince._id);
         setDistricts(data);
       } catch (error: any) {
+        console.error(error);
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       }
     };

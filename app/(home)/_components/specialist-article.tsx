@@ -41,6 +41,7 @@ const SpecialistArticle = () => {
         setHeartPosts(heartData.posts);
         setCancerPosts(cancerData.posts);
       } catch (error: any) {
+        console.error(error);
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       } finally {
         setLoading(false);
@@ -64,7 +65,8 @@ const SpecialistArticle = () => {
         <div className="flex items-center justify-between">
           <h1 className="text-[22px] font-bold">Ung thư - Ung bướu</h1>
           <Link
-            href={`/specialties/${cancerSpecialty?._id}`}
+            href={cancerSpecialty?._id ? `/specialties/${btoa(cancerSpecialty._id)}` : "/"}
+            onClick={() => cancerSpecialty?._id && NProgress.start()}
             className="flex items-center gap-2 text-[15px] font-medium text-primary"
           >
             Xem thêm <FaAngleRight size="14" />
@@ -92,12 +94,8 @@ const SpecialistArticle = () => {
 
                 <div className="flex flex-col gap-2 sm:gap-6">
                   <div className="flex flex-col gap-1 sm:gap-2">
-                    <p className="text-[13px] sm:text-[15px] font-bold text-primary">
-                      {post?.specialty_id?.name}
-                    </p>
-                    <h1 className="text-sm sm:text-xl font-bold line-clamp-2">
-                      {post?.title}
-                    </h1>
+                    <p className="text-[13px] sm:text-[15px] font-bold text-primary">{post?.specialty_id?.name}</p>
+                    <h1 className="text-sm sm:text-xl font-bold line-clamp-2">{post?.title}</h1>
                   </div>
 
                   <div className="flex items-center gap-3">
@@ -111,8 +109,7 @@ const SpecialistArticle = () => {
                       />
                     </div>
                     <p className="text-[12px] sm:text-[15px]">
-                      Tham vấn y khoa: {""}
-                      <span className="font-semibold">{post?.doctor_id?.fullname}</span>
+                      Tham vấn y khoa: <span className="font-semibold">{post?.doctor_id?.fullname}</span>
                     </p>
                   </div>
                 </div>
@@ -121,13 +118,7 @@ const SpecialistArticle = () => {
           </div>
         ) : (
           <div className="w-full flex flex-col items-center justify-center gap-12 pt-8">
-            <Image
-              loading="lazy"
-              src="/not-found.png"
-              alt="Not found"
-              width="240"
-              height="240"
-            />
+            <Image loading="lazy" src="/not-found.png" alt="Not found" width="240" height="240" />
             <h1 className="text-xl font-semibold text-[#262626] text-center">
               Rất tiếc, hiện tại không tìm thấy bài viết nào!
             </h1>
@@ -139,7 +130,8 @@ const SpecialistArticle = () => {
         <div className="flex items-center justify-between">
           <h1 className="text-[22px] font-bold">Tim mạch</h1>
           <Link
-            href={`/specialties/${heartSpecialty?._id}`}
+            href={heartSpecialty?._id ? `/specialties/${btoa(heartSpecialty._id)}` : "/"}
+            onClick={() => cancerSpecialty?._id && NProgress.start()}
             className="flex items-center gap-2 text-[15px] font-medium text-primary"
           >
             Xem thêm <FaAngleRight size="14" />
@@ -167,12 +159,8 @@ const SpecialistArticle = () => {
 
                 <div className="flex flex-col gap-2 sm:gap-6">
                   <div className="flex flex-col gap-1 sm:gap-2">
-                    <p className="text-[13px] sm:text-[15px] font-bold text-primary">
-                      {post?.specialty_id?.name}
-                    </p>
-                    <h1 className="text-sm sm:text-xl font-bold line-clamp-2">
-                      {post?.title}
-                    </h1>
+                    <p className="text-[13px] sm:text-[15px] font-bold text-primary">{post?.specialty_id?.name} </p>
+                    <h1 className="text-sm sm:text-xl font-bold line-clamp-2">{post?.title}</h1>
                   </div>
 
                   <div className="flex items-center gap-3">
@@ -186,8 +174,7 @@ const SpecialistArticle = () => {
                       />
                     </div>
                     <p className="text-[12px] sm:text-[15px]">
-                      Tham vấn y khoa: {""}
-                      <span className="font-semibold">{post?.doctor_id?.fullname}</span>
+                      Tham vấn y khoa: <span className="font-semibold">{post?.doctor_id?.fullname}</span>
                     </p>
                   </div>
                 </div>
@@ -196,13 +183,7 @@ const SpecialistArticle = () => {
           </div>
         ) : (
           <div className="w-full flex flex-col items-center justify-center gap-12 pt-8">
-            <Image
-              loading="lazy"
-              src="/not-found.png"
-              alt="Not found"
-              width="240"
-              height="240"
-            />
+            <Image loading="lazy" src="/not-found.png" alt="Not found" width="240" height="240" />
             <h1 className="text-xl font-semibold text-[#262626] text-center">
               Rất tiếc, hiện tại không tìm thấy bài viết nào!
             </h1>

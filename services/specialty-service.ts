@@ -1,29 +1,21 @@
-import {
-  EditSpecialtyData,
-  CreateSpecialtyData,
-  GetAllSpecialtiesData
-} from "@/types/specialty-types";
+import { EditSpecialtyData, CreateSpecialtyData, GetAllSpecialtiesData } from "@/types/specialty-types";
 
 import { handleResponse } from "@/utils/handle-response";
 import { appendFormData } from "@/utils/append-form-data";
 
 export const createSpecialty = async (
-  accessToken: string,
-  { name, desc, imageName, image }: CreateSpecialtyData
+  accessToken: string, { name, desc, imageName, image }: CreateSpecialtyData
 ) => {
   const formData = new FormData();
   appendFormData(formData, { name, desc, imageName });
 
   if (image) formData.append("image", image);
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/specialty/create`,
-    {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${accessToken}` },
-      body: formData
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/specialty/create`, {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${accessToken}` },
+    body: formData
+  });
 
   const responseData = await response.json();
   if (!response.ok) {
@@ -34,22 +26,18 @@ export const createSpecialty = async (
 };
 
 export const editSpecialty = async (
-  accessToken: string,
-  { id, name, desc, imageName, image }: EditSpecialtyData
+  accessToken: string, { id, name, desc, imageName, image }: EditSpecialtyData
 ) => {
   const formData = new FormData();
   appendFormData(formData, { name, desc, imageName });
 
   if (image) formData.append("image", image);
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/specialty/${id}`,
-    {
-      method: "PUT",
-      headers: { "Authorization": `Bearer ${accessToken}` },
-      body: formData
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/specialty/${id}`, {
+    method: "PUT",
+    headers: { "Authorization": `Bearer ${accessToken}` },
+    body: formData
+  });
 
   const responseData = await response.json();
   if (!response.ok) {
@@ -60,13 +48,10 @@ export const editSpecialty = async (
 };
 
 export const deleteSpecialty = async (accessToken: string, id: string) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/specialty/${id}`,
-    {
-      method: "DELETE",
-      headers: { "Authorization": `Bearer ${accessToken}` }
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/specialty/${id}`, {
+    method: "DELETE",
+    headers: { "Authorization": `Bearer ${accessToken}` }
+  });
 
   return await handleResponse(response);
 };
@@ -92,23 +77,18 @@ export const getAllSpecialties = async ({
 };
 
 export const getSpecialtyById = async (id: string) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/specialty/${id}`,
-    {
-      method: "GET"
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/specialty/${id}`, {
+    method: "GET"
+  });
 
   return await handleResponse(response);
 };
 
 export const getSpecialtyByName = async (name: string) => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/specialty/name/${name}`,
-    {
-      method: "GET"
-    }
-  );
+    `${process.env.NEXT_PUBLIC_API_URL}/specialty/name/${name}`, {
+    method: "GET"
+  });
 
   return await handleResponse(response);
 };

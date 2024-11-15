@@ -10,7 +10,7 @@ import { IoClose } from "react-icons/io5";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-interface FormInput {
+type FormInput = {
   name: string;
   phone: string;
   address: string;
@@ -19,12 +19,9 @@ interface FormInput {
 
 const ModalAdvertise = () => {
   const [openModal, setOpenModal] = useState<boolean>(true);
-
   const { register, handleSubmit, formState: { errors } } = useForm<FormInput>();
 
-  const onSubmit: SubmitHandler<FormInput> = (data) => {
-    console.log(data);
-  };
+  const onSubmit: SubmitHandler<FormInput> = (formData) => console.log(formData);
 
   return (
     <div
@@ -44,10 +41,7 @@ const ModalAdvertise = () => {
           onClick={() => setOpenModal(false)}
           className="absolute top-4 right-8 w-[40px] h-[40px] bg-white rounded-full shadow-md z-[1001]"
         >
-          <IoClose
-            size="28"
-            className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-[#262626]"
-          />
+          <IoClose size="28" className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-[#262626]" />
         </Button>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full overflow-y-auto">
@@ -68,9 +62,7 @@ const ModalAdvertise = () => {
                 <br />
                 đình trước khi quá muộn
               </h1>
-              <p className="text-sm font-medium text-[#262626]">
-                Cơ hội nhận ngay quà tặng hấp dẫn lên đến 3 triệu đồng
-              </p>
+              <p className="text-sm font-medium text-[#262626]">Cơ hội nhận ngay quà tặng hấp dẫn lên đến 3 triệu đồng</p>
             </div>
 
             <div className="w-full flex flex-col gap-6">
@@ -114,9 +106,7 @@ const ModalAdvertise = () => {
                 <Input
                   type="checkbox"
                   id="check"
-                  {...register("agree", {
-                    required: "Bạn phải đồng ý với các điều khoản"
-                  })}
+                  {...register("agree", { required: "Bạn phải đồng ý với các điều khoản" })}
                   className="w-[15px] h-[15px]"
                 />
                 <label className="text-sm select-none" htmlFor="check">

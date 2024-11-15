@@ -24,16 +24,13 @@ import Spinner from "@/components/spinner";
 
 const CreateSchedule = () => {
   const router = useRouter();
-
-  const [errors, setErrors] = useState({
-    dateError: "", timesError: "", doctorError: ""
-  });
-
   const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const [doctors, setDoctors] = useState<DoctorData[]>([]);
 
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
   const [isLoading, setLoading] = useState({ doctors: false, creating: false });
+
+  const [doctors, setDoctors] = useState<DoctorData[]>([]);
+  const [errors, setErrors] = useState({ dateError: "", timesError: "", doctorError: "" });
 
   const timeSlots = generateTimeSlots();
   const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
@@ -42,39 +39,34 @@ const CreateSchedule = () => {
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorData | null>(null);
 
   const [query, setQuery] = useState<string>("");
-  const [inputValue, setInputValue] = useState<string>("");
   const debouncedQuery = useDebounce(query, 500);
 
   useClickOutside(dropdownRef, () => setIsDropdownVisible(false));
 
-  const fetchDoctors = async (query?: string) => {
-    setLoading({ ...isLoading, doctors: true });
-
-    try {
-      const { doctors } = await getAllDoctors({
-        query, exclude: "specialty_id, clinic_id, desc, medicalFee"
-      });
-      setDoctors(doctors);
-    } catch (error: any) {
-      toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
-    } finally {
-      setLoading({ ...isLoading, doctors: false });
-    }
-  };
-
   useEffect(() => {
-    fetchDoctors(debouncedQuery);
+    const fetchDoctors = async () => {
+      setLoading({ ...isLoading, doctors: true });
+
+      try {
+        const { doctors } = await getAllDoctors({
+          query: debouncedQuery, exclude: "specialty_id, clinic_id, desc, medicalFee"
+        });
+        setDoctors(doctors);
+      } catch (error: any) {
+        console.error(error);
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
+      } finally {
+        setLoading({ ...isLoading, doctors: false });
+      }
+    };
+
+    fetchDoctors();
   }, [debouncedQuery]);
-
-  useEffect(() => {
-    if (selectedDoctor) setInputValue(selectedDoctor?.fullname);
-  }, [selectedDoctor]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setQuery(value);
-    setInputValue(value);
-    setIsDropdownVisible(true);
+    if (selectedDoctor) setSelectedDoctor(null);
   };
 
   const handleSelectTimeSlot = (timeSlot: string) => {
@@ -92,11 +84,11 @@ const CreateSchedule = () => {
       newErrors.dateError = "Vui lòng chọn ngày!";
       hasError = true;
     }
-
     if (!selectedDoctor) {
       newErrors.doctorError = "Vui lòng chọn bác sĩ!";
       hasError = true;
     }
+    window.scrollTo({ top: 0, behavior: "smooth" });
 
     if (selectedTimes.length === 0) {
       newErrors.timesError = "Vui lòng chọn thời gian!";
@@ -105,6 +97,12 @@ const CreateSchedule = () => {
 
     setErrors(newErrors);
     return !hasError;
+  };
+
+  const handleSelectDoctor = (doctor: DoctorData) => {
+    setErrors({ ...errors, doctorError: "" });
+    setSelectedDoctor(doctor);
+    setIsDropdownVisible(false);
   };
 
   const resetForm = () => {
@@ -119,38 +117,34 @@ const CreateSchedule = () => {
 
     const accessToken = Cookies.get("access_token");
     if (!accessToken || !selectedDoctor || !selectedDate) return;
-
     setLoading({ ...isLoading, creating: true });
 
     try {
       await createSchedule(
         accessToken,
         {
-          doctor_id: selectedDoctor?._id,
+          doctor_id: selectedDoctor._id,
           date: selectedDate,
-          timeSlots: selectedTimes.map((time) => ({
-            timeline: time,
-            isBooked: false
-          }))
+          timeSlots: selectedTimes.map((time) => ({ timeline: time, isBooked: false }))
         }
       );
 
       toast.success("Thêm lịch trình thành công!");
       router.replace("/admin/manage-schedules");
-    } catch (error: any) {
-      setLoading({ ...isLoading, creating: false });
+    } catch (status: any) {
+      handleError(status);
+    }
+  };
 
-      switch (error) {
-        case 409:
-          toast.error("Lịch trình này đã tồn tại!");
-          resetForm();
-          break;
+  const handleError = (status: number) => {
+    setLoading({ ...isLoading, creating: false });
 
-        default:
-          toast.error("Thêm lịch trình thất bại. Vui lòng thử lại sau ít phút nữa!");
-          router.replace("/admin/manage-schedules");
-          break;
-      }
+    if (status === 409) {
+      toast.error("Lịch trình này đã tồn tại!");
+      resetForm();
+    } else {
+      toast.error("Thêm lịch trình thất bại. Vui lòng thử lại sau ít phút nữa!");
+      router.replace("/admin/manage-schedules");
     }
   };
 
@@ -161,14 +155,13 @@ const CreateSchedule = () => {
   return (
     <>
       <h1 className="text-xl font-bold mb-4">Thêm lịch trình mới</h1>
-
       <form onSubmit={handleCreateSchedule}>
         <div className="flex flex-col gap-8 pb-6">
           <div className="flex flex-col gap-2">
             <label className="text-[17px] font-semibold">Bác sĩ</label>
             <div ref={dropdownRef} className="relative w-full lg:w-auto flex-1">
               <Input
-                value={inputValue}
+                value={selectedDoctor ? selectedDoctor?.fullname : query}
                 spellCheck={false}
                 onChange={handleInputChange}
                 placeholder="Tìm kiếm theo tên bác sĩ"
@@ -189,11 +182,7 @@ const CreateSchedule = () => {
                       type="button"
                       variant="ghost"
                       key={doctor?._id}
-                      onClick={() => {
-                        setSelectedDoctor(doctor);
-                        setIsDropdownVisible(false);
-                        setInputValue(doctor?.fullname);
-                      }}
+                      onClick={() => handleSelectDoctor(doctor)}
                       className="w-full h-14 flex items-center justify-start gap-4 hover:text-primary transition duration-500"
                     >
                       <Image
@@ -204,9 +193,7 @@ const CreateSchedule = () => {
                         height="40"
                         className="object-cover rounded-full"
                       />
-                      <p className="w-fit font-medium text-ellipsis overflow-hidden">
-                        {doctor?.fullname}
-                      </p>
+                      <p className="w-fit font-medium text-ellipsis overflow-hidden">{doctor?.fullname}</p>
                     </Button>
                   ))
                 ) : (
@@ -216,9 +203,7 @@ const CreateSchedule = () => {
                 )}
               </div>
             </div>
-            {errors.doctorError && (
-              <p className="text-red-500 text-sm">{errors.doctorError}</p>
-            )}
+            {errors.doctorError && <p className="text-red-500 text-sm">{errors.doctorError}</p>}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -231,9 +216,7 @@ const CreateSchedule = () => {
               setSelectedDate={setSelectedDate}
               setDateError={(err) => setErrors((prev) => ({ ...prev, dateError: err }))}
             />
-            {errors.dateError && (
-              <p className="text-red-500 text-sm">{errors.dateError}</p>
-            )}
+            {errors.dateError && <p className="text-red-500 text-sm">{errors.dateError}</p>}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -247,8 +230,7 @@ const CreateSchedule = () => {
                   className={cn(
                     "w-full h-14 text-base shadow-none transition duration-500",
                     selectedTimes.includes(timeSlot)
-                      ? "text-white bg-primary"
-                      : "text-black hover:text-white border bg-transparent",
+                      ? "text-white bg-primary" : "text-black hover:text-white border bg-transparent",
                     errors.timesError && "border-red-500 hover:border-transparent"
                   )}
                 >
@@ -256,27 +238,14 @@ const CreateSchedule = () => {
                 </Button>
               ))}
             </div>
-            {errors.timesError && (
-              <p className="text-red-500 text-sm">{errors.timesError}</p>
-            )}
+            {errors.timesError && <p className="text-red-500 text-sm">{errors.timesError}</p>}
           </div>
 
           <div className="flex items-center justify-end gap-4">
-            <Button
-              type="button"
-              size="lg"
-              variant="cancel"
-              onClick={() => router.replace("/admin/manage-schedules")}
-            >
+            <Button type="button" size="lg" variant="cancel" onClick={() => router.replace("/admin/manage-schedules")}>
               Hủy
             </Button>
-
-            <Button
-              type="submit"
-              size="lg"
-              variant="submit"
-              disabled={isLoading.creating}
-            >
+            <Button type="submit" size="lg" variant="submit" disabled={isLoading.creating}>
               {isLoading.creating ? "Đang tạo..." : "Tạo mới"}
             </Button>
           </div>

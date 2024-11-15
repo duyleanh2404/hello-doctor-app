@@ -28,16 +28,9 @@ const SpecialtiesPage = () => {
   return (
     <>
       <Breadcrumb labels={[{ label: "Tất cả chuyên khoa" }]} />
-
-      <div
-        className="w-full h-fit bg-cover bg-no-repeat"
-        style={{ backgroundImage: "url(/specialties/banner.svg)" }}
-      >
+      <div className="w-full h-fit bg-cover bg-no-repeat" style={{ backgroundImage: "url(/specialties/banner.svg)" }}>
         <div className="wrapper flex flex-col gap-16 pt-12 pb-20 sm:px-8">
-          <h1 className="text-2xl sm:text-4xl font-bold text-[#284a75] text-center">
-            Tất cả chuyên khoa
-          </h1>
-
+          <h1 className="text-2xl sm:text-4xl font-bold text-[#284a75] text-center">Tất cả chuyên khoa</h1>
           {specialties?.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
               {specialties?.map((specialty: SpecialtyData) => (
@@ -71,13 +64,7 @@ const SpecialtiesPage = () => {
             </div>
           ) : (
             <div className="w-full hidden lg:flex flex-col items-center justify-center gap-12 pt-8">
-              <Image
-                loading="lazy"
-                src="/not-found.png"
-                alt="Not found"
-                width="240"
-                height="240"
-              />
+              <Image loading="lazy" src="/not-found.png" alt="Not found" width="240" height="240" />
               <h1 className="text-xl font-semibold text-[#262626] text-center">
                 Rất tiếc, hiện tại không tìm thấy chuyên khoa nào!
               </h1>

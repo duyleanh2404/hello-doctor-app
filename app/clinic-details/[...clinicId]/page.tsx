@@ -25,9 +25,6 @@ const ClinicDetailsPage = () => {
 
   useEffect(() => {
     NProgress.done();
-  }, []);
-
-  useEffect(() => {
     const shouldShowBillboard = Math.random() > 0.5;
     setShowBillboard(shouldShowBillboard);
   }, []);
@@ -47,25 +44,13 @@ const ClinicDetailsPage = () => {
         />
 
         <div className="relative w-full pt-[30%]">
-          <Image
-            loading="lazy"
-            src={clinic?.banner}
-            alt="Banner"
-            fill
-            className="w-full h-full object-contain"
-          />
+          <Image loading="lazy" src={clinic?.banner} alt="Banner" fill className="w-full h-full object-contain" />
         </div>
 
         <div className="wrapper w-full flex flex-col sm:flex-row sm:items-center sm:gap-4 border-b">
           <div className="relative w-[120px] sm:w-[180px] h-[120px] sm:h-[180px] bg-white border border-gray-300 
           rounded-full shadow-md -translate-y-12">
-            <Image
-              fill
-              loading="lazy"
-              src={clinic?.avatar}
-              alt="Avatar"
-              className="w-full h-full p-4 object-contain"
-            />
+            <Image fill loading="lazy" src={clinic?.avatar} alt="Avatar" className="w-full h-full p-4 object-contain" />
           </div>
 
           <div className="flex flex-col gap-3 -translate-y-6 sm:-translate-y-0">
@@ -79,17 +64,12 @@ const ClinicDetailsPage = () => {
       </div>
 
       <div className="sm:wrapper w-full flex flex-col lg:flex-row gap-12 lg:gap-8 sm:pb-16">
-        <div
-          className="wrapper w-full lg:w-[55%] xl:w-[65%]"
-          dangerouslySetInnerHTML={{ __html: clinic?.desc }}
-        />
+        <div className="wrapper w-full lg:w-[55%] xl:w-[65%]" dangerouslySetInnerHTML={{ __html: clinic?.desc }} />
 
         <div className="relative w-full lg:w-auto flex-1 flex flex-col gap-8">
           <BookingForm clinic={clinic} />
           <div className="sticky hidden lg:block top-32">
-            <Suspense fallback={<Spinner table />}>
-              <Advertise />
-            </Suspense>
+            <Suspense fallback={<Spinner table />}><Advertise /></Suspense>
           </div>
         </div>
       </div>

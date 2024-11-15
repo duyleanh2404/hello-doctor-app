@@ -3,12 +3,17 @@ import Image from "next/image";
 
 import { centralPoints } from "@/constants/central-points";
 
+type CentralPoint = {
+  id: number;
+  image: string;
+};
+
 const CentralPoints = () => {
   return (
     <div className="wrapper py-12">
       <h1 className="text-[22px] font-bold text-center sm:text-start">Tâm điểm</h1>
       <Link href="/" className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-10">
-        {centralPoints.map(({ id, image }) => (
+        {centralPoints.map(({ id, image }: CentralPoint) => (
           <div key={id} className="relative w-full pt-[140%]">
             <Image
               loading="lazy"

@@ -19,17 +19,17 @@ import { Button } from "@/components/ui/button";
 import Hint from "@/components/hint";
 import Spinner from "@/components/spinner";
 
-interface MenuState {
+type MenuState = {
   tabActive: string | null;
   isOpenMenuMobile: boolean;
 };
 
-interface CategoriesMenuProps {
+interface IProps {
   tabActive: string | null;
   setMenuState: React.Dispatch<React.SetStateAction<MenuState>>;
 };
 
-const CategoriesMenu = memo(({ tabActive, setMenuState }: CategoriesMenuProps) => {
+const CategoriesMenu = memo(({ tabActive, setMenuState }: IProps) => {
   const { specialties, isLoading } = useSpecialties("desc");
   const { isBannerVisible } = useSelector((state: RootState) => state.common);
 
@@ -56,9 +56,7 @@ const CategoriesMenu = memo(({ tabActive, setMenuState }: CategoriesMenuProps) =
 
           <div className="w-full max-h-[55vh] flex flex-col gap-3 pr-3 overflow-y-auto">
             {isLoading ? (
-              <div className="py-24">
-                <Spinner table />
-              </div>
+              <div className="py-24"><Spinner table /></div>
             ) : (
               specialties?.length > 0 ? (
                 specialties?.map((specialty: SpecialtyData) => (
@@ -68,13 +66,7 @@ const CategoriesMenu = memo(({ tabActive, setMenuState }: CategoriesMenuProps) =
                     onClick={() => NProgress.start()}
                     className="w-full flex items-center p-2 hover:bg-[#e3f2ff] rounded-md cursor-pointer transition duration-500"
                   >
-                    <Image
-                      loading="lazy"
-                      src={specialty?.image}
-                      alt="Specialty"
-                      width={40}
-                      height={40}
-                    />
+                    <Image loading="lazy" src={specialty?.image} alt="Specialty" width={40} height={40} />
                     <h1 className="w-full h-full flex items-center text-[17px] font-medium pl-4 hover:text-primary transition-colors duration-500">
                       {specialty?.name}
                     </h1>
@@ -118,11 +110,7 @@ const CategoriesMenu = memo(({ tabActive, setMenuState }: CategoriesMenuProps) =
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {centralPoints.map(({ id, image }) => (
-              <Link
-                key={id}
-                href="/"
-                className="relative w-full pt-[140%]"
-              >
+              <Link key={id} href="/" className="relative w-full pt-[140%]" >
                 <Hint label="Xem chi tiết">
                   <Image
                     loading="lazy"
@@ -140,5 +128,7 @@ const CategoriesMenu = memo(({ tabActive, setMenuState }: CategoriesMenuProps) =
     </div>
   );
 });
+
+CategoriesMenu.displayName = "CategoriesMenu";
 
 export default CategoriesMenu;

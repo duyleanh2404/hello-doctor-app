@@ -12,14 +12,11 @@ export const createHistory = async (
 
   if (prescriptionImage) formData.append("prescriptionImage", prescriptionImage);
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/history`,
-    {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${accessToken}` },
-      body: formData
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/history`, {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${accessToken}` },
+    body: formData
+  });
 
   return handleResponse(response);
 };

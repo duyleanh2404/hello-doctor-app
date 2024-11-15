@@ -7,7 +7,7 @@ import { FaPlus } from "react-icons/fa6";
 import { Button } from "@/components/ui/button";
 import Hint from "@/components/hint";
 
-interface SidebarButtonProps {
+interface IProps {
   path: string;
   text: string;
   addPath?: string;
@@ -16,17 +16,13 @@ interface SidebarButtonProps {
   currentPath: string;
 };
 
-const SidebarButton = ({
-  path, text, icon, currentPath, addLabel, addPath
-}: SidebarButtonProps) => {
+const SidebarButton = ({ path, text, icon, currentPath, addLabel, addPath }: IProps) => {
   const router = useRouter();
   const isActive = currentPath.replace(/^[/-]+/, "").startsWith(path.replace(/^[/-]+/, ""));
 
   const handleAddClick = (event: React.MouseEvent) => {
     event.preventDefault();
-    if (addPath) {
-      router.replace(addPath);
-    }
+    if (addPath) router.push(addPath);
   };
 
   return (

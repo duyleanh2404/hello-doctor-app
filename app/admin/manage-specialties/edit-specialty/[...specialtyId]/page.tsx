@@ -4,12 +4,12 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 
 import { FiUpload } from "react-icons/fi";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
-import JoditEditor from "jodit-react";
 
 import { EditSpecialtyForm } from "@/types/specialty-types";
 import { editSpecialty, getSpecialtyById } from "@/services/specialty-service";
@@ -17,6 +17,8 @@ import { editSpecialty, getSpecialtyById } from "@/services/specialty-service";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Spinner from "@/components/spinner";
+
+const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
 const EditSpecialty = () => {
   const router = useRouter();
@@ -26,15 +28,10 @@ const EditSpecialty = () => {
   const [isLoading, setLoading] = useState({ specialty: false, editing: false });
 
   const [imageName, setImageName] = useState<string>("");
-  const [imageURL, setImageURL] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const {
-    register,
-    setValue,
-    setError,
-    clearErrors,
-    handleSubmit,
-    formState: { errors }
+    register, setValue, setError, clearErrors, handleSubmit, formState: { errors }
   } = useForm<EditSpecialtyForm>();
 
   useEffect(() => {
@@ -45,10 +42,11 @@ const EditSpecialty = () => {
         const { specialty } = await getSpecialtyById(atob(specialtyId[0]));
         setValue("name", specialty.name);
         setValue("desc", specialty.desc);
-        setImageURL(specialty.image);
+        setImageUrl(specialty.image);
         setContent(specialty.desc);
         setImageName(specialty.imageName);
       } catch (error: any) {
+        console.error(error);
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
       } finally {
         setLoading({ ...isLoading, specialty: false });
@@ -58,25 +56,35 @@ const EditSpecialty = () => {
     fetchSpecialtyData();
   }, []);
 
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Vui lòng chỉ tải lên hình ảnh!");
+      return;
+    }
+
+    clearErrors("image");
+    setImageName(file.name);
+    setImageUrl(URL.createObjectURL(file));
+  };
+
   const handleEditorChange = (newContent: string) => {
     clearErrors("desc");
     setContent(newContent);
     setValue("desc", newContent);
   };
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    clearErrors("image");
-    setImageName(file.name);
-    setImageURL(URL.createObjectURL(file));
+  const handleValidateEditor = () => {
+    if (content.trim() === "") {
+      setError("desc", { type: "manual", message: "Vui lòng nhập mô tả của chuyên khoa!" });
+    }
   };
 
-  const handleEditSpecialty: SubmitHandler<EditSpecialtyForm> = async (data) => {
+  const handleEditSpecialty: SubmitHandler<EditSpecialtyForm> = async (specialtyData) => {
     const accessToken = Cookies.get("access_token");
     if (!accessToken) return;
-
     setLoading({ ...isLoading, editing: true });
 
     try {
@@ -84,31 +92,30 @@ const EditSpecialty = () => {
         accessToken,
         {
           id: atob(specialtyId[0]),
-          name: data.name,
+          name: specialtyData.name,
           desc: content,
           imageName,
-          image: data.image?.[0]
+          image: specialtyData.image?.[0]
         });
 
       router.replace("/admin/manage-specialties");
       toast.success("Cập nhật thông tin thành công!");
-    } catch (error: any) {
-      setLoading({ ...isLoading, editing: false });
+    } catch (status: any) {
+      handleError(status);
+    }
+  };
 
-      switch (error) {
-        case 409:
-          setError("name", {
-            type: "manual",
-            message: "Chuyên khoa này đã tồn tại!",
-          });
-          window.scrollTo({ top: 0, behavior: "smooth" });
-          break;
+  const handleError = (status: number) => {
+    setLoading({ ...isLoading, editing: false });
 
-        default:
-          toast.error("Cập nhật chuyên khoa thất bại. Vui lòng thử lại sau ít phút nữa!");
-          router.replace("/admin/manage-specialties");
-          break;
-      }
+    if (status === 409) {
+      setError("name", {
+        type: "manual", message: "Chuyên khoa này đã tồn tại!"
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      toast.error("Cập nhật chuyên khoa thất bại. Vui lòng thử lại sau ít phút nữa!");
+      router.replace("/admin/manage-specialties");
     }
   };
 
@@ -119,7 +126,6 @@ const EditSpecialty = () => {
   return (
     <>
       <h1 className="text-xl font-bold mb-4">Chỉnh sửa chuyên khoa</h1>
-
       <form onSubmit={handleSubmit(handleEditSpecialty)}>
         <div className="flex flex-col gap-8 pb-6">
           <div className="flex flex-col gap-8 -mx-4 px-4">
@@ -132,9 +138,7 @@ const EditSpecialty = () => {
                 {...register("name", { required: "Vui lòng nhập tên chuyên khoa!" })}
                 className={cn(errors.name ? "border-red-500" : "border-gray-300")}
               />
-              {errors.name && (
-                <p className="text-sm text-red-500">{errors.name.message}</p>
-              )}
+              {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
             </div>
 
             <div className="flex flex-col gap-2">
@@ -159,14 +163,12 @@ const EditSpecialty = () => {
                 </Button>
               </div>
 
-              {errors.image && (
-                <p className="text-sm text-red-500">{errors.image.message}</p>
-              )}
+              {errors.image && <p className="text-sm text-red-500">{errors.image.message}</p>}
 
-              {imageURL && (
+              {imageUrl && (
                 <div className="mx-auto mt-6">
                   <Image
-                    src={imageURL}
+                    src={imageUrl}
                     alt="Preview"
                     width={220}
                     height={220}
@@ -183,28 +185,15 @@ const EditSpecialty = () => {
                 onChange={handleEditorChange}
                 className={cn("!rounded-md", errors.desc && "!border-red-500")}
               />
-              {errors.desc && (
-                <p className="text-sm text-red-500">{errors.desc.message}</p>
-              )}
+              {errors.desc && <p className="text-sm text-red-500">{errors.desc.message}</p>}
             </div>
           </div>
 
           <div className="flex items-center justify-end gap-4">
-            <Button
-              type="button"
-              size="lg"
-              variant="cancel"
-              onClick={() => router.replace("/admin/manage-specialties")}
-            >
+            <Button type="button" size="lg" variant="cancel" onClick={() => router.replace("/admin/manage-specialties")}>
               Hủy
             </Button>
-
-            <Button
-              type="submit"
-              size="lg"
-              variant="submit"
-              disabled={isLoading.editing}
-            >
+            <Button type="submit" size="lg" variant="submit" disabled={isLoading.editing} onClick={handleValidateEditor}>
               {isLoading.editing ? "Đang cập nhật..." : "Cập nhật"}
             </Button>
           </div>

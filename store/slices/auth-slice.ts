@@ -1,13 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface UserData {
-  email: string;
-  fullname: string;
-  role: string;
-  image: string;
-};
+import { UserData } from "@/types/user-types";
 
-interface AuthState {
+type AuthState = {
   verificationEmail: string;
   userData: UserData | null;
   isLoggedIn: boolean;

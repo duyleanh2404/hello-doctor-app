@@ -32,8 +32,8 @@ export interface CreateAppointmentData {
 export interface GetAllAppointmentsData {
   page?: number;
   limit?: number;
+  query?: string;
   user_id?: string;
   doctor_id?: string;
-  query?: string;
   date?: Date;
 };

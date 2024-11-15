@@ -5,24 +5,19 @@ import Image from "next/image";
 
 import { format } from "date-fns";
 import Swal from "sweetalert2";
-import Cookies from "js-cookie";
 import NProgress from "nprogress";
-import toast from "react-hot-toast";
 import "nprogress/nprogress.css";
 
 import { RootState } from "@/store/store";
 import { useSelector } from "react-redux";
 
+import { getSchedule } from "@/services/schedule-service";
 import { ActiveTime, timeRanges } from "@/constants/time-ranges";
 
-import { getCurrentUser } from "@/services/user-serivce";
-import { getSchedule } from "@/services/schedule-service";
-
-import { UserData } from "@/types/user-types";
 import { ClinicData } from "@/types/clinic-types";
 import { DoctorData } from "@/types/doctor-types";
-import { ScheduleData } from "@/types/schedule-types";
 import { SpecialtyData } from "@/types/specialty-types";
+import { ScheduleData, TimeSlot } from "@/types/schedule-types";
 
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -34,17 +29,15 @@ import TimeButtons from "@/components/time-buttons";
 const BookingForm = ({ clinic }: { clinic: ClinicData }) => {
   const router = useRouter();
 
-  const { isLoggedIn } = useSelector((state: RootState) => state.auth);
+  const { isLoggedIn, userData } = useSelector((state: RootState) => state.auth);
   const [isLoading, setLoading] = useState({ schedule: false, booking: false });
+
+  const [schedule, setSchedule] = useState<ScheduleData | null>(null);
+  const [activeTime, setActiveTime] = useState<ActiveTime>("morning");
+  const [filteredTimeSlots, setFilteredTimeSlots] = useState<TimeSlot[]>([]);
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
-
-  const [user, setUser] = useState<UserData | null>(null);
-  const [schedule, setSchedule] = useState<ScheduleData | null>(null);
-
-  const [activeTime, setActiveTime] = useState<ActiveTime>("morning");
-  const [filteredTimeSlots, setFilteredTimeSlots] = useState<any[]>([]);
 
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorData | null>(null);
   const [selectedSpecialty, setSelectedSpecialty] = useState<SpecialtyData | null>(null);
@@ -52,17 +45,16 @@ const BookingForm = ({ clinic }: { clinic: ClinicData }) => {
   useEffect(() => {
     const fetchSchedule = async () => {
       if (!selectedDate || !selectedDoctor) return;
-
       resetState();
       setLoading({ ...isLoading, schedule: true });
 
       try {
         const { schedule } = await getSchedule({
-          doctor_id: selectedDoctor?._id,
-          date: selectedDate
+          doctor_id: selectedDoctor._id, date: selectedDate
         });
         setSchedule(schedule);
       } catch (error: any) {
+        console.error(error);
         resetState();
       } finally {
         setLoading({ ...isLoading, schedule: false });
@@ -83,24 +75,6 @@ const BookingForm = ({ clinic }: { clinic: ClinicData }) => {
     setFilteredTimeSlots(filteredSlots);
   }, [activeTime, schedule]);
 
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      if (!isLoggedIn) return;
-
-      const accessToken = Cookies.get("access_token");
-      if (!accessToken) return;
-
-      try {
-        const userData = await getCurrentUser(accessToken);
-        setUser(userData.user);
-      } catch (error: any) {
-        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
-      }
-    };
-
-    fetchCurrentUser();
-  }, []);
-
   const resetState = () => {
     setSchedule(null);
     setSelectedSlot(null);
@@ -108,30 +82,38 @@ const BookingForm = ({ clinic }: { clinic: ClinicData }) => {
     setFilteredTimeSlots([]);
   };
 
-  const handleBooking = async () => {
-    if (user?.role !== "user") {
-      Swal.fire({
-        icon: "error",
-        title: "Đây là chức năng dành cho bệnh nhân!",
-        confirmButtonText: "Đã hiểu",
-        text: "Nhấn vào nút bên dưới để tiếp tục!"
-      });
-      return;
-    }
-
-    setLoading({ ...isLoading, booking: true });
-
+  const handleBookingAppointment = async () => {
     if (!isLoggedIn) {
       router.replace("/login");
       return;
     }
 
+    if (!userData?.phoneNumber || !userData?.dateOfBirth) {
+      Swal.fire({
+        icon: "error",
+        title: "Bạn chưa cập nhật đầy đủ thông tin!",
+        confirmButtonText: "Đến trang hồ sơ",
+        text: "Vui lòng cập nhật đầy đủ thông tin của bạn để có thể đặt lịch khám!"
+      })
+        .then((result) => {
+          if (result.isConfirmed) {
+            NProgress.start();
+            router.replace("/settings/my-profile");
+          }
+        });
+      return;
+    }
+
+    setLoading({ ...isLoading, booking: true });
     NProgress.start();
-    const formattedDate = format(selectedDate!, "dd/MM/yyyy");
-    const encodedDate = btoa(formattedDate);
-    const encodedTime = btoa(selectedSlot!);
-    const encodedDoctorId = btoa(selectedDoctor?._id!);
-    router.replace(`/booking-details?time=${encodedTime}&date=${encodedDate}&doctorId=${encodedDoctorId}`);
+
+    if (selectedDate && selectedSlot && selectedDoctor) {
+      const formattedDate = format(selectedDate, "dd/MM/yyyy");
+      const encodedDate = btoa(formattedDate);
+      const encodedTime = btoa(selectedSlot);
+      const encodedDoctorId = btoa(selectedDoctor._id);
+      router.replace(`/booking-details?time=${encodedTime}&date=${encodedDate}&doctorId=${encodedDoctorId}`);
+    }
   };
 
   return (
@@ -149,17 +131,8 @@ const BookingForm = ({ clinic }: { clinic: ClinicData }) => {
           <div className="flex flex-col gap-1">
             <label className="text-sm font-semibold text-[#595959]">Bệnh viện</label>
             <div className="h-14 flex items-center gap-3 p-[10px] border border-gray-300 rounded-md cursor-default">
-              <Image
-                loading="lazy"
-                src={clinic?.avatar}
-                alt="Logo"
-                width={40}
-                height={40}
-                className="object-cover"
-              />
-              <p className="font-medium text-ellipsis whitespace-nowrap overflow-hidden">
-                {clinic?.name}
-              </p>
+              <Image loading="lazy" src={clinic?.avatar} alt="Logo" width={40} height={40} className="object-cover" />
+              <p className="font-medium text-ellipsis whitespace-nowrap overflow-hidden">{clinic?.name}</p>
             </div>
           </div>
 
@@ -176,10 +149,7 @@ const BookingForm = ({ clinic }: { clinic: ClinicData }) => {
 
           <div className="flex flex-col gap-1 transition duration-500">
             <label className="text-sm font-semibold text-[#595959]">Ngày khám</label>
-            <DatePicker
-              selectedDate={selectedDate}
-              setSelectedDate={setSelectedDate}
-            />
+            <DatePicker selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
           </div>
         </div>
 
@@ -200,8 +170,7 @@ const BookingForm = ({ clinic }: { clinic: ClinicData }) => {
                   className={cn(
                     "h-14 p-3 font-medium text-black hover:text-white border border-transparent rounded-md shadow-md hover:shadow-lg text-center transition duration-500",
                     selectedSlot === slot?.timeline
-                      ? "text-white"
-                      : "bg-[#f8f9fc] hover:bg-[#8f9fc] hover:text-black hover:border-primary"
+                      ? "text-white" : "bg-[#f8f9fc] hover:bg-[#8f9fc] hover:text-black hover:border-primary"
                   )}
                 >
                   {slot?.timeline}
@@ -209,19 +178,15 @@ const BookingForm = ({ clinic }: { clinic: ClinicData }) => {
               ))}
             </div>
           ) : (
-            !selectedSpecialty && !selectedDoctor && !selectedDate ? (
+            !selectedSpecialty || !selectedDoctor || !selectedDate ? (
               <div className="flex flex-col items-center gap-12 py-16 text-center">
                 <Image loading="lazy" src="/calendar.svg" alt="Calendar Icon" width={110} height={110} />
-                <p className="font-medium text-[#595959]">
-                  Vui lòng chọn chuyên khoa, bác sĩ và ngày khám!
-                </p>
+                <p className="font-medium text-[#595959]">Vui lòng chọn chuyên khoa, bác sĩ và ngày khám!</p>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-12 py-16">
                 <Image loading="lazy" src="/calendar.svg" alt="Calendar Icon" width={110} height={110} />
-                <p className="font-medium text-[#595959]">
-                  Không tìm thấy lịch nào vào thời gian này!
-                </p>
+                <p className="font-medium text-[#595959]">Không tìm thấy lịch nào vào thời gian này!</p>
               </div>
             )
           )
@@ -236,13 +201,13 @@ const BookingForm = ({ clinic }: { clinic: ClinicData }) => {
           type="button"
           size="xl"
           variant="submit"
-          onClick={handleBooking}
-          disabled={isLoading.booking || !selectedDate || !selectedSlot}
+          onClick={handleBookingAppointment}
+          disabled={isLoading.booking || !selectedDate || !selectedSlot || userData?.role !== "user"}
         >
           {isLoading.booking ? "Đang xử lý..." : "Tiếp tục đặt lịch"}
         </Button>
       </div>
-    </div >
+    </div>
   );
 };
 

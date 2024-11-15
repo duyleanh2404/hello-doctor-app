@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface BookingData {
+type BookingData = {
   user_id: string;
   doctor_id: string;
   date: string;
@@ -12,7 +12,7 @@ interface BookingData {
   newPatients: boolean;
 };
 
-interface BookingState {
+type BookingState = {
   bookingData: BookingData | null;
   isVerifyingPayment: boolean;
   isVerifyingAppointment: boolean;

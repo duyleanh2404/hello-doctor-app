@@ -1,65 +1,63 @@
 import { ClinicData } from "./clinic-types";
 import { SpecialtyData } from "./specialty-types";
 
-export interface DoctorData {
+export type DoctorData = {
   _id: string;
   clinic_id: ClinicData;
   specialty_id: SpecialtyData;
   clinic: string;
   specialty: string;
   fullname: string;
-  desc: string;
   province: string;
   medicalFee: number;
+  desc: string;
   image: string;
 };
 
-export interface CreateDoctorForm {
+export type CreateDoctorForm = {
   clinic_id: string;
   specialty_id: string;
   fullname: string;
-  desc: string;
   province: string;
   medicalFee: number;
-  imageName: string;
+  desc: string;
   image: FileList;
 };
 
-export interface EditDoctorForm {
-  clinic_id: string;
-  specialty_id: string;
-  fullname: string;
-  desc: string;
-  province: string;
-  medicalFee: number;
-  imageName?: string;
+export type EditDoctorForm = {
+  clinic_id?: string;
+  specialty_id?: string;
+  fullname?: string;
+  province?: string;
+  medicalFee?: number;
+  desc?: string;
   image?: FileList;
 };
 
-export interface CreateDoctorData {
+export type CreateDoctorData = {
   clinic_id: string;
   specialty_id: string;
   fullname: string;
-  desc: string;
   province: string;
   medicalFee: number;
+  desc: string;
   imageName: string;
   image: File;
 };
 
-export interface EditDoctorData {
+export type EditDoctorData = {
   id: string;
-  clinic_id: string;
-  specialty_id: string;
+  clinic_id?: string;
+  specialty_id?: string;
   fullname?: string;
-  desc?: string;
   province?: string;
   medicalFee?: number;
+  desc?: string;
   imageName?: string;
   image?: File;
 };
 
-export interface GetAllDoctorsData {
+export type GetAllDoctorsData = {
   page?: number;
   limit?: number;
   clinic_id?: string;

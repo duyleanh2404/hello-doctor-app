@@ -32,7 +32,7 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import Spinner from "@/components/spinner";
 import PaginationSection from "@/components/pagination";
-import DeleteConfirmationModal from "@/components/delete-confirmation-modal";
+import DeleteConfirmationModal from "@/components/modal/delete-confirmation-modal";
 import VerifyConfirmationModal from "./_components/verify-confirmation-modal";
 
 const ManagePatientsPage = () => {
@@ -40,11 +40,10 @@ const ManagePatientsPage = () => {
   const [isModalOpen, setModalOpen] = useState({ delete: false, verify: false });
   const [isLoading, setLoading] = useState({ appointments: false, deleting: false, changed: false });
 
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [appointments, setAppointments] = useState<AppointmentData[]>([]);
   const [appointmentToDelete, setAppointmentToDelete] = useState<string | null>(null);
   const [appointmentToVerify, setAppointmentToVerify] = useState<AppointmentData | null>(null);
-
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
 
   const [totalPages, setTotalPages] = useState<number>(1);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -58,31 +57,27 @@ const ManagePatientsPage = () => {
 
     const decodedToken: any = jwtDecode<JwtPayload>(accessToken);
     if (!decodedToken) return;
-
     setLoading({ ...isLoading, appointments: true });
 
     try {
       const { appointments, total } = await getAllAppointments(
         accessToken,
-        {
-          page,
-          limit: 10,
-          query,
-          doctor_id: decodedToken.doctor_id,
-          date
-        }
+        { page, limit: 10, query, doctor_id: decodedToken.doctor_id, date }
       );
-
-      const itemsPerPage = 10;
-      const totalPages = Math.ceil(total / itemsPerPage);
-
-      setTotalPages(totalPages);
-      setAppointments(appointments);
+      handleAppointmentsFetchSuccess(appointments, total);
     } catch (error: any) {
+      console.error(error);
       toast.error("Có lỗi xảy ra. Vui lòng thử lại sau ít phút nữa!");
     } finally {
       setLoading({ ...isLoading, appointments: false });
     }
+  };
+
+  const handleAppointmentsFetchSuccess = (appointments: AppointmentData[], total: number) => {
+    const itemsPerPage = 10;
+    const totalPages = Math.ceil(total / itemsPerPage);
+    setTotalPages(totalPages);
+    setAppointments(appointments);
   };
 
   useEffect(() => {
@@ -90,34 +85,33 @@ const ManagePatientsPage = () => {
   }, [currentPage, debouncedSearchQuery, selectedDate]);
 
   useEffect(() => {
-    if (!isLoading.changed) return;
-    fetchAppointments(currentPage);
+    if (isLoading.changed) fetchAppointments(currentPage);
   }, [currentPage, isLoading.changed]);
 
   const handleCancelAppointment = async () => {
-    if (!appointmentToDelete) return;
-
     const accessToken = Cookies.get("access_token");
-    if (!accessToken) return;
-
+    if (!accessToken || !appointmentToDelete) return;
     setLoading({ ...isLoading, deleting: true });
 
     try {
       await deleteAppointment(accessToken, appointmentToDelete);
-
-      if (currentPage > 1 && appointments?.length === 1) {
-        setCurrentPage(currentPage - 1);
-        await fetchAppointments(currentPage - 1);
-      } else {
-        await fetchAppointments(currentPage);
-      }
-
-      setModalOpen({ ...isModalOpen, delete: false });
+      await handlePrefetchingAppointments();
       toast.success("Hủy đơn đặt lịch khám thành công!");
     } catch (error: any) {
+      console.error(error);
       toast.error("Hủy đơn thất bại. Vui lòng thử lại sau ít phút nữa!");
     } finally {
       setLoading({ ...isLoading, deleting: false });
+      setModalOpen({ ...isModalOpen, delete: false });
+    }
+  };
+
+  const handlePrefetchingAppointments = async () => {
+    if (currentPage > 1 && appointments?.length === 1) {
+      setCurrentPage(currentPage - 1);
+      await fetchAppointments(currentPage - 1);
+    } else {
+      await fetchAppointments(currentPage);
     }
   };
 
@@ -128,7 +122,6 @@ const ManagePatientsPage = () => {
   return (
     <>
       <h1 className="text-xl font-bold mb-4">Danh sách đơn đặt lịch khám</h1>
-
       <div className="flex items-center justify-between">
         <DatePicker
           selectedDate={selectedDate}
@@ -178,7 +171,7 @@ const ManagePatientsPage = () => {
             {appointments?.filter((appointment) => !appointment.isFinished)?.length > 0 ? (
               appointments
                 ?.filter((appointment) => !appointment.isFinished)
-                ?.map((appointment, index) => {
+                ?.map((appointment: AppointmentData, index) => {
                   const startIndex = (currentPage - 1) * 10;
 
                   return (
@@ -199,10 +192,7 @@ const ManagePatientsPage = () => {
                             }}
                             className="group"
                           >
-                            <FaRegCalendarCheck
-                              size="22"
-                              className="group-hover:text-green-500 transition duration-500"
-                            />
+                            <FaRegCalendarCheck size="22" className="group-hover:text-green-500 transition duration-500" />
                           </Button>
 
                           <Button
@@ -214,10 +204,7 @@ const ManagePatientsPage = () => {
                             }}
                             className="group"
                           >
-                            <AiOutlineDelete
-                              size="24"
-                              className="group-hover:text-red-500 transition duration-500"
-                            />
+                            <AiOutlineDelete size="24" className="group-hover:text-red-500 transition duration-500" />
                           </Button>
                         </div>
                       </TableCell>

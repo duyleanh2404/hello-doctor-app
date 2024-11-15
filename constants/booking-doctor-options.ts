@@ -13,5 +13,5 @@ export const bookingDoctorOptions = [
     id: 3,
     type: "specialty",
     title: "Chuyên khoa"
-  },
+  }
 ];
