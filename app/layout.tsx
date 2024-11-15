@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 
 import { Toaster } from "react-hot-toast";
-import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import ProviderAuth from "@/components/providers/provider-auth";
 import ProviderStore from "@/components/providers/provider-global";
@@ -30,10 +29,8 @@ export default function RootLayout({
       <body className={`${ibmPlexSans.variable} antialiased`}>
         <ProviderStore>
           <ProviderAuth>
-            <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID!}>
-              <Toaster position="top-center" reverseOrder={false} toastOptions={{ style: { maxWidth: 800 } }} />
-              {children}
-            </GoogleOAuthProvider>
+            <Toaster position="top-center" reverseOrder={false} toastOptions={{ style: { maxWidth: 800 } }} />
+            {children}
           </ProviderAuth>
         </ProviderStore>
       </body>

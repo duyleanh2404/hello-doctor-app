@@ -9,12 +9,12 @@ import createWebStorage from "redux-persist/lib/storage/createWebStorage";
 const encryptTransform = createTransform(
   (inboundState) => {
     const encrypted =
-      CryptoJS.AES.encrypt(JSON.stringify(inboundState), process.env.NEXT_PUBLIC_AES_SECRET_KEY!).toString();
+      CryptoJS.AES.encrypt(JSON.stringify(inboundState), process.env.AES_SECRET_KEY!).toString();
     return encrypted;
   },
   (outboundState) => {
     if (!outboundState) return outboundState;
-    const bytes = CryptoJS.AES.decrypt(outboundState, process.env.NEXT_PUBLIC_AES_SECRET_KEY!);
+    const bytes = CryptoJS.AES.decrypt(outboundState, process.env.AES_SECRET_KEY!);
     const decrypted = bytes.toString(CryptoJS.enc.Utf8);
     return decrypted ? JSON.parse(decrypted) : null;
   },
