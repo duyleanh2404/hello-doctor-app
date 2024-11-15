@@ -13,7 +13,7 @@ const useDistricts = (selectedProvince: Province | null) => {
       if (!selectedProvince) return;
 
       try {
-        const { data } = await getDisctricts(selectedProvince._id);
+        const { data } = await getDisctricts(selectedProvince.id);
         setDistricts(data);
       } catch (error: any) {
         console.error(error);

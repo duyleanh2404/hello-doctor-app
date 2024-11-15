@@ -13,7 +13,7 @@ const useWards = (selectedDistrict: District | null) => {
       if (!selectedDistrict) return;
 
       try {
-        const { data } = await getWards(selectedDistrict._id);
+        const { data } = await getWards(selectedDistrict.id);
         setWards(data);
       } catch (error: any) {
         console.error(error);
