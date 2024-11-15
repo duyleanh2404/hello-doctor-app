@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -120,8 +120,11 @@ const RegisterPage = () => {
           <Image loading="lazy" src="/logo.png" alt="Logo" width={140} height={30} />
         </Link>
 
-        <div className="w-full sm:w-[580px] h-auto py-10 px-6 sm:p-8 bg-white rounded-3xl sm:rounded-lg shadow-md">
-          <form onSubmit={handleSubmit(handleRegister)} className="flex flex-col gap-8">
+        <Suspense fallback={<Spinner center />}>
+          <form
+            onSubmit={handleSubmit(handleRegister)}
+            className="flex flex-col gap-8 w-full sm:w-[580px] h-auto py-10 px-6 sm:p-8 bg-white rounded-3xl sm:rounded-lg shadow-md"
+          >
             <h1 className="text-[22px] font-bold text-center">Đăng ký tài khoản</h1>
 
             <div className="flex flex-col gap-2">
@@ -240,7 +243,7 @@ const RegisterPage = () => {
             </p>
             <ContinueWithGoogle />
           </form>
-        </div>
+        </Suspense>
       </div>
     </div>
   );
