@@ -1,5 +1,5 @@
-import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -24,6 +24,7 @@ import Spinner from "@/components/spinner";
 
 const UserSettings = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
   const dispatch = useDispatch();
@@ -71,7 +72,7 @@ const UserSettings = () => {
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
-                  NProgress.start();
+                  if (pathname !== "/settings/my-profile") NProgress.start();
                   router.replace("/settings/my-profile");
                 }}
                 className="flex items-center gap-3 p-3 cursor-pointer select-none"
@@ -81,7 +82,7 @@ const UserSettings = () => {
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
-                  NProgress.start();
+                  if (pathname !== "/settings/history-booking") NProgress.start();
                   router.replace("/settings/history-booking");
                 }}
                 className="flex items-center gap-3 p-3 cursor-pointer select-none"

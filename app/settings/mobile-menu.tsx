@@ -42,7 +42,7 @@ const MobileMenu = () => {
         icon={`user${pathname === "/settings/my-profile" ? "-active" : ""}.svg`}
         isActive={pathname === "/settings/my-profile"}
         onClick={() => {
-          NProgress.start();
+          if (pathname !== "/settings/my-profile") NProgress.start();
           dispatch(setOpenMenuMobile(false));
           router.replace("/settings/my-profile");
         }}
@@ -53,7 +53,7 @@ const MobileMenu = () => {
         icon="calendar.svg"
         isActive={pathname === "/settings/history-booking"}
         onClick={() => {
-          NProgress.start();
+          if (pathname !== "/settings/history-booking") NProgress.start();
           dispatch(setOpenMenuMobile(false));
           router.replace("/settings/history-booking");
         }}

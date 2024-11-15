@@ -114,32 +114,42 @@ const MyProfile = memo(() => {
   const handleEditUser: SubmitHandler<EditUserForm> = async (_userData) => {
     const accessToken = Cookies.get("access_token");
     if (!accessToken || !userData) return;
+
     NProgress.start();
     setIsEditing(true);
 
+    const formattedDateOfBirth = `${_userData.day}/${_userData.month}/${_userData.year}`;
+    const formattedAddress = `${_userData.street}, ${_userData.ward}, ${_userData.district}, ${_userData.province}`;
+
     try {
-      await editUser(
-        accessToken,
-        {
-          id: userData._id,
-          fullname: _userData.fullname,
-          gender: _userData.gender,
-          province: _userData.province,
-          phoneNumber: _userData.phoneNumber,
-          dateOfBirth: `${_userData.day}/${_userData.month}/${_userData.year}`,
-          address: `${_userData.street}, ${_userData.ward}, ${_userData.district}, ${_userData.province}`
-        }
-      );
+      await editUser(accessToken, {
+        id: userData._id,
+        fullname: _userData.fullname,
+        gender: _userData.gender,
+        address: formattedAddress,
+        province: _userData.province,
+        dateOfBirth: formattedDateOfBirth,
+        phoneNumber: _userData.phoneNumber
+      });
 
       toast.success("Cập nhật thông tin thành công!");
       dispatch(setIsInfoChanged(true));
-      dispatch(setUserData({ ...userData, fullname: _userData.fullname }));
-    } catch (error: any) {
-      console.error(error);
+      dispatch(setUserData({
+        ...userData,
+        fullname: _userData.fullname,
+        gender: _userData.gender,
+        address: formattedAddress,
+        province: _userData.province,
+        dateOfBirth: formattedDateOfBirth,
+        phoneNumber: _userData.phoneNumber
+      }));
+    } catch (error: unknown) {
+      console.error("Error updating user:", error);
       toast.error("Cập nhật thông tin thất bại. Vui lòng thử lại sau ít phút nữa!");
     } finally {
       NProgress.done();
       setIsEditing(false);
+      setIsModeEdit(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
