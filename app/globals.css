@@ -152,6 +152,10 @@ svg {
   width: 100% !important;
 }
 
+p>img {
+  width: 100%;
+}
+
 .sc-9c10e22a-3 {
   display: grid !important;
   grid-template-columns: repeat(3, 1fr);

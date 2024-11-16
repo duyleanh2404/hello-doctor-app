@@ -15,7 +15,6 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface IProps {
-  disableDate?: Date;
   className?: string;
   dateError?: string;
   placeholder?: string;
@@ -25,9 +24,12 @@ interface IProps {
 };
 
 export function DatePicker({
-  disableDate, className, dateError, placeholder, selectedDate, setDateError, setSelectedDate
+  className, dateError, placeholder, selectedDate, setDateError, setSelectedDate
 }: IProps) {
   const [open, setOpen] = useState(false);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -42,18 +44,16 @@ export function DatePicker({
           )}
         >
           <CalendarIcon className="flex-shrink-0 mr-2 h-4 w-4" />
-          {
-            selectedDate
-              ? capitalizeFirstLetter(format(selectedDate, "PPP", { locale: vi }))
-              : <span>{placeholder ? placeholder : "Chọn ngày khám"}</span>
-          }
+          {selectedDate
+            ? capitalizeFirstLetter(format(selectedDate, "PPP", { locale: vi }))
+            : <span>{placeholder ? placeholder : "Chọn ngày khám"}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
         <Calendar
           mode="single"
           selected={selectedDate}
-          disabled={(date) => date < disableDate!}
+          disabled={(date) => date < today}
           onSelect={(value) => {
             setOpen(false);
             setSelectedDate(value);

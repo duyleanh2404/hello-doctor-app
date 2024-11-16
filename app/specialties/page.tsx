@@ -37,6 +37,7 @@ const SpecialtiesPage = () => {
                 <Link
                   key={specialty?._id}
                   href={`/specialties/${btoa(specialty?._id)}`}
+                  onClick={() => NProgress.start()}
                   className="flex flex-col items-center gap-6 p-4 bg-white border shadow-md hover:shadow-lg rounded-xl transition duration-500"
                 >
                   <Image
