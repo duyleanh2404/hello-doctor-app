@@ -140,7 +140,12 @@ const ManageSchedules = () => {
           <div className="flex flex-col gap-8 -mx-4 px-4">
             <div className="flex flex-col gap-2">
               <label className="text-[17px] font-semibold">Chọn ngày</label>
-              <DatePicker placeholder="Chọn ngày" selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
+              <DatePicker
+                placeholder="Chọn ngày"
+                disableDate={today}
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
+              />
             </div>
 
             <div className="flex flex-col gap-2">

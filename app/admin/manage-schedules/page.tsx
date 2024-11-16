@@ -34,6 +34,9 @@ import DeleteConfirmationModal from "@/components/modal/delete-confirmation-moda
 
 const ManageSchedules = () => {
   const router = useRouter();
+
+  const today = new Date();
+  today.setUTCHours(-7, 0, 0, 0);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
 
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
@@ -115,9 +118,10 @@ const ManageSchedules = () => {
       <h1 className="text-xl font-bold mb-4">Danh sách lịch trình của bác sĩ</h1>
       <div className="flex items-center justify-between">
         <DatePicker
+          placeholder="Chọn ngày"
+          disableDate={today}
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
-          placeholder="Chọn ngày"
           className={cn("h-12", selectedDate ? "w-fit" : "w-[240px]")}
         />
 

@@ -26,6 +26,9 @@ const CreateSchedule = () => {
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
+  const today = new Date();
+  today.setUTCHours(-7, 0, 0, 0);
+
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
   const [isLoading, setLoading] = useState({ doctors: false, creating: false });
 
@@ -211,6 +214,7 @@ const CreateSchedule = () => {
             <DatePicker
               className="h-14"
               placeholder="Chọn ngày"
+              disableDate={today}
               selectedDate={selectedDate}
               dateError={errors.dateError}
               setSelectedDate={setSelectedDate}

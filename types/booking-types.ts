@@ -10,7 +10,7 @@ import { UserData } from "./user-types";
 import { DoctorData } from "./doctor-types";
 import { ScheduleData } from "./schedule-types";
 
-export interface BookingData {
+export type BookingData = {
   _id: string;
   user_id: string;
   doctor_id: DoctorData;

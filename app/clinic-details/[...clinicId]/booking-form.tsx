@@ -29,6 +29,9 @@ import TimeButtons from "@/components/time-buttons";
 const BookingForm = ({ clinic }: { clinic: ClinicData }) => {
   const router = useRouter();
 
+  const today = new Date();
+  today.setUTCHours(-7, 0, 0, 0);
+
   const { isLoggedIn, userData } = useSelector((state: RootState) => state.auth);
   const [isLoading, setLoading] = useState({ schedule: false, booking: false });
 
@@ -149,7 +152,11 @@ const BookingForm = ({ clinic }: { clinic: ClinicData }) => {
 
           <div className="flex flex-col gap-1 transition duration-500">
             <label className="text-sm font-semibold text-[#595959]">Ngày khám</label>
-            <DatePicker selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
+            <DatePicker
+              disableDate={today}
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
+            />
           </div>
         </div>
 

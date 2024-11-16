@@ -2,7 +2,7 @@ import { ClinicData } from "./clinic-types";
 import { DoctorData } from "./doctor-types";
 import { SpecialtyData } from "./specialty-types";
 
-export interface ScheduleData {
+export type ScheduleData = {
   _id: string;
   doctor_id: DoctorData;
   clinic_id: ClinicData;
@@ -11,25 +11,25 @@ export interface ScheduleData {
   timeSlots: TimeSlot[];
 };
 
-export interface TimeSlot {
+export type TimeSlot = {
   timeline: string;
   isBooked: boolean;
 };
 
-export interface CreateScheduleData {
+export type CreateScheduleData = {
   doctor_id: string;
   date: Date;
   timeSlots: TimeSlot[];
 };
 
-export interface EditScheduleData {
+export type EditScheduleData = {
   id: string;
   doctor_id?: string;
   date?: Date;
   timeSlots?: Array<TimeSlot>;
 };
 
-export interface GetAllSchedulesData {
+export type GetAllSchedulesData = {
   page?: number;
   limit?: number;
   query?: string;
@@ -37,13 +37,13 @@ export interface GetAllSchedulesData {
   date?: Date;
 };
 
-export interface GetSchedulesByRangeData {
+export type GetSchedulesByRangeData = {
   doctor_id?: string;
   startDate?: Date;
   endDate?: Date;
 };
 
-export interface GetScheduleData {
+export type GetScheduleData = {
   doctor_id?: string;
   schedule_id?: string;
   date?: Date;

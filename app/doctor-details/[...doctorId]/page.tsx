@@ -200,7 +200,12 @@ const DoctorDetailsPage = () => {
               <h1 className="text-lg font-bold">Tư vấn trực tiếp</h1>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-[#595959]">Ngày khám</label>
-                <DatePicker placeholder="Chọn ngày khám" selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
+                <DatePicker
+                  placeholder="Chọn ngày khám"
+                  disableDate={today}
+                  selectedDate={selectedDate}
+                  setSelectedDate={setSelectedDate}
+                />
               </div>
 
               <TimeButtons activeTime={activeTime} setActiveTime={setActiveTime} />

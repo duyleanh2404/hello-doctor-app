@@ -139,7 +139,7 @@ const BookingDetails = () => {
                 amount: schedule?.doctor_id?.medicalFee,
                 txnRef: (Math.floor(100000 + Math.random() * 900000)).toString(),
                 orderInfo: `Thanh toán tiền khám bệnh ${schedule.doctor_id.fullname}, ${format(schedule.date, "dd/MM/yyyy")}`,
-                returnUrl: `${process.env.NEXT_PUBLIC_URL}/verify-payment`
+                returnUrl: "https://hello-doctor-app.vercel.app/verify-payment"
               }
             );
             router.replace(paymentUrl);

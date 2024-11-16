@@ -1,7 +1,7 @@
 import { DoctorData } from "./doctor-types";
 import { SpecialtyData } from "./specialty-types";
 
-export interface PostData {
+export type PostData = {
   _id: string;
   doctor_id: DoctorData;
   specialty_id: SpecialtyData;
@@ -14,7 +14,7 @@ export interface PostData {
   image: string;
 };
 
-export interface CreatePostForm {
+export type CreatePostForm = {
   doctor_id: string;
   specialty_id: string;
   title: string;
@@ -24,7 +24,7 @@ export interface CreatePostForm {
   image: FileList;
 };
 
-export interface EditPostForm {
+export type EditPostForm = {
   doctor_id?: string;
   specialty_id?: string;
   title?: string;
@@ -34,7 +34,7 @@ export interface EditPostForm {
   image?: FileList;
 };
 
-export interface CreatePostData {
+export type CreatePostData = {
   doctor_id: string;
   specialty_id: string;
   title: string;
@@ -45,7 +45,7 @@ export interface CreatePostData {
 };
 
 
-export interface EditPostData {
+export type EditPostData = {
   id: string;
   doctor_id?: string;
   specialty_id?: string;
@@ -56,7 +56,7 @@ export interface EditPostData {
   image?: File;
 };
 
-export interface GetAllPostsData {
+export type GetAllPostsData = {
   doctor_id?: string;
   specialty_id?: string;
   page?: number;

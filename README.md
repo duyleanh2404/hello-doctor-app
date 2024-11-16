@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hello Bacsi
 
-## Getting Started
+## Medical Appointment Booking System  
+08/2024 - 11/2024
 
-First, run the development server:
+Hello Bacsi là nền tảng đặt lịch hẹn y tế trực tuyến, giúp người dùng dễ dàng tìm kiếm thông tin về bác sĩ, bệnh viện, và chuyên khoa y tế, đồng thời đặt lịch hẹn. Nền tảng này cũng cung cấp các dịch vụ chăm sóc sức khỏe từ xa với nhiều tính năng hỗ trợ.
 
+### Mục lục
+- Tính năng
+- Công nghệ sử dụng
+- Hướng dẫn cài đặt
+- Ảnh minh họa
+- Đóng góp
+- Thông tin liên hệ
+
+### Ảnh minh họa
+- ![Giao diện đặt lịch hẹn](/readme-1.png)
+
+### Tính năng
+- **Đăng ký, đăng nhập, và xác thực:** Sử dụng JWT và OAuth2 để xác thực người dùng.
+- **Xác thực OTP:** Gửi mã OTP qua email để xác minh tài khoản.
+- **Hỗ trợ chatbot:** Tích hợp Gemini 1.5 Flash để hỗ trợ bệnh nhân giải đáp thắc mắc.
+- **Đặt lịch hẹn:** Lọc lịch hẹn theo ngày, bệnh viện, bác sĩ, và chuyên khoa.
+- **Tích hợp thanh toán:**
+  - Thanh toán tiền mặt (COD) với xác minh qua email.
+  - Thanh toán qua VNPay (môi trường thử nghiệm).
+- **Quản lý người dùng và dữ liệu:** Thêm, sửa, hoặc xóa thông tin người dùng, bác sĩ, bệnh viện, chuyên khoa, bài viết, và lịch trình của bác sĩ.
+- **Chỉnh sửa bài viết:** Cung cấp trình chỉnh sửa văn bản chuyên nghiệp.
+- **Xác nhận lịch hẹn:** Gửi email xác nhận với hình ảnh đơn thuốc từ bác sĩ.
+
+### Công nghệ sử dụng
+- **Frontend:** Next.js, Tailwind CSS, Shadcn/UI, Redux Toolkit, React Hook Form.
+- **Backend:** NestJS, MongoDB, Nodemailer.
+- **Xác thực:** JWT và OAuth2.
+- **Thanh toán:** VNPay (môi trường thử nghiệm).
+- **Hỗ trợ Chatbot:** Gemini 1.5 Flash.
+
+### Hướng dẫn cài đặt
+
+#### Frontend
+Clone repo:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+git clone https://github.com/duyleanh2404/hello-doctor-app
+cd hello-doctor-app

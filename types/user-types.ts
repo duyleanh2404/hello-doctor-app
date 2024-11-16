@@ -1,4 +1,4 @@
-export interface UserData {
+export type UserData = {
   _id: string;
   email: string;
   fullname: string;
@@ -12,7 +12,7 @@ export interface UserData {
   otp?: string;
 };
 
-export interface EditUserForm {
+export type EditUserForm = {
   _id: string;
   fullname: string;
   desc: string;
@@ -30,7 +30,7 @@ export interface EditUserForm {
   image?: FileList;
 };
 
-export interface EditUserData {
+export type EditUserData = {
   id: string;
   fullname?: string;
   gender?: string;
@@ -42,7 +42,7 @@ export interface EditUserData {
   image?: File;
 };
 
-export interface GetAllUsersData {
+export type GetAllUsersData = {
   page?: number;
   limit?: number;
   query?: string;

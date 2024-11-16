@@ -1,4 +1,4 @@
-export interface ClinicData {
+export type ClinicData = {
   _id: string;
   name: string;
   address: string;
@@ -7,7 +7,7 @@ export interface ClinicData {
   banner: string;
 };
 
-export interface CreateClinicForm {
+export type CreateClinicForm = {
   _id?: string;
   name: string;
   street: string;
@@ -19,7 +19,7 @@ export interface CreateClinicForm {
   banner: FileList;
 };
 
-export interface EditClinicForm {
+export type EditClinicForm = {
   _id: string;
   name?: string;
   street?: string;
@@ -31,7 +31,7 @@ export interface EditClinicForm {
   banner?: FileList;
 };
 
-export interface CreateClinicData {
+export type CreateClinicData = {
   name: string;
   address: string;
   desc: string;
@@ -41,7 +41,7 @@ export interface CreateClinicData {
   banner: File;
 };
 
-export interface EditClinicData {
+export type EditClinicData = {
   id: string;
   name?: string;
   address?: string;
@@ -52,7 +52,7 @@ export interface EditClinicData {
   banner?: File;
 };
 
-export interface GetAllClinicsData {
+export type GetAllClinicsData = {
   page?: number;
   limit?: number;
   query?: string;

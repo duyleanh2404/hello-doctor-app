@@ -1,7 +1,7 @@
 import { UserData } from "./user-types";
 import { DoctorData } from "./doctor-types";
 
-export interface AppointmentData {
+export type AppointmentData = {
   _id: string;
   user_id: UserData;
   doctor_id: DoctorData;
@@ -17,7 +17,7 @@ export interface AppointmentData {
   isFinished: boolean;
 };
 
-export interface CreateAppointmentData {
+export type CreateAppointmentData = {
   user_id: string;
   doctor_id: string;
   date: Date;
@@ -29,7 +29,7 @@ export interface CreateAppointmentData {
   newPatients: boolean;
 };
 
-export interface GetAllAppointmentsData {
+export type GetAllAppointmentsData = {
   page?: number;
   limit?: number;
   query?: string;

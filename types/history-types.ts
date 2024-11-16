@@ -1,10 +1,10 @@
-export interface CreateHistoryForm {
+export type CreateHistoryForm = {
   doctorComment: string;
   healthStatus: "bad" | "normal" | "good";
   prescriptionImage: FileList;
 };
 
-export interface CreateHistoryData {
+export type CreateHistoryData = {
   appointment_id: string;
   email: string;
   doctorComment: string;
