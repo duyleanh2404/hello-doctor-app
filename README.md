@@ -14,7 +14,7 @@ Hello Bacsi là nền tảng đặt lịch hẹn y tế trực tuyến, giúp ng
 - Thông tin liên hệ
 
 ### Ảnh minh họa
-- ![Giao diện đặt lịch hẹn](/readme-1.png)
+- ![Giao diện đặt lịch hẹn](https://github.com/duyleanh2404/hello-doctor-app/blob/a3a6a4c0e558a48d4f74c2e484c51f55e805d408/public/readme/readme-7.png)
 
 ### Tính năng
 - **Đăng ký, đăng nhập, và xác thực:** Sử dụng JWT và OAuth2 để xác thực người dùng.
