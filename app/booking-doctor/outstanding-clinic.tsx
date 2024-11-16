@@ -59,6 +59,10 @@ const OutstandingClinic = memo(({ provinces }: { provinces: Province[] }) => {
     fetchClinics();
   }, [currentPage, selectedProvince]);
 
+  if (isLoading) {
+    return <Spinner center />;
+  }
+
   return (
     <LazyLoadComponent>
       <div className="wrapper flex flex-col gap-12 pt-12 pb-28">
@@ -93,21 +97,17 @@ const OutstandingClinic = memo(({ provinces }: { provinces: Province[] }) => {
 
         <div className="flex flex-col-reverse sm:flex-col gap-6 sm:gap-12">
           <div className="hidden lg:flex flex-col gap-6">
-            {isLoading ? (
-              <Spinner center />
+            {clinics?.length > 0 ? (
+              <div className="grid grid-cols-3 xl:grid-cols-4 gap-6">
+                {clinics?.slice(0, 8)?.map((clinic: ClinicData) => <ClinicCard key={clinic?._id} clinic={clinic} />)}
+              </div>
             ) : (
-              clinics?.length > 0 ? (
-                <div className="grid grid-cols-3 xl:grid-cols-4 gap-6">
-                  {clinics?.slice(0, 8)?.map((clinic: ClinicData) => <ClinicCard key={clinic?._id} clinic={clinic} />)}
-                </div>
-              ) : (
-                <div className="w-full flex flex-col items-center justify-center gap-12 pt-8">
-                  <Image loading="lazy" src="/not-found.png" alt="Not found" width="240" height="240" />
-                  <h1 className="text-xl font-semibold text-[#262626] text-center">
-                    Rất tiếc, hiện tại không tìm thấy bệnh viện/ phòng khám nào tại tỉnh thành này!
-                  </h1>
-                </div>
-              )
+              <div className="w-full flex flex-col items-center justify-center gap-12 pt-8">
+                <Image loading="lazy" src="/not-found.png" alt="Not found" width="240" height="240" />
+                <h1 className="text-xl font-semibold text-[#262626] text-center">
+                  Rất tiếc, hiện tại không tìm thấy bệnh viện/ phòng khám nào tại tỉnh thành này!
+                </h1>
+              </div>
             )}
 
             {totalPages > 1 && (
@@ -123,7 +123,7 @@ const OutstandingClinic = memo(({ provinces }: { provinces: Province[] }) => {
 
           {clinics?.length > 0 ? (
             <div className="block lg:hidden">
-              <Carousel plugins={[Autoplay({ delay: 3000 })]}>
+              <Carousel plugins={[Autoplay({ delay: 2000 })]}>
                 <CarouselContent>
                   {clinics?.slice(0, 8)?.map((clinic: ClinicData) => (
                     <CarouselItem key={clinic?._id} className="sm:basis-1/2">

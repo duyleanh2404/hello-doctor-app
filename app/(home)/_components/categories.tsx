@@ -22,7 +22,7 @@ const Categories = () => {
             href={href}
             key={id}
             onClick={() => ![3, 4].includes(id) && NProgress.start()}
-            className="w-full lg:w-auto flex items-center gap-4 py-3 pl-4 pr-12 bg-[#f2f3f3] rounded-lg shadow-md hover:shadow-lg transition-all duration-500"
+            className="w-full lg:w-auto flex items-center gap-4 py-5 sm:py-3 pl-4 pr-12 bg-[#f2f3f3] rounded-lg shadow-md hover:shadow-lg transition-all duration-500"
           >
             <Image loading="lazy" src={image} alt="Category" width={35} height={35} />
             <p className="xl:text-lg font-semibold">{title}</p>

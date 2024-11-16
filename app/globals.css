@@ -175,6 +175,13 @@ p>img {
   background-color: #2D87F3 !important;
 }
 
+@media (max-width: 768px) {
+  .swal2-title {
+    padding: 0;
+  }
+}
+
+
 @media (max-width: 640px) {
   ol {
     padding-left: 0 !important;

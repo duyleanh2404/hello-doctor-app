@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import Swal from "sweetalert2";
 import Cookies from "js-cookie";
@@ -18,6 +18,7 @@ import Spinner from "@/components/spinner";
 
 const VerifyPaymentPage = () => {
   const router = useRouter();
+  const pathname = usePathname();
 
   const dispatch = useDispatch();
   const { bookingData, isVerifyingPayment } = useSelector((state: RootState) => state.booking);
@@ -62,7 +63,7 @@ const VerifyPaymentPage = () => {
           })
             .then((result) => {
               if (result.isConfirmed) {
-                NProgress.start();
+                if (pathname !== "/") NProgress.start();
                 router.replace("/");
                 dispatch(setVerifyingPayment(false));
               };

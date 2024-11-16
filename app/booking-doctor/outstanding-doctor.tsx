@@ -68,6 +68,10 @@ const OutstandingDoctor = memo(({ provinces, specialty_id }: IProps) => {
     fetchDoctors();
   }, [currentPage, selectedProvince, specialty_id]);
 
+  if (isLoading) {
+    return <Spinner center />;
+  }
+
   return (
     <LazyLoadComponent>
       <div className="wrapper flex flex-col gap-12 py-12">
@@ -102,21 +106,17 @@ const OutstandingDoctor = memo(({ provinces, specialty_id }: IProps) => {
 
         <div className="flex flex-col-reverse sm:flex-col gap-6 sm:gap-12">
           <div className="hidden lg:flex flex-col gap-6">
-            {isLoading ? (
-              <Spinner center />
+            {doctors?.length > 0 ? (
+              <div className="grid grid-cols-3 xl:grid-cols-4 gap-6">
+                {doctors?.slice(0, 8)?.map((doctor: DoctorData) => <DoctorCard key={doctor?._id} doctor={doctor} />)}
+              </div>
             ) : (
-              doctors?.length > 0 ? (
-                <div className="grid grid-cols-3 xl:grid-cols-4 gap-6">
-                  {doctors?.slice(0, 8)?.map((doctor: DoctorData) => <DoctorCard key={doctor?._id} doctor={doctor} />)}
-                </div>
-              ) : (
-                <div className="w-full flex flex-col items-center justify-center gap-12 pt-8">
-                  <Image loading="lazy" src="/not-found.png" alt="Not found" width="240" height="240" />
-                  <h1 className="text-xl font-semibold text-[#262626] text-center">
-                    Rất tiếc, hiện tại không tìm thấy bác sĩ nào tại tỉnh thành này!
-                  </h1>
-                </div>
-              )
+              <div className="w-full flex flex-col items-center justify-center gap-12 pt-8">
+                <Image loading="lazy" src="/not-found.png" alt="Not found" width="240" height="240" />
+                <h1 className="text-xl font-semibold text-[#262626] text-center">
+                  Rất tiếc, hiện tại không tìm thấy bác sĩ nào tại tỉnh thành này!
+                </h1>
+              </div>
             )}
 
             {totalPages > 1 && (
@@ -132,7 +132,7 @@ const OutstandingDoctor = memo(({ provinces, specialty_id }: IProps) => {
 
           {doctors?.length > 0 ? (
             <div className="block lg:hidden">
-              <Carousel plugins={[Autoplay({ delay: 3000 })]}>
+              <Carousel plugins={[Autoplay({ delay: 2000 })]}>
                 <CarouselContent>
                   {doctors?.slice(0, 8)?.map((doctor: DoctorData) => (
                     <CarouselItem key={doctor?._id} className="sm:basis-1/2">
