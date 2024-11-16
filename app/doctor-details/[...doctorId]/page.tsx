@@ -103,7 +103,28 @@ const DoctorDetailsPage = () => {
 
   const handleBookingAppointment = async () => {
     if (!isLoggedIn) {
-      router.replace("/login");
+      Swal.fire({
+        icon: "error",
+        title: "Bạn chưa đăng nhập tài khoản!",
+        confirmButtonText: "Tới trang đăng nhập",
+        text: "Bấm vào nút bên dưới để tiếp tục!"
+      })
+        .then((result) => {
+          if (result.isConfirmed) {
+            NProgress.start();
+            router.replace("/login");
+          }
+        });
+      return;
+    }
+
+    if (userData?.role !== "user") {
+      Swal.fire({
+        icon: "error",
+        title: "Đây là chức năng chỉ dành cho bệnh nhân!",
+        confirmButtonText: "Vâng, tôi đã hiểu!",
+        text: "Bấm vào nút bên dưới để tiếp tục!"
+      })
       return;
     }
 
@@ -250,7 +271,7 @@ const DoctorDetailsPage = () => {
                 size="xl"
                 variant="submit"
                 onClick={handleBookingAppointment}
-                disabled={isLoading.booking || !selectedDate || !selectedSlot || userData?.role !== "user"}
+                disabled={isLoading.booking || !selectedDate || !selectedSlot}
               >
                 {isLoading.booking ? "Đang xử lý..." : "Tiếp tục đặt lịch"}
               </Button>

@@ -36,7 +36,7 @@ const PopularSpecialities = () => {
         </div>
 
         {specialties?.length > 0 ? (
-          <Carousel className="w-full mt-10" plugins={[Autoplay({ delay: 3000 })]}>
+          <Carousel className="w-full mt-10" plugins={[Autoplay({ delay: 2000 })]}>
             <CarouselContent>
               {specialties?.map((specialty: SpecialtyData) => (
                 <CarouselItem

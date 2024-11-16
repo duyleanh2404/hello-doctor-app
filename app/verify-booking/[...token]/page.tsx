@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 
 import Swal from "sweetalert2";
 import Cookies from "js-cookie";
@@ -18,7 +18,9 @@ import Spinner from "@/components/spinner";
 
 const VerifyBookingPage = () => {
   const { token } = useParams();
+
   const router = useRouter();
+  const pathname = usePathname();
 
   const dispatch = useDispatch();
   const { isVerifyingAppointment } = useSelector((state: RootState) => state.booking);
@@ -57,7 +59,7 @@ const VerifyBookingPage = () => {
         })
           .then((result) => {
             if (result.isConfirmed) {
-              NProgress.start();
+              if (pathname !== "/") NProgress.start();
               router.replace("/");
               dispatch(setVerifyingAppointment(false));
             };

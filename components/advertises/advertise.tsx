@@ -22,7 +22,7 @@ const Advertise = () => {
   }, [getRandomImage]);
 
   return (
-    <div className="sticky top-32 flex flex-col items-center">
+    <div className="sticky top-32 flex flex-col items-center pb-12 sm:pb-0">
       <div className="flex items-center gap-3">
         <Image src="/advertise-icon.svg" alt="Advertise Icon" width={20} height={20} />
         <p className="font-medium text-[#595959]">Quảng cáo</p>

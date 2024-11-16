@@ -21,10 +21,10 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         main: "font-semibold text-white bg-primary hover:bg-[#2c74df] rounded-md shadow-sm transition duration-500 select-none",
         back: "flex items-center gap-3 font-medium py-4 border border-gray-300 rounded-md shadow-sm transition duration-500 select-none",
-        cancel: "min-w-[140px] border shadow-md transition duration-500",
-        submit: "min-w-[140px] text-white border bg-primary hover:bg-[#2c74df] shadow-md transition duration-500",
+        cancel: "w-full sm:min-w-[140px] border shadow-md transition duration-500",
+        submit: "w-full sm:min-w-[140px] text-white border bg-primary hover:bg-[#2c74df] shadow-md transition duration-500",
         upload: "flex items-center justify-start gap-3 w-full p-4 border border-dashed focus:border-primary focus:shadow-input-primary rounded-md transition duration-500",
-        search: "relative w-[160px] lg:w-[13%] ml-auto lg:ml-0 text-base font-semibold text-white bg-primary hover:bg-[#2c74df] rounded-md transition duration-500"
+        search: "relative w-full sm:w-[160px] lg:w-[13%] ml-auto lg:ml-0 text-base font-semibold text-white bg-primary hover:bg-[#2c74df] rounded-md transition duration-500"
       },
       size: {
         default: "h-12 px-4 py-2",

@@ -130,16 +130,16 @@ const HistoryBooking = () => {
         </div>
 
         <div className={cn(
-          "flex flex-col gap-12", appointments?.length > 0 ? "w-[700px]" : "w-full"
+          "flex flex-col gap-12", appointments?.length > 0 ? "w-full sm:w-[700px]" : "w-full"
         )}>
           {isLoading.appointments ? (
             <Spinner center />
           ) : (
             appointments?.length > 0 ? (
               appointments?.map((appointment: AppointmentData) => (
-                <div key={appointment?._id} className="w-full bg-white shadow-md rounded-lg">
+                <div key={appointment?._id} className="w-full bg-white shadow-md rounded-2xl">
                   <div className="flex flex-col p-6">
-                    <div className="flex items-start justify-between pb-6 border-b border-dashed">
+                    <div className="flex flex-col-reverse sm:flex-row items-start justify-between gap-6 sm:gap-0 pb-6 border-b border-dashed">
                       <div className="flex items-center gap-6">
                         <Image
                           src={appointment?.doctor_id?.image}
